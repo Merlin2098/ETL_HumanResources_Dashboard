@@ -1,0 +1,12 @@
+fastexcel
+pandas
+pyarrow
+openpyxl
+polars
+python-calamine
+wheel
+setuptools
+duckdb
+tabulate
+tqdm
+xlsxwriter
