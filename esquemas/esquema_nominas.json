@@ -121,6 +121,14 @@
       "min_value": 0,
       "description": "Horas simples al 50%"
     },
+    "HRS SIMPLES AL 50%": {
+      "type": "float",
+      "nullable": true,
+      "min_value": 0,
+      "precision": 2,
+      "description": "Horas simples trabajadas con recargo del 50%"
+    },
+
     "HORAS EXTRAS 25%": {
       "type": "float",
       "nullable": true,
@@ -150,7 +158,23 @@
       "nullable": true,
       "min_value": 0,
       "description": "Días distintos de licencia sin goce de haber"
+    },
+    
+    "SUBS. POR ENFERMEDAD": {
+      "type": "float",
+      "nullable": true,
+      "min_value": 0,
+      "precision": 2,
+      "description": "Monto del subsidio por enfermedad"
+    },
+    "SUBS. POR ACCIDENTE": {
+      "type": "float",
+      "nullable": true,
+      "min_value": 0,
+      "precision": 2,
+      "description": "Monto del subsidio por accidente"
     }
+
   },
   "constraints": {
     "primary_key": ["PERIODO", "DNI/CEX"],

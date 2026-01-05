@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "fecha_modificacion": "2025-12-30",
+    "descripcion": "Esquema para capa Gold - Movimiento de Renovaciones",
+    "reporte": "movimiento_renovaciones"
+  },
+  "columnas": [
+    {
+      "nombre": "AÑO",
+      "tipo": "integer"
+    },
+    {
+      "nombre": "MES",
+      "tipo": "integer"
+    },
+    {
+      "nombre": "CODIGO SAP2",
+      "tipo": "string"
+    },
+    {
+      "nombre": "NOMBRE CC",
+      "tipo": "string"
+    },
+    {
+      "nombre": "CATEGORIA CC",
+      "tipo": "string"
+    },
+    {
+      "nombre": "GERENCIA",
+      "tipo": "string"
+    },
+    {
+      "nombre": "DNI",
+      "tipo": "string"
+    },
+    {
+      "nombre": "SEDE3",
+      "tipo": "string"
+    },
+    {
+      "nombre": "WHITE COLLAR / BLUE COLLAR",
+      "tipo": "string"
+    },
+    {
+      "nombre": "SERVICIO",
+      "tipo": "string"
+    },
+    {
+      "nombre": "NIVEL II",
+      "tipo": "string"
+    },
+    {
+      "nombre": "NIVEL III",
+      "tipo": "string"
+    },
+    {
+      "nombre": "NIVEL IV",
+      "tipo": "string"
+    }
+  ]
+}

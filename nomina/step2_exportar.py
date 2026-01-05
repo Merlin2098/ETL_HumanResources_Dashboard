@@ -75,6 +75,46 @@ def aplicar_transformaciones_gold(df, schema):
     
     return df
 
+def agregar_nombre_mes(df):
+    """Agrega columna con nombre del mes en español"""
+    
+    print("📅 Agregando nombre del mes...")
+    
+    # Crear columna NOMBRE_MES usando when-then-otherwise
+    df = df.with_columns(
+        pl.when(pl.col("MES") == 1).then(pl.lit("Enero"))
+        .when(pl.col("MES") == 2).then(pl.lit("Febrero"))
+        .when(pl.col("MES") == 3).then(pl.lit("Marzo"))
+        .when(pl.col("MES") == 4).then(pl.lit("Abril"))
+        .when(pl.col("MES") == 5).then(pl.lit("Mayo"))
+        .when(pl.col("MES") == 6).then(pl.lit("Junio"))
+        .when(pl.col("MES") == 7).then(pl.lit("Julio"))
+        .when(pl.col("MES") == 8).then(pl.lit("Agosto"))
+        .when(pl.col("MES") == 9).then(pl.lit("Septiembre"))
+        .when(pl.col("MES") == 10).then(pl.lit("Octubre"))
+        .when(pl.col("MES") == 11).then(pl.lit("Noviembre"))
+        .when(pl.col("MES") == 12).then(pl.lit("Diciembre"))
+        .otherwise(pl.lit(None))
+        .alias("NOMBRE_MES")
+    )
+    
+    # Reordenar columnas para colocar NOMBRE_MES después de MES
+    columnas = df.columns
+    indice_mes = columnas.index("MES")
+    
+    # Crear nuevo orden: todo antes de MES, MES, NOMBRE_MES, todo después de MES
+    nuevo_orden = (
+        columnas[:indice_mes + 1] +  # Hasta MES inclusive
+        ["NOMBRE_MES"] +               # NOMBRE_MES
+        [col for col in columnas[indice_mes + 1:] if col != "NOMBRE_MES"]  # Resto
+    )
+    
+    df = df.select(nuevo_orden)
+    
+    print(f"✓ Columna 'NOMBRE_MES' agregada después de 'MES'")
+    
+    return df
+
 def validar_constraints(df, schema):
     """Valida constraints del schema"""
     errores = []
@@ -216,7 +256,7 @@ def main():
     print()
     
     # Seleccionar parquet silver
-    print("📁 Seleccione el archivo Parquet Silver...")
+    print("🔍 Seleccione el archivo Parquet Silver...")
     ruta_parquet = seleccionar_archivo(
         "Seleccione el archivo Parquet Silver",
         [("Parquet files", "*.parquet"), ("All files", "*.*")]
@@ -270,7 +310,7 @@ def main():
     print()
     
     # Seleccionar schema JSON de la carpeta de esquemas
-    print("📁 Seleccione el archivo JSON del esquema Gold...")
+    print("🔍 Seleccione el archivo JSON del esquema Gold...")
     
     # Cambiar directorio inicial del diálogo a la carpeta de esquemas
     root = Tk()
@@ -311,6 +351,10 @@ def main():
     
     try:
         df_gold = aplicar_transformaciones_gold(df, schema)
+        
+        # Agregar columna NOMBRE_MES
+        df_gold = agregar_nombre_mes(df_gold)
+        
         print(f"\n✓ Transformaciones aplicadas exitosamente")
         print(f"  - Columnas finales: {df_gold.shape[1]}")
         print(f"  - Registros: {df_gold.shape[0]:,}")

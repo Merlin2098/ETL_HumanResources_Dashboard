@@ -165,7 +165,7 @@ def limpiar_datos(df: pl.DataFrame, nombre_hoja: str) -> pl.DataFrame:
     Aplica reglas de limpieza específicas para Relación de Ingresos
     
     Reglas:
-    - PROYECTO: Reemplazar "0" por null
+    - PROYECTO: Reemplazar "0" y valores vacíos/null por "Staff"
     - CODIGO SAP: Reemplazar "#N/D" o "Error" por null
     """
     print(f"\n🧹 Limpiando datos de {nombre_hoja}...")
@@ -177,21 +177,23 @@ def limpiar_datos(df: pl.DataFrame, nombre_hoja: str) -> pl.DataFrame:
     if "PROYECTO" in df.columns:
         registros_antes = df_limpio.filter(
             (pl.col("PROYECTO").cast(pl.Utf8) == "0") | 
-            (pl.col("PROYECTO").is_null())
+            (pl.col("PROYECTO").is_null()) |
+            (pl.col("PROYECTO").cast(pl.Utf8).str.strip_chars() == "")
         ).height
         
         df_limpio = df_limpio.with_columns(
             pl.when(
                 (pl.col("PROYECTO").cast(pl.Utf8) == "0") |
-                (pl.col("PROYECTO").is_null())
+                (pl.col("PROYECTO").is_null()) |
+                (pl.col("PROYECTO").cast(pl.Utf8).str.strip_chars() == "")
             )
-            .then(None)
+            .then(pl.lit("Staff"))
             .otherwise(pl.col("PROYECTO"))
             .alias("PROYECTO")
         )
         
         stats["proyecto"] = registros_antes
-        print(f"   ✓ PROYECTO: {registros_antes} valores '0' → null")
+        print(f"   ✓ PROYECTO: {registros_antes} valores '0'/null/vacíos → 'Staff'")
     
     # Limpieza de CODIGO SAP (ambas hojas)
     if "CODIGO SAP" in df.columns:
@@ -227,7 +229,6 @@ def limpiar_datos(df: pl.DataFrame, nombre_hoja: str) -> pl.DataFrame:
         print(f"   ✓ Eliminadas {stats['filas_vacias']} filas completamente vacías")
     
     return df_limpio
-
 
 def generar_reporte_calidad(df_original: pl.DataFrame, df_limpio: pl.DataFrame, nombre_hoja: str):
     """Genera reporte de calidad de datos por hoja"""
