@@ -1,0 +1,56 @@
+{
+  "nombre_reporte": "examenes_retiro_gold",
+  "descripcion": "Esquema para la capa Gold de Programación de Exámenes de Retiro",
+  "columnas": [
+    {
+      "nombre": "NOMBRE",
+      "tipo": "STRING",
+      "descripcion": "Nombre completo del empleado cesado"
+    },
+    {
+      "nombre": "DNI",
+      "tipo": "STRING",
+      "descripcion": "Documento Nacional de Identidad"
+    },
+    {
+      "nombre": "FECHA DE CESE",
+      "tipo": "DATE",
+      "descripcion": "Fecha de cese del empleado"
+    },
+    {
+      "nombre": "CAUSA DE SALIDA",
+      "tipo": "STRING",
+      "descripcion": "Motivo de cese del empleado"
+    },
+    {
+      "nombre": "CARGO",
+      "tipo": "STRING",
+      "descripcion": "Cargo que ocupaba el empleado"
+    },
+    {
+      "nombre": "AÑO",
+      "tipo": "INTEGER",
+      "descripcion": "Año extraído de FECHA DE CESE",
+      "derivado_de": "FECHA DE CESE"
+    },
+    {
+      "nombre": "MES",
+      "tipo": "INTEGER",
+      "descripcion": "Mes extraído de FECHA DE CESE",
+      "derivado_de": "FECHA DE CESE"
+    },
+        {
+      "nombre": "NOMBRE DE CC",
+      "tipo": "STRING",
+      "descripcion": "Nombre del centro de costo asociado al empleado"
+    }
+  ],
+  "filtros": [
+    {
+      "columna": "CARGO",
+      "condicion": "NOT_EQUAL",
+      "valor": "STUDENT INTERNAL",
+      "descripcion": "Excluir practicantes del análisis"
+    }
+  ]
+}

@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "version": "2.2",
+    "version": "2.3",
     "capa": "gold",
     "fecha_creacion": "2025-12-29",
-    "fecha_actualizacion": "2025-12-29",
-    "descripcion": "Esquema de datos para la capa gold - nombres originales del parquet silver"
+    "fecha_actualizacion": "2025-01-05",
+    "descripcion": "Esquema de datos para la capa gold - nombres originales del parquet silver - Actualizado con MOTIVO CESE"
   },
   "schema": {
     "PERIODO": {
@@ -85,6 +85,11 @@
       "nullable": true,
       "description": "Fecha de cese laboral"
     },
+    "MOTIVO CESE": {
+      "type": "string",
+      "nullable": true,
+      "description": "Motivo del cese laboral del empleado"
+    },
     "DIAS SUBSIDIO ENFERMEDAD": {
       "type": "integer",
       "nullable": true,
@@ -128,7 +133,6 @@
       "precision": 2,
       "description": "Horas simples trabajadas con recargo del 50%"
     },
-
     "HORAS EXTRAS 25%": {
       "type": "float",
       "nullable": true,
@@ -159,7 +163,6 @@
       "min_value": 0,
       "description": "Días distintos de licencia sin goce de haber"
     },
-    
     "SUBS. POR ENFERMEDAD": {
       "type": "float",
       "nullable": true,
@@ -174,14 +177,14 @@
       "precision": 2,
       "description": "Monto del subsidio por accidente"
     }
-
   },
   "constraints": {
     "primary_key": ["PERIODO", "DNI/CEX"],
     "unique_keys": [],
     "business_rules": [
       "FECHA CESE debe ser posterior a FECHA DE INGRESO si ambas existen",
-      "Si FECHA CESE existe, el empleado esta inactivo"
+      "Si FECHA CESE existe, el empleado esta inactivo",
+      "MOTIVO CESE solo debe tener valor si FECHA CESE existe"
     ]
   },
   "transformations": {
