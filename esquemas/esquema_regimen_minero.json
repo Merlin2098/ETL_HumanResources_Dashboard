@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "version": "1.2",
+    "version": "1.3",
     "capa": "gold",
     "fecha_creacion": "2025-01-06",
     "fecha_actualizacion": "2025-01-06",
-    "descripcion": "Esquema de datos para la capa gold - Régimen Minero - nombres originales del parquet silver - Incluye TOTAL COSTO LABORAL calculado y CENTRO DE COSTOS"
+    "descripcion": "Esquema de datos para la capa gold - Régimen Minero - columnas base del parquet silver (sin columnas enriquecidas)"
   },
   "schema": {
     "PERIODO": {
@@ -18,11 +18,6 @@
       "min_value": 1,
       "max_value": 12,
       "description": "Mes del periodo (1-12)"
-    },
-    "NOMBRE_MES": {
-      "type": "string",
-      "nullable": false,
-      "description": "Nombre del mes en español (generado desde MES)"
     },
     "AÑO": {
       "type": "string",
@@ -108,13 +103,6 @@
       "precision": 2,
       "description": "Total de aportaciones (empleador) en el periodo"
     },
-    "TOTAL COSTO LABORAL": {
-      "type": "float",
-      "nullable": true,
-      "min_value": 0,
-      "precision": 2,
-      "description": "Costo laboral total (TOTAL INGRESOS + TOTAL APORTACIONES) - columna calculada"
-    },
     "NETO": {
       "type": "float",
       "nullable": true,
@@ -139,11 +127,31 @@
     "string_trimming": true,
     "null_handling": "explicit",
     "enrichment": [
-      "NOMBRE_MES se genera automáticamente desde columna MES",
-      "TOTAL COSTO LABORAL se calcula como TOTAL INGRESOS + TOTAL APORTACIONES"
+      "NOMBRE_MES se genera automáticamente desde columna MES (agregada después de MES)",
+      "TOTAL COSTO LABORAL se calcula como TOTAL INGRESOS + TOTAL APORTACIONES (agregada después de TOTAL APORTACIONES)"
     ]
   },
-  "column_order": [
+  "column_order_base": [
+    "PERIODO",
+    "MES",
+    "AÑO",
+    "CÓDIGO CORPORATIVO",
+    "DNI/CEX",
+    "SEXO",
+    "F. NACIMIENTO",
+    "PUESTO",
+    "SEDE",
+    "ÁREA",
+    "CENTRO DE COSTOS",
+    "DESC. CENTRO DE COSTO",
+    "FECHA DE INGRESO",
+    "DIAS TRABAJADOS",
+    "TOTAL INGRESOS",
+    "TOTAL DESCUENTOS",
+    "TOTAL APORTACIONES",
+    "NETO"
+  ],
+  "column_order_final": [
     "PERIODO",
     "MES",
     "NOMBRE_MES",
