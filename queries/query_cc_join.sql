@@ -83,6 +83,7 @@ SELECT
     e."NOMBRE DE CC" AS codigo_cc_original,  -- Renombrado para claridad
     e.AÑO,
     e.MES,
+    e.NOMBRE_MES,
     
     -- Columnas enriquecidas desde catálogo de CC
     cc.CC AS codigo_cc,                      -- Código CC normalizado

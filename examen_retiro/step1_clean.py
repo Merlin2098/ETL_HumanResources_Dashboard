@@ -4,8 +4,8 @@ Procesa archivo Excel con información de empleados cesados y sus exámenes méd
 
 Arquitectura:
 - Bronze: Excel con hoja DATA, headers en fila 3, datos desde fila 4
-- Silver: Parquet limpio y estandarizado
-- Output: Excel para visualización de usuario
+- Silver: Parquet limpio y estandarizado (SE SOBRESCRIBE EN CADA EJECUCIÓN)
+- Output: Excel para visualización de usuario (SE SOBRESCRIBE EN CADA EJECUCIÓN)
 """
 
 import polars as pl
@@ -153,7 +153,7 @@ def limpiar_silver_examenes_retiro(df_bronze: pl.DataFrame) -> pl.DataFrame:
 
 def guardar_silver_parquet(df_silver: pl.DataFrame, ruta_salida: str) -> None:
     """
-    Guarda el DataFrame Silver en formato Parquet
+    Guarda el DataFrame Silver en formato Parquet (SOBRESCRIBE archivo existente)
     """
     print(f"\n💾 Guardando capa Silver (Parquet)...")
     
@@ -164,6 +164,7 @@ def guardar_silver_parquet(df_silver: pl.DataFrame, ruta_salida: str) -> None:
         tamanio_mb = Path(ruta_salida).stat().st_size / (1024 * 1024)
         print(f"   ✓ Archivo guardado: {Path(ruta_salida).name}")
         print(f"   ✓ Tamaño: {tamanio_mb:.2f} MB")
+        print(f"   ℹ️  Archivo sobrescrito (sin historial)")
         
     except Exception as e:
         print(f"❌ Error al guardar Parquet: {str(e)}")
@@ -172,7 +173,7 @@ def guardar_silver_parquet(df_silver: pl.DataFrame, ruta_salida: str) -> None:
 
 def exportar_excel_usuario(df_silver: pl.DataFrame, ruta_salida: str) -> None:
     """
-    Exporta el DataFrame Silver a Excel para visualización de usuario
+    Exporta el DataFrame Silver a Excel para visualización de usuario (SOBRESCRIBE archivo existente)
     """
     print(f"\n📊 Exportando Excel para usuario...")
     
@@ -191,6 +192,7 @@ def exportar_excel_usuario(df_silver: pl.DataFrame, ruta_salida: str) -> None:
         
         print(f"   ✓ Excel guardado: {Path(ruta_salida).name}")
         print(f"   ✓ {df_export.height} filas exportadas")
+        print(f"   ℹ️  Archivo sobrescrito (sin historial)")
         
     except Exception as e:
         print(f"❌ Error al exportar Excel: {str(e)}")
@@ -201,9 +203,9 @@ def ejecutar_etl_examenes_retiro(ruta_bronze: str,
                                    carpeta_silver: str = None) -> None:
     """
     Ejecuta el pipeline ETL completo para exámenes de retiro
+    SIN TIMESTAMP - SOBRESCRIBE archivos existentes
     """
     inicio = time.time()
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     
     print("=" * 80)
     print("ETL - PROGRAMACIÓN DE EXÁMENES DE RETIRO")
@@ -218,9 +220,9 @@ def ejecutar_etl_examenes_retiro(ruta_bronze: str,
         # Crear carpeta si no existe
         Path(carpeta_silver).mkdir(parents=True, exist_ok=True)
         
-        nombre_base = f"examenes_retiro_{timestamp}"
-        ruta_parquet = Path(carpeta_silver) / f"{nombre_base}.parquet"
-        ruta_excel_output = Path(carpeta_silver) / f"{nombre_base}.xlsx"
+        # NOMBRES FIJOS SIN TIMESTAMP (se sobrescriben en cada ejecución)
+        ruta_parquet = Path(carpeta_silver) / "examenes_retiro.parquet"
+        ruta_excel_output = Path(carpeta_silver) / "examenes_retiro.xlsx"
         
         # 1. Extraer Bronze
         df_bronze = extraer_bronze_examenes_retiro(ruta_bronze)
@@ -228,10 +230,10 @@ def ejecutar_etl_examenes_retiro(ruta_bronze: str,
         # 2. Limpiar Silver
         df_silver = limpiar_silver_examenes_retiro(df_bronze)
         
-        # 3. Guardar Parquet
+        # 3. Guardar Parquet (sobrescribe)
         guardar_silver_parquet(df_silver, str(ruta_parquet))
         
-        # 4. Exportar Excel
+        # 4. Exportar Excel (sobrescribe)
         exportar_excel_usuario(df_silver, str(ruta_excel_output))
         
         # Resumen final
@@ -245,6 +247,7 @@ def ejecutar_etl_examenes_retiro(ruta_bronze: str,
         print(f"\nArchivos generados en: {carpeta_silver}")
         print(f"  📦 Parquet: {ruta_parquet.name}")
         print(f"  📊 Excel:   {ruta_excel_output.name}")
+        print("\n⚠️  NOTA: Los archivos se sobrescriben en cada ejecución (sin historial)")
         print("=" * 80)
         
     except Exception as e:
@@ -284,14 +287,13 @@ if __name__ == "__main__":
     print(f"✓ Archivo seleccionado: {Path(ruta_bronze).name}\n")
     
     # Definir carpeta silver en la misma ubicación del archivo bronze
-    # Ejemplo: Si el archivo está en C:/Reportes/archivo.xlsm
-    # - Silver se creará en: C:/Reportes/silver/ (con parquet y excel)
     carpeta_bronze = Path(ruta_bronze).parent
     carpeta_silver = carpeta_bronze / 'silver'
     
     print(f"📁 Estructura de salida:")
     print(f"   📂 Archivo Bronze: {carpeta_bronze}")
-    print(f"   📦 Carpeta Silver: {carpeta_silver} (parquet + excel)\n")
+    print(f"   📦 Carpeta Silver: {carpeta_silver} (parquet + excel)")
+    print(f"   ⚠️  Modo: SOBRESCRITURA (sin historial)\n")
     
     # Ejecutar ETL
     ejecutar_etl_examenes_retiro(ruta_bronze, str(carpeta_silver))

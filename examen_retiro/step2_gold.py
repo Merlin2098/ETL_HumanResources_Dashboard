@@ -1,10 +1,11 @@
 """
 ETL Silver → Gold para Programación de Exámenes de Retiro
 Filtra y selecciona columnas según esquema definido
+Agrega columna NOMBRE_MES derivada de FECHA DE CESE
 
 Arquitectura:
 - Silver: Parquet con todas las columnas
-- Gold: Parquet con columnas filtradas según esquema
+- Gold: Parquet con columnas filtradas según esquema + NOMBRE_MES
 """
 
 import polars as pl
@@ -39,6 +40,7 @@ def cargar_esquema(ruta_esquema: str) -> dict:
 def transformar_silver_a_gold(df_silver: pl.DataFrame, esquema: dict) -> pl.DataFrame:
     """
     Transforma la capa Silver a Gold aplicando el esquema definido
+    Genera columna NOMBRE_MES automáticamente desde FECHA DE CESE
     """
     print("\n✨ Transformando Silver → Gold...")
     
@@ -86,7 +88,7 @@ def transformar_silver_a_gold(df_silver: pl.DataFrame, esquema: dict) -> pl.Data
                     pl.col(col_nombre).cast(pl.Float64, strict=False).alias(col_nombre)
                 )
         
-        # Generar columnas derivadas
+        # Generar columnas derivadas del esquema
         for col_def in esquema['columnas']:
             if 'derivado_de' not in col_def:
                 continue
@@ -110,6 +112,32 @@ def transformar_silver_a_gold(df_silver: pl.DataFrame, esquema: dict) -> pl.Data
                 )
             
             print(f"   ✓ Columna derivada generada: {col_nombre} (desde {col_origen})")
+        
+        # GENERAR COLUMNA NOMBRE_MES desde FECHA DE CESE
+        if 'FECHA DE CESE' in df_gold.columns:
+            # Mapeo de número de mes a nombre en español
+            meses_espanol = {
+                1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril',
+                5: 'Mayo', 6: 'Junio', 7: 'Julio', 8: 'Agosto',
+                9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
+            }
+            
+            # Extraer número de mes y convertir a nombre
+            df_gold = df_gold.with_columns(
+                pl.col('FECHA DE CESE').dt.month().alias('_mes_num')
+            )
+            
+            # Crear columna NOMBRE_MES usando replace
+            df_gold = df_gold.with_columns(
+                pl.col('_mes_num').replace(meses_espanol, default=None).alias('NOMBRE_MES')
+            )
+            
+            # Eliminar columna temporal
+            df_gold = df_gold.drop('_mes_num')
+            
+            print(f"   ✓ Columna derivada generada: NOMBRE_MES (desde FECHA DE CESE)")
+        else:
+            print(f"   ⚠️  No se puede generar NOMBRE_MES: columna FECHA DE CESE no existe")
         
         # Aplicar filtros definidos en el esquema
         if 'filtros' in esquema:
@@ -230,7 +258,7 @@ def ejecutar_etl_silver_to_gold(ruta_silver: str,
         print(f"   ✓ {df_silver.height} registros leídos")
         print(f"   ✓ {df_silver.width} columnas disponibles")
         
-        # 3. Transformar a Gold
+        # 3. Transformar a Gold (incluye generación de NOMBRE_MES)
         df_gold = transformar_silver_a_gold(df_silver, esquema)
         
         # 4. Guardar Gold Parquet
@@ -250,6 +278,7 @@ def ejecutar_etl_silver_to_gold(ruta_silver: str,
         print(f"\nArchivos generados en: {carpeta_gold}")
         print(f"  📦 Parquet: {ruta_parquet_gold.name}")
         print(f"  📊 Excel:   {ruta_excel_gold.name}")
+        print("\n📌 Columnas adicionales generadas: NOMBRE_MES")
         print("=" * 80)
         
     except Exception as e:
@@ -310,7 +339,8 @@ if __name__ == "__main__":
     
     print(f"📁 Estructura de salida:")
     print(f"   📦 Carpeta Silver: {carpeta_silver}")
-    print(f"   ✨ Carpeta Gold:   {carpeta_gold} (parquet + excel)\n")
+    print(f"   ✨ Carpeta Gold:   {carpeta_gold} (parquet + excel)")
+    print(f"   📌 Nueva columna:  NOMBRE_MES (derivada de FECHA DE CESE)\n")
     
     # Ejecutar ETL
     ejecutar_etl_silver_to_gold(ruta_silver, ruta_esquema, str(carpeta_gold))
