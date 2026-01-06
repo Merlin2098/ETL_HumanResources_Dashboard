@@ -1,15 +1,20 @@
 """
-Script: procesar_relacion_ingresos.py
-Descripción: Procesa archivos Excel de Relación de Ingresos
+Script: step1_consolidar_ingresos.py
+Descripción: Procesa archivos Excel de Relación de Ingresos - Bronze → Silver
              - Hoja EMPLEADOS: 22 columnas, headers en fila 2 (empieza en columna B)
              - Hoja PRACTICANTES: 20 columnas, headers en fila 2 (empieza en columna A)
              
 Limpieza aplicada:
-    - PROYECTO: Reemplazar "0" por null
+    - PROYECTO: Reemplazar "0", null o vacío por "Staff"
     - CODIGO SAP: Reemplazar "#N/D" o "Error" por null
+    - Genera columna PERIODO desde AÑO-MES
     
+Salida: Archivos sin timestamp en carpeta silver/
+    - Relacion Ingresos EMPLEADOS.parquet/.xlsx
+    - Relacion Ingresos PRACTICANTES.parquet/.xlsx
+
 Autor: Richi
-Fecha: 30.12.2024
+Fecha: 06.01.2025
 """
 
 import polars as pl
@@ -18,6 +23,7 @@ from pathlib import Path
 from datetime import datetime
 import sys
 from tkinter import Tk, filedialog
+import time
 
 # ============================================================================
 # CONFIGURACIÓN
@@ -51,11 +57,6 @@ CONFIGURACION_HOJAS = {
 # ============================================================================
 # FUNCIONES AUXILIARES
 # ============================================================================
-
-def obtener_timestamp() -> str:
-    """Genera timestamp en formato dd.mm.yyyy_hh.mm.ss"""
-    return datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
-
 
 def seleccionar_archivo_excel() -> Path | None:
     """Abre diálogo para seleccionar archivo Excel"""
@@ -91,7 +92,7 @@ def leer_hoja_excel(ruta_excel: Path, nombre_hoja: str, config: dict) -> pl.Data
     
     try:
         # Cargar workbook
-        wb = openpyxl.load_workbook(ruta_excel, data_only=True)
+        wb = openpyxl.load_workbook(ruta_excel, data_only=True, read_only=True)
         
         if nombre_hoja not in wb.sheetnames:
             raise ValueError(f"La hoja '{nombre_hoja}' no existe. Hojas disponibles: {wb.sheetnames}")
@@ -141,7 +142,6 @@ def leer_hoja_excel(ruta_excel: Path, nombre_hoja: str, config: dict) -> pl.Data
             return pl.DataFrame()
         
         # Convertir todos los valores a string para evitar conflictos de tipo
-        # (especialmente útil para fechas con formatos mixtos y números como strings)
         datos_str = []
         for fila in datos:
             fila_str = [str(valor) if valor is not None else None for valor in fila]
@@ -167,6 +167,7 @@ def limpiar_datos(df: pl.DataFrame, nombre_hoja: str) -> pl.DataFrame:
     Reglas:
     - PROYECTO: Reemplazar "0" y valores vacíos/null por "Staff"
     - CODIGO SAP: Reemplazar "#N/D" o "Error" por null
+    - Genera columna PERIODO desde AÑO-MES
     """
     print(f"\n🧹 Limpiando datos de {nombre_hoja}...")
     
@@ -197,7 +198,6 @@ def limpiar_datos(df: pl.DataFrame, nombre_hoja: str) -> pl.DataFrame:
     
     # Limpieza de CODIGO SAP (ambas hojas)
     if "CODIGO SAP" in df.columns:
-        # Contar registros que serán limpiados
         registros_antes = df_limpio.filter(
             pl.col("CODIGO SAP").cast(pl.Utf8).is_in(["#N/D", "Error", "#N/A"]) |
             pl.col("CODIGO SAP").cast(pl.Utf8).str.contains("(?i)error") |
@@ -228,7 +228,23 @@ def limpiar_datos(df: pl.DataFrame, nombre_hoja: str) -> pl.DataFrame:
     if stats["filas_vacias"] > 0:
         print(f"   ✓ Eliminadas {stats['filas_vacias']} filas completamente vacías")
     
+    # Generar columna PERIODO (YYYY-MM) desde AÑO y MES
+    if "AÑO" in df_limpio.columns and "MES" in df_limpio.columns:
+        print(f"   - Generando columna PERIODO desde AÑO-MES...")
+        
+        df_limpio = df_limpio.with_columns(
+            (pl.col("AÑO").cast(pl.Utf8) + "-" + 
+             pl.col("MES").cast(pl.Utf8).str.zfill(2)).alias("PERIODO")
+        )
+        
+        # Reorganizar columnas: PERIODO al inicio
+        columnas_ordenadas = ["PERIODO"] + [col for col in df_limpio.columns if col != "PERIODO"]
+        df_limpio = df_limpio.select(columnas_ordenadas)
+        
+        print(f"   ✓ Columna PERIODO generada exitosamente")
+    
     return df_limpio
+
 
 def generar_reporte_calidad(df_original: pl.DataFrame, df_limpio: pl.DataFrame, nombre_hoja: str):
     """Genera reporte de calidad de datos por hoja"""
@@ -257,6 +273,54 @@ def generar_reporte_calidad(df_original: pl.DataFrame, df_limpio: pl.DataFrame, 
         print("   ✓ No hay valores nulos")
 
 
+def guardar_resultados(resultados: dict, carpeta_trabajo: Path):
+    """
+    Guarda ambas hojas en silver/ sin timestamp
+    - EMPLEADOS: Se procesará después a Gold
+    - PRACTICANTES: Se queda aquí (solo consulta)
+    
+    Args:
+        resultados: Diccionario con DataFrames por hoja
+        carpeta_trabajo: Path de la carpeta de trabajo
+        
+    Returns:
+        dict: Rutas de archivos guardados por hoja
+    """
+    # Crear carpeta silver si no existe
+    carpeta_silver = carpeta_trabajo / "silver"
+    carpeta_silver.mkdir(exist_ok=True)
+    
+    print(f"\n[3/3] Guardando resultados en capa Silver...")
+    print(f"  📁 Carpeta: {carpeta_silver}")
+    
+    rutas_guardadas = {}
+    
+    for nombre_hoja, datos in resultados.items():
+        nombre_base = f"Relacion Ingresos {nombre_hoja}"
+        
+        # Guardar Parquet
+        print(f"\n  📄 {nombre_hoja}:")
+        print(f"    - Guardando parquet...", end='', flush=True)
+        ruta_parquet = carpeta_silver / f"{nombre_base}.parquet"
+        datos["df"].write_parquet(ruta_parquet, compression="snappy")
+        print(f" ✓")
+        
+        # Guardar Excel
+        print(f"    - Guardando Excel...", end='', flush=True)
+        ruta_excel = carpeta_silver / f"{nombre_base}.xlsx"
+        datos["df"].write_excel(ruta_excel)
+        print(f" ✓")
+        
+        print(f"    - Registros: {datos['registros']:,}")
+        
+        rutas_guardadas[nombre_hoja] = {
+            "parquet": ruta_parquet,
+            "excel": ruta_excel
+        }
+    
+    return rutas_guardadas
+
+
 # ============================================================================
 # FUNCIÓN PRINCIPAL
 # ============================================================================
@@ -264,23 +328,34 @@ def generar_reporte_calidad(df_original: pl.DataFrame, df_limpio: pl.DataFrame, 
 def main():
     """Función principal de procesamiento"""
     print("=" * 80)
-    print("🚀 PROCESADOR DE RELACIÓN DE INGRESOS - BRONZE → SILVER")
+    print(" CONSOLIDADOR DE RELACIÓN DE INGRESOS - CAPA SILVER ".center(80, "="))
     print("=" * 80)
     
     # 1. Seleccionar archivo
+    print("\n[PASO 1] Selecciona el archivo de Relación de Ingresos (Bronze)...")
     archivo_bronze = seleccionar_archivo_excel()
     
     if not archivo_bronze:
         print("❌ No se seleccionó ningún archivo. Proceso cancelado.")
         return
     
-    timestamp = obtener_timestamp()
+    # Iniciar cronómetro después de la selección
+    tiempo_inicio = time.time()
+    
+    print(f"✓ Archivo seleccionado: {archivo_bronze.name}")
+    carpeta_trabajo = archivo_bronze.parent
+    
+    # 2. Procesar hojas
+    print("\n" + "=" * 80)
+    print(" PROCESAMIENTO ".center(80, "="))
+    print("=" * 80)
+    print(f"\n[1/3] Procesando hojas...")
+    
     resultados = {}
     
-    # 2. Procesar cada hoja
-    for nombre_hoja, config in CONFIGURACION_HOJAS.items():
+    for idx, (nombre_hoja, config) in enumerate(CONFIGURACION_HOJAS.items(), 1):
         print(f"\n{'='*80}")
-        print(f"📄 PROCESANDO HOJA: {nombre_hoja}")
+        print(f"[{idx}/{len(CONFIGURACION_HOJAS)}] PROCESANDO HOJA: {nombre_hoja}")
         print('='*80)
         
         try:
@@ -313,40 +388,39 @@ def main():
         return
     
     print(f"\n{'='*80}")
-    print("💾 GUARDANDO ARCHIVOS PROCESADOS")
+    print("[2/3] Validando resultados...")
     print('='*80)
+    print(f"  ✓ Hojas procesadas exitosamente: {len(resultados)}/{len(CONFIGURACION_HOJAS)}")
     
-    # Obtener la carpeta donde está el archivo de origen
-    carpeta_origen = archivo_bronze.parent
-    print(f"\nCarpeta de destino: {carpeta_origen}")
+    rutas_guardadas = guardar_resultados(resultados, carpeta_trabajo)
     
-    for nombre_hoja, datos in resultados.items():
-        # Crear subcarpeta para cada hoja en la misma ubicación del archivo
-        carpeta_salida = carpeta_origen / nombre_hoja.lower()
-        carpeta_salida.mkdir(parents=True, exist_ok=True)
-        
-        # Guardar Parquet
-        ruta_parquet = carpeta_salida / f"{nombre_hoja.lower()}_silver_{timestamp}.parquet"
-        datos["df"].write_parquet(ruta_parquet, compression="snappy")
-        print(f"\n✅ {nombre_hoja}")
-        print(f"   Parquet: {ruta_parquet}")
-        
-        # Guardar Excel
-        ruta_excel = carpeta_salida / f"{nombre_hoja.lower()}_silver_{timestamp}.xlsx"
-        datos["df"].write_excel(ruta_excel)
-        print(f"   Excel:   {ruta_excel}")
-        print(f"   Registros: {datos['registros']:,}")
+    # Calcular tiempo total
+    tiempo_total = time.time() - tiempo_inicio
     
     # 4. Resumen final
     print("\n" + "=" * 80)
-    print("✨ PROCESO COMPLETADO EXITOSAMENTE")
+    print(" RESUMEN ".center(80, "="))
     print("=" * 80)
-    print(f"\nHojas procesadas: {len(resultados)}")
-    print(f"Total de registros: {sum(d['registros'] for d in resultados.values()):,}")
-    print(f"\nArchivos generados en: {carpeta_origen}")
-    for nombre_hoja in resultados.keys():
-        print(f"  → {nombre_hoja.lower()}/")
-    print("=" * 80)
+    
+    print(f"\n✓ Consolidación completada exitosamente")
+    print(f"\n📊 Estadísticas:")
+    print(f"  - Hojas procesadas: {len(resultados)}")
+    print(f"  - Total de registros: {sum(d['registros'] for d in resultados.values()):,}")
+    
+    print(f"\n📁 Archivos generados en carpeta silver/:")
+    for nombre_hoja, rutas in rutas_guardadas.items():
+        print(f"\n  {nombre_hoja}:")
+        print(f"    - Parquet: {rutas['parquet'].name}")
+        print(f"    - Excel:   {rutas['excel'].name}")
+    
+    print(f"\n⏱️  Tiempo de ejecución: {tiempo_total:.2f}s")
+    
+    print("\n💡 Notas:")
+    print("  - EMPLEADOS: Listo para procesamiento a Gold (step2)")
+    print("  - PRACTICANTES: Se mantiene en Silver (solo consulta)")
+    print("  - Archivos sin timestamp (se sobreescriben en cada ejecución)")
+    
+    print("\n" + "=" * 80)
 
 
 # ============================================================================
