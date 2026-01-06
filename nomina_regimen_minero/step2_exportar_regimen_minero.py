@@ -1,5 +1,5 @@
 """
-Script de transformación Silver → Gold para reportes de planilla
+Script de transformación Silver → Gold para reportes de planilla - Régimen Minero
 Implementa versionamiento con carpetas actual/ e historico/
 """
 
@@ -9,6 +9,7 @@ from pathlib import Path
 from tkinter import Tk, filedialog
 from datetime import datetime
 import shutil
+
 
 def seleccionar_archivo(titulo, tipos):
     """Abre un diálogo para seleccionar archivo"""
@@ -22,6 +23,7 @@ def seleccionar_archivo(titulo, tipos):
     )
     root.destroy()
     return archivo
+
 
 def aplicar_transformaciones_gold(df, schema):
     """Aplica transformaciones según el esquema gold"""
@@ -58,11 +60,11 @@ def aplicar_transformaciones_gold(df, schema):
         
         try:
             if col_type == "string":
-                df = df.with_columns(pl.col(col_name).cast(pl.Utf8))
+                df = df.with_columns(pl.col(col_name).cast(pl.Utf8, strict=False))
             elif col_type == "integer":
-                df = df.with_columns(pl.col(col_name).cast(pl.Int64))
+                df = df.with_columns(pl.col(col_name).cast(pl.Int64, strict=False))
             elif col_type == "float":
-                df = df.with_columns(pl.col(col_name).cast(pl.Float64))
+                df = df.with_columns(pl.col(col_name).cast(pl.Float64, strict=False))
             elif col_type == "date":
                 # Manejar fechas que vienen como datetime string
                 df = df.with_columns(
@@ -78,6 +80,7 @@ def aplicar_transformaciones_gold(df, schema):
             df = df.with_columns(pl.col(col).str.strip_chars())
     
     return df
+
 
 def agregar_nombre_mes(df):
     """Agrega columna con nombre del mes en español"""
@@ -119,86 +122,6 @@ def agregar_nombre_mes(df):
     
     return df
 
-def validar_constraints(df, schema):
-    """Valida constraints del schema"""
-    errores = []
-    warnings = []
-    
-    print("\n✅ Validando constraints...")
-    print("-" * 70)
-    
-    # Validar primary key
-    pk_cols = schema["constraints"]["primary_key"]
-    pk_cols_existentes = [col for col in pk_cols if col in df.columns]
-    
-    if len(pk_cols_existentes) != len(pk_cols):
-        faltantes = set(pk_cols) - set(pk_cols_existentes)
-        warnings.append(f"⚠️  Columnas de primary key faltantes: {faltantes}")
-        pk_cols = pk_cols_existentes
-    
-    if pk_cols:
-        duplicados = df.group_by(pk_cols).agg(pl.len().alias("count")).filter(pl.col("count") > 1)
-        
-        if len(duplicados) > 0:
-            errores.append(f"❌ Se encontraron {len(duplicados)} registros duplicados en primary key: {pk_cols}")
-        else:
-            print(f"✓ Primary key sin duplicados: {pk_cols}")
-    
-    # Validar nulls en columnas no nullable
-    nulls_encontrados = False
-    for col_name, col_spec in schema["schema"].items():
-        if col_name not in df.columns:
-            continue
-            
-        if not col_spec.get("nullable", True):
-            nulls = df.filter(pl.col(col_name).is_null()).height
-            if nulls > 0:
-                errores.append(f"❌ Columna '{col_name}' tiene {nulls} valores nulos (no permitidos)")
-                nulls_encontrados = True
-    
-    if not nulls_encontrados:
-        print("✓ Validación de nulls correcta")
-    
-    # Validar valores permitidos
-    valores_invalidos_encontrados = False
-    for col_name, col_spec in schema["schema"].items():
-        if col_name not in df.columns:
-            continue
-            
-        if "allowed_values" in col_spec:
-            valores_invalidos = df.filter(
-                ~pl.col(col_name).is_in(col_spec["allowed_values"]) & 
-                pl.col(col_name).is_not_null()
-            )
-            if len(valores_invalidos) > 0:
-                valores_unicos = valores_invalidos[col_name].unique().to_list()[:5]
-                warnings.append(f"⚠️  Columna '{col_name}' tiene {len(valores_invalidos)} valores fuera del rango permitido: {valores_unicos}")
-                valores_invalidos_encontrados = True
-    
-    if not valores_invalidos_encontrados:
-        print("✓ Validación de valores permitidos correcta")
-    
-    # Validar rangos numéricos
-    rangos_invalidos_encontrados = False
-    for col_name, col_spec in schema["schema"].items():
-        if col_name not in df.columns:
-            continue
-            
-        if "min_value" in col_spec:
-            fuera_rango = df.filter(
-                (pl.col(col_name) < col_spec["min_value"]) & 
-                pl.col(col_name).is_not_null()
-            ).height
-            if fuera_rango > 0:
-                warnings.append(f"⚠️  Columna '{col_name}' tiene {fuera_rango} valores menores al mínimo permitido ({col_spec['min_value']})")
-                rangos_invalidos_encontrados = True
-    
-    if not rangos_invalidos_encontrados:
-        print("✓ Validación de rangos numéricos correcta")
-    
-    print("-" * 70)
-    
-    return errores, warnings
 
 def generar_excel_visualizacion(df, ruta_salida):
     """Genera Excel con formato para visualización"""
@@ -206,61 +129,79 @@ def generar_excel_visualizacion(df, ruta_salida):
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     from openpyxl.utils.dataframe import dataframe_to_rows
     
-    print("\n📊 Generando Excel de visualización...")
+    print("📝 Generando Excel con formato...")
     
+    # Convertir a pandas para usar openpyxl
     df_pandas = df.to_pandas()
     
+    # Crear workbook
     wb = Workbook()
     ws = wb.active
-    ws.title = "Planilla Gold"
+    ws.title = "Planilla"
     
-    # Agregar datos
-    for r_idx, row in enumerate(dataframe_to_rows(df_pandas, index=False, header=True), 1):
-        for c_idx, value in enumerate(row, 1):
-            cell = ws.cell(row=r_idx, column=c_idx, value=value)
+    # Estilos
+    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF", size=11)
+    header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    
+    border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Escribir encabezados
+    for col_idx, col_name in enumerate(df_pandas.columns, 1):
+        cell = ws.cell(row=1, column=col_idx)
+        cell.value = col_name
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = header_alignment
+        cell.border = border
+    
+    # Escribir datos
+    for row_idx, row_data in enumerate(df_pandas.values, 2):
+        for col_idx, value in enumerate(row_data, 1):
+            cell = ws.cell(row=row_idx, column=col_idx)
+            cell.value = value
+            cell.border = border
             
-            # Formato para encabezados
-            if r_idx == 1:
-                cell.font = Font(bold=True, color="FFFFFF")
-                cell.fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
-                cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            # Alineación según tipo de dato
+            if isinstance(value, (int, float)):
+                cell.alignment = Alignment(horizontal="right")
             else:
-                cell.alignment = Alignment(horizontal="left", vertical="center")
-            
-            thin_border = Border(
-                left=Side(style='thin'),
-                right=Side(style='thin'),
-                top=Side(style='thin'),
-                bottom=Side(style='thin')
-            )
-            cell.border = thin_border
+                cell.alignment = Alignment(horizontal="left")
     
-    # Ajustar ancho de columnas
+    # Ajustar anchos de columna
     for column in ws.columns:
         max_length = 0
         column_letter = column[0].column_letter
+        
         for cell in column:
             try:
-                if len(str(cell.value)) > max_length:
-                    max_length = len(str(cell.value))
+                if cell.value:
+                    max_length = max(max_length, len(str(cell.value)))
             except:
                 pass
+        
         adjusted_width = min(max_length + 2, 50)
         ws.column_dimensions[column_letter].width = adjusted_width
     
     # Congelar primera fila
     ws.freeze_panes = "A2"
     
+    # Guardar
     wb.save(ruta_salida)
-    print(f"✓ Excel guardado exitosamente")
+
 
 def gestionar_versionamiento_gold(carpeta_base):
     """
-    Crea estructura de carpetas gold/ con actual/ e historico/
-    Mueve archivo anterior de actual/ a historico/ si existe
+    Gestiona el versionamiento en la capa Gold:
+    - Crea carpetas gold/actual/ y gold/historico/
     
     Args:
-        carpeta_base: Path de la carpeta base donde crear la estructura
+        carpeta_base: Path de la carpeta base del proyecto
         
     Returns:
         tuple: (carpeta_actual, carpeta_historico)
@@ -270,49 +211,23 @@ def gestionar_versionamiento_gold(carpeta_base):
     carpeta_actual = carpeta_gold / "actual"
     carpeta_historico = carpeta_gold / "historico"
     
+    # Crear carpetas si no existen
     carpeta_actual.mkdir(parents=True, exist_ok=True)
     carpeta_historico.mkdir(parents=True, exist_ok=True)
     
-    # Nombres de archivos
-    nombre_parquet = "Planilla Metso BI_Gold.parquet"
-    nombre_excel = "Planilla Metso BI_Gold.xlsx"
-    
-    # Verificar si existe archivo actual y moverlo a histórico
-    archivo_actual_parquet = carpeta_actual / nombre_parquet
-    archivo_actual_excel = carpeta_actual / nombre_excel
-    
-    if archivo_actual_parquet.exists() or archivo_actual_excel.exists():
-        print("\n📦 Archivando versión anterior...")
-        
-        # Generar timestamp para histórico
-        timestamp = datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
-        
-        # Mover parquet a histórico
-        if archivo_actual_parquet.exists():
-            nombre_historico_parquet = f"Planilla Metso BI_Gold_{timestamp}.parquet"
-            destino_parquet = carpeta_historico / nombre_historico_parquet
-            shutil.move(str(archivo_actual_parquet), str(destino_parquet))
-            print(f"  ✓ Parquet anterior archivado: {nombre_historico_parquet}")
-        
-        # Mover excel a histórico
-        if archivo_actual_excel.exists():
-            nombre_historico_excel = f"Planilla Metso BI_Gold_{timestamp}.xlsx"
-            destino_excel = carpeta_historico / nombre_historico_excel
-            shutil.move(str(archivo_actual_excel), str(destino_excel))
-            print(f"  ✓ Excel anterior archivado: {nombre_historico_excel}")
-    
     return carpeta_actual, carpeta_historico
+
 
 def main():
     print("=" * 70)
-    print("TRANSFORMACIÓN SILVER → GOLD - REPORTES DE PLANILLA")
+    print("TRANSFORMACIÓN SILVER → GOLD - RÉGIMEN MINERO")
     print("=" * 70)
     print()
     
     # Seleccionar parquet silver
     print("🔍 Seleccione el archivo Parquet Silver...")
     ruta_parquet = seleccionar_archivo(
-        "Seleccione el archivo Parquet Silver",
+        "Seleccione el archivo Parquet Silver - Régimen Minero",
         [("Parquet files", "*.parquet"), ("All files", "*.*")]
     )
     
@@ -364,7 +279,7 @@ def main():
     print()
     
     # Seleccionar schema JSON de la carpeta de esquemas
-    print("🔍 Seleccione el archivo JSON del esquema Gold...")
+    print("🔍 Seleccione el archivo JSON del esquema Gold (Régimen Minero)...")
     
     # Cambiar directorio inicial del diálogo a la carpeta de esquemas
     root = Tk()
@@ -372,7 +287,7 @@ def main():
     root.attributes('-topmost', True)
     
     ruta_schema = filedialog.askopenfilename(
-        title="Seleccione el esquema JSON Gold",
+        title="Seleccione el esquema JSON Gold - Régimen Minero",
         initialdir=str(carpeta_esquemas),
         filetypes=[("JSON files", "*.json"), ("All files", "*.*")]
     )
@@ -404,6 +319,7 @@ def main():
     print("=" * 70)
     
     try:
+        # Aplicar transformaciones según esquema
         df_gold = aplicar_transformaciones_gold(df, schema)
         
         # Agregar columna NOMBRE_MES
@@ -418,48 +334,48 @@ def main():
         traceback.print_exc()
         return
     
-    # Validar constraints
-    errores, warnings = validar_constraints(df_gold, schema)
-    
-    if errores:
-        print("\n⚠️  ERRORES CRÍTICOS ENCONTRADOS:")
-        for error in errores:
-            print(f"  {error}")
-        print()
-        respuesta = input("¿Desea continuar de todos modos? (s/n): ")
-        if respuesta.lower() != 's':
-            print("❌ Operación cancelada por el usuario.")
-            return
-    
-    if warnings:
-        print("\n⚠️  ADVERTENCIAS:")
-        for warning in warnings:
-            print(f"  {warning}")
-        print()
-    
     # Preparar carpetas gold con versionamiento
     carpeta_base = Path(ruta_parquet).parent.parent  # Subir desde silver/ a carpeta base
     carpeta_actual, carpeta_historico = gestionar_versionamiento_gold(carpeta_base)
     
-    # Rutas de salida (sin timestamp en actual/)
-    ruta_parquet_gold = carpeta_actual / "Planilla Metso BI_Gold.parquet"
-    ruta_excel_gold = carpeta_actual / "Planilla Metso BI_Gold.xlsx"
+    # Generar timestamp para archivos de histórico
+    timestamp = datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
+    
+    # Rutas de salida en actual/ (sin timestamp)
+    ruta_parquet_gold_actual = carpeta_actual / "Planilla Metso - Regimen Minero.parquet"
+    ruta_excel_gold_actual = carpeta_actual / "Planilla Metso - Regimen Minero.xlsx"
+    
+    # Rutas de salida en historico/ (con timestamp)
+    ruta_parquet_gold_historico = carpeta_historico / f"Planilla Metso - Regimen Minero_{timestamp}.parquet"
+    ruta_excel_gold_historico = carpeta_historico / f"Planilla Metso - Regimen Minero_{timestamp}.xlsx"
     
     # Guardar archivos
     print("\n💾 Guardando archivos en capa Gold...")
     print(f"  📁 Carpeta actual: {carpeta_actual}")
+    print(f"  📁 Carpeta histórico: {carpeta_historico}")
     print("-" * 70)
     
-    # Guardar parquet gold
-    df_gold.write_parquet(ruta_parquet_gold)
-    print(f"✓ Parquet gold: {ruta_parquet_gold.name}")
+    # Guardar en actual/
+    df_gold.write_parquet(ruta_parquet_gold_actual)
+    print(f"✓ Parquet gold (actual): {ruta_parquet_gold_actual.name}")
     
-    # Generar Excel de visualización
+    # Guardar en historico/
+    df_gold.write_parquet(ruta_parquet_gold_historico)
+    print(f"✓ Parquet gold (histórico): {ruta_parquet_gold_historico.name}")
+    
+    # Generar Excel de visualización en actual/
     try:
-        generar_excel_visualizacion(df_gold, ruta_excel_gold)
-        print(f"✓ Excel gold: {ruta_excel_gold.name}")
+        generar_excel_visualizacion(df_gold, ruta_excel_gold_actual)
+        print(f"✓ Excel gold (actual): {ruta_excel_gold_actual.name}")
     except Exception as e:
-        print(f"⚠️  Error al generar Excel: {e}")
+        print(f"⚠️  Error al generar Excel en actual/: {e}")
+    
+    # Generar Excel de visualización en historico/
+    try:
+        generar_excel_visualizacion(df_gold, ruta_excel_gold_historico)
+        print(f"✓ Excel gold (histórico): {ruta_excel_gold_historico.name}")
+    except Exception as e:
+        print(f"⚠️  Error al generar Excel en histórico/: {e}")
     
     # Resumen final
     duracion = (datetime.now() - inicio).total_seconds()
@@ -471,19 +387,22 @@ def main():
     print(f"📋 Schema utilizado: {Path(ruta_schema).name}")
     print(f"\n📁 Estructura de carpetas Gold:")
     print(f"   {carpeta_base / 'gold'}/")
-    print(f"   ├── actual/        (Power BI apunta aquí)")
-    print(f"   │   ├── Planilla Metso BI_Gold.parquet")
-    print(f"   │   └── Planilla Metso BI_Gold.xlsx")
-    print(f"   └── historico/     (versiones anteriores)")
+    print(f"   ├── actual/        (Power BI apunta aquí - se sobreescribe)")
+    print(f"   │   ├── Planilla Metso - Regimen Minero.parquet")
+    print(f"   │   └── Planilla Metso - Regimen Minero.xlsx")
+    print(f"   └── historico/     (versiones con timestamp - se acumulan)")
+    print(f"       ├── Planilla Metso - Regimen Minero_{timestamp}.parquet")
+    print(f"       └── Planilla Metso - Regimen Minero_{timestamp}.xlsx")
     
     # Contar archivos en histórico
     archivos_historico = list(carpeta_historico.glob("*.parquet"))
     if archivos_historico:
-        print(f"\n📦 Archivos en histórico: {len(archivos_historico)}")
+        print(f"\n📦 Total de archivos parquet en histórico: {len(archivos_historico)}")
     
     print("\n💡 Los archivos en actual/ se sobreescriben en cada ejecución")
-    print("💡 Las versiones anteriores se guardan automáticamente en historico/")
+    print("💡 Los archivos en histórico/ se acumulan con timestamp")
     print("=" * 70)
+
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,5 @@
 """
-Script de consolidación de reportes de planilla
+Script de consolidación de reportes de planilla - Régimen Minero
 Consolida múltiples archivos Excel en un solo parquet/Excel en capa Silver
 """
 
@@ -16,7 +16,7 @@ def seleccionar_carpeta():
     root = Tk()
     root.withdraw()
     root.attributes('-topmost', True)
-    carpeta = filedialog.askdirectory(title="Selecciona la carpeta con los archivos de planilla")
+    carpeta = filedialog.askdirectory(title="Selecciona la carpeta con los archivos de planilla - Régimen Minero")
     root.destroy()
     return carpeta
 
@@ -25,7 +25,7 @@ def extraer_periodo(nombre_archivo):
     """
     Extrae el periodo del nombre del archivo
     
-    Patrón esperado: METSO_Planilla YYYY-MM Empleados.xlsx
+    Patrón esperado: YYYY-MM en cualquier parte del nombre
     
     Args:
         nombre_archivo: Nombre del archivo (str)
@@ -102,7 +102,6 @@ def leer_archivo_planilla(archivo_path, periodo):
                      for i in range(len(encabezados))}
         
         # Crear DataFrame con polars usando strict=False para manejar tipos mixtos
-        # Intentamos crear el DataFrame de forma más robusta
         try:
             df = pl.DataFrame(data_dict, strict=False)
         except Exception as e:
@@ -253,8 +252,8 @@ def guardar_resultados(df, carpeta_trabajo):
     carpeta_silver.mkdir(exist_ok=True)
     
     # Nombres fijos sin timestamp
-    nombre_parquet = "Planilla Metso Consolidado.parquet"
-    nombre_excel = "Planilla Metso Consolidado.xlsx"
+    nombre_parquet = "Planilla Metso Consolidado - Regimen Minero.parquet"
+    nombre_excel = "Planilla Metso Consolidado - Regimen Minero.xlsx"
     
     # Rutas de salida
     ruta_parquet = carpeta_silver / nombre_parquet
@@ -280,7 +279,7 @@ def guardar_resultados(df, carpeta_trabajo):
 
 def main():
     print("=" * 70)
-    print(" CONSOLIDADOR DE PLANILLAS METSO - CAPA SILVER ".center(70, "="))
+    print(" CONSOLIDADOR DE PLANILLAS METSO - RÉGIMEN MINERO - CAPA SILVER ".center(70, "="))
     print("=" * 70)
     
     # 1. Seleccionar carpeta
