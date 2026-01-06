@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "version": "1.1",
+    "version": "1.2",
     "capa": "gold",
     "fecha_creacion": "2025-01-06",
     "fecha_actualizacion": "2025-01-06",
-    "descripcion": "Esquema de datos para la capa gold - Régimen Minero - nombres originales del parquet silver - Incluye TOTAL COSTO LABORAL calculado"
+    "descripcion": "Esquema de datos para la capa gold - Régimen Minero - nombres originales del parquet silver - Incluye TOTAL COSTO LABORAL calculado y CENTRO DE COSTOS"
   },
   "schema": {
     "PERIODO": {
@@ -64,6 +64,11 @@
       "type": "string",
       "nullable": true,
       "description": "Área de trabajo"
+    },
+    "CENTRO DE COSTOS": {
+      "type": "string",
+      "nullable": true,
+      "description": "Código del centro de costos asignado"
     },
     "DESC. CENTRO DE COSTO": {
       "type": "string",
@@ -150,6 +155,7 @@
     "PUESTO",
     "SEDE",
     "ÁREA",
+    "CENTRO DE COSTOS",
     "DESC. CENTRO DE COSTO",
     "FECHA DE INGRESO",
     "DIAS TRABAJADOS",
