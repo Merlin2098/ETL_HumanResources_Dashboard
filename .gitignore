@@ -1,0 +1,38 @@
+# Entornos virtuales
+.venv/
+venv/
+
+# Build y distribución
+build/
+dist/
+spec/
+
+# Logs
+logs/
+*.log
+
+# Archivos específicos
+treemap.py
+treemap.md
+diagnostico.py
+validar_esquema.py
+
+# __pycache__ y temporales de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Cache de herramientas
+*.egg-info/
+.eggs/
+.cache/
+.mypy_cache/
+.pytest_cache/
+
+# Configuración de PyInstaller
+*.spec
+
+# Sistemas operativos
+.DS_Store
+Thumbs.db

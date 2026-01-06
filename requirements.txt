@@ -1,4 +1,6 @@
 fastexcel
+pre-commit
+pathspec
 pandas
 pyarrow
 openpyxl

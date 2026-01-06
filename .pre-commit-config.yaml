@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: update-treemap
+        name: Actualizar estructura del proyecto
+        entry: .venv/Scripts/python.exe treemap.py
+        language: system
+        pass_filenames: false
+        always_run: true
