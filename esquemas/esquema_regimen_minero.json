@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "version": "1.0",
+    "version": "1.1",
     "capa": "gold",
     "fecha_creacion": "2025-01-06",
     "fecha_actualizacion": "2025-01-06",
-    "descripcion": "Esquema de datos para la capa gold - Régimen Minero - nombres originales del parquet silver"
+    "descripcion": "Esquema de datos para la capa gold - Régimen Minero - nombres originales del parquet silver - Incluye TOTAL COSTO LABORAL calculado"
   },
   "schema": {
     "PERIODO": {
@@ -103,6 +103,13 @@
       "precision": 2,
       "description": "Total de aportaciones (empleador) en el periodo"
     },
+    "TOTAL COSTO LABORAL": {
+      "type": "float",
+      "nullable": true,
+      "min_value": 0,
+      "precision": 2,
+      "description": "Costo laboral total (TOTAL INGRESOS + TOTAL APORTACIONES) - columna calculada"
+    },
     "NETO": {
       "type": "float",
       "nullable": true,
@@ -115,9 +122,10 @@
     "unique_keys": [],
     "business_rules": [
       "NETO deberia ser aproximadamente igual a TOTAL INGRESOS - TOTAL DESCUENTOS",
+      "TOTAL COSTO LABORAL = TOTAL INGRESOS + TOTAL APORTACIONES",
       "DIAS TRABAJADOS debe ser mayor o igual a 0 y menor o igual a 31",
       "FECHA DE INGRESO debe ser anterior a PERIODO si ambas existen",
-      "Los montos (TOTAL INGRESOS, TOTAL DESCUENTOS, TOTAL APORTACIONES, NETO) deben ser no negativos"
+      "Los montos (TOTAL INGRESOS, TOTAL DESCUENTOS, TOTAL APORTACIONES, TOTAL COSTO LABORAL, NETO) deben ser no negativos"
     ]
   },
   "transformations": {
@@ -126,7 +134,8 @@
     "string_trimming": true,
     "null_handling": "explicit",
     "enrichment": [
-      "NOMBRE_MES se genera automáticamente desde columna MES"
+      "NOMBRE_MES se genera automáticamente desde columna MES",
+      "TOTAL COSTO LABORAL se calcula como TOTAL INGRESOS + TOTAL APORTACIONES"
     ]
   },
   "column_order": [
@@ -147,6 +156,7 @@
     "TOTAL INGRESOS",
     "TOTAL DESCUENTOS",
     "TOTAL APORTACIONES",
+    "TOTAL COSTO LABORAL",
     "NETO"
   ]
 }
