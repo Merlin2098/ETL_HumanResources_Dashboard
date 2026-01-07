@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 from pathlib import Path
 from typing import List, Optional
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import sys
 
 # Agregar path del proyecto
@@ -18,8 +18,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from utils.file_selector_qt import quick_file_select_qt
 
 
-class BaseETLWidget(ABC, QWidget):
-    """Widget base abstracto para ETLs"""
+class BaseETLWidget(QWidget):
+    """Widget base para ETLs (sin ABC para evitar conflicto de metaclases)"""
     
     def __init__(self, title: str):
         super().__init__()

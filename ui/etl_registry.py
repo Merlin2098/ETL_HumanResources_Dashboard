@@ -25,46 +25,55 @@ class ETLRegistry:
         Returns:
             Lista de diccionarios con metadata de cada ETL
         """
+        print(f"\n🔍 Buscando ETLs en: {self.etls_dir}")
+        
         if not self.etls_dir.exists():
-            print("⚠️ No se encontró la carpeta etls/")
+            print(f"⚠️ No se encontró la carpeta etls/ en: {self.etls_dir}")
             return []
+        
+        print(f"✅ Carpeta etls/ encontrada")
         
         discovered_etls = []
         
         # Buscar subcarpetas en etls/
-        for etl_dir in self.etls_dir.iterdir():
-            if not etl_dir.is_dir():
-                continue
-            
-            if etl_dir.name.startswith('_'):  # Ignorar __pycache__, etc.
-                continue
+        subdirs = [d for d in self.etls_dir.iterdir() if d.is_dir() and not d.name.startswith('_')]
+        print(f"📁 Subcarpetas encontradas: {[d.name for d in subdirs]}")
+        
+        for etl_dir in subdirs:
+            print(f"\n📦 Procesando: {etl_dir.name}")
             
             # Buscar config.py
             config_file = etl_dir / "config.py"
             widget_file = etl_dir / "widget.py"
             
+            print(f"   - config.py existe: {config_file.exists()}")
+            print(f"   - widget.py existe: {widget_file.exists()}")
+            
             if not config_file.exists() or not widget_file.exists():
-                print(f"⚠️ ETL incompleto: {etl_dir.name} (falta config.py o widget.py)")
+                print(f"   ⚠️ ETL incompleto: {etl_dir.name}")
                 continue
             
             try:
                 # Importar configuración
                 module_path = f"ui.etls.{etl_dir.name}.config"
+                print(f"   - Importando config: {module_path}")
                 config_module = import_module(module_path)
                 
                 if not hasattr(config_module, 'CONFIG'):
-                    print(f"⚠️ {etl_dir.name}/config.py no tiene CONFIG")
+                    print(f"   ⚠️ {etl_dir.name}/config.py no tiene CONFIG")
                     continue
                 
                 config = config_module.CONFIG
+                print(f"   ✅ Config cargado: {config.name}")
                 
                 # Verificar si está habilitado
                 if not config.enabled:
-                    print(f"⏸️ ETL deshabilitado: {config.name}")
+                    print(f"   ⏸️ ETL deshabilitado: {config.name}")
                     continue
                 
                 # Importar widget
                 widget_module_path = f"ui.etls.{etl_dir.name}.widget"
+                print(f"   - Importando widget: {widget_module_path}")
                 widget_module = import_module(widget_module_path)
                 
                 # Buscar clase que termine en "Widget"
@@ -72,10 +81,11 @@ class ETLRegistry:
                 for item_name in dir(widget_module):
                     if item_name.endswith('Widget') and item_name != 'BaseETLWidget':
                         widget_class = getattr(widget_module, item_name)
+                        print(f"   ✅ Widget encontrado: {item_name}")
                         break
                 
                 if not widget_class:
-                    print(f"⚠️ No se encontró clase Widget en {etl_dir.name}")
+                    print(f"   ⚠️ No se encontró clase Widget en {etl_dir.name}")
                     continue
                 
                 # Registrar ETL
@@ -90,16 +100,19 @@ class ETLRegistry:
                 }
                 
                 discovered_etls.append(etl_info)
-                print(f"✅ ETL descubierto: {config.icon} {config.name}")
+                print(f"   ✅ ETL registrado: {config.icon} {config.name}")
                 
             except Exception as e:
-                print(f"❌ Error cargando ETL {etl_dir.name}: {e}")
+                print(f"   ❌ Error cargando ETL {etl_dir.name}: {e}")
                 import traceback
+                print("   Traceback completo:")
                 traceback.print_exc()
                 continue
         
         # Ordenar por 'order'
         discovered_etls.sort(key=lambda x: x['order'])
+        
+        print(f"\n📊 Total ETLs descubiertos: {len(discovered_etls)}\n")
         
         return discovered_etls
     

@@ -5,7 +5,7 @@ Worker base abstracto para todos los ETLs
 from PySide6.QtCore import QThread, Signal
 from pathlib import Path
 from typing import List, Dict
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import sys
 
 # Agregar path del proyecto
@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from utils.logger_qt import UILogger
 
 
-class BaseETLWorker(QThread, ABC):
+class BaseETLWorker(QThread):
     """
     Worker base para ejecutar ETLs en background.
     Todos los workers heredan de esta clase.
