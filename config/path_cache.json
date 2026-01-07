@@ -1,6 +1,7 @@
 {
   "last_paths": {
-    "nomina_carpeta": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Analisis de nómina\\prueba"
+    "nomina_carpeta": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Analisis de nómina\\prueba",
+    "nomina_regimen_minero_carpeta": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Contratista minero"
   },
   "frequent_dirs": {
     "nomina_bronze_dir": [
@@ -10,7 +11,7 @@
   },
   "metadata": {
     "created": "2026-01-07T12:11:25.926351",
-    "last_updated": "2026-01-07T17:33:22.123946",
+    "last_updated": "2026-01-07T17:48:10.172733",
     "version": "1.0"
   }
 }
