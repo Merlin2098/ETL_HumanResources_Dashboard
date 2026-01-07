@@ -20,6 +20,7 @@ class ETLManagerWindow(QMainWindow):
         
         self._setup_ui()
         self._apply_theme()
+        self._set_app_icon()
     
     def _setup_ui(self):
         """Configura la interfaz con tabs dinámicos."""
@@ -79,9 +80,37 @@ class ETLManagerWindow(QMainWindow):
     def _apply_theme(self):
         """Aplica tema desde JSON."""
         try:
+            # Buscar theme_light.json en config/
             theme_path = Path(__file__).parent.parent / "config" / "theme_light.json"
+            
+            if not theme_path.exists():
+                print(f"⚠️ Tema no encontrado en: {theme_path}")
+                print("   Continuando sin tema...")
+                return
+            
             stylesheet = load_theme(str(theme_path))
             self.setStyleSheet(stylesheet)
             print("✅ Tema aplicado correctamente")
         except Exception as e:
             print(f"⚠️ Error cargando tema: {e}")
+            print("   Continuando sin tema...")
+    
+    def _set_app_icon(self):
+        """Aplica ícono de la aplicación desde config/app.ico"""
+        try:
+            from PySide6.QtGui import QIcon
+            
+            # Buscar app.ico en config/
+            icon_path = Path(__file__).parent.parent / "config" / "app.ico"
+            
+            if not icon_path.exists():
+                print(f"⚠️ Ícono no encontrado en: {icon_path}")
+                print("   Continuando sin ícono...")
+                return
+            
+            icon = QIcon(str(icon_path))
+            self.setWindowIcon(icon)
+            print("✅ Ícono aplicado correctamente")
+        except Exception as e:
+            print(f"⚠️ Error cargando ícono: {e}")
+            print("   Continuando sin ícono...")

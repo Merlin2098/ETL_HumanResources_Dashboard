@@ -24,6 +24,16 @@ def main():
     app.setApplicationName("ETL Manager - Tawa Consulting")
     app.setOrganizationName("Tawa Consulting")
     
+    # Configurar ícono de la aplicación
+    try:
+        from PySide6.QtGui import QIcon
+        icon_path = Path(__file__).parent / "config" / "app.ico"
+        if icon_path.exists():
+            app.setWindowIcon(QIcon(str(icon_path)))
+            print("✅ Ícono de aplicación configurado")
+    except Exception as e:
+        print(f"⚠️ No se pudo configurar el ícono: {e}")
+    
     window = ETLManagerWindow()
     window.show()
     

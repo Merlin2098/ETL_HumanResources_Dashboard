@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from utils.file_selector_qt import quick_file_select_qt
 
 
-class BaseETLWidget(QWidget, ABC):
+class BaseETLWidget(ABC, QWidget):
     """Widget base abstracto para ETLs"""
     
     def __init__(self, title: str):
