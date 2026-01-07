@@ -55,9 +55,8 @@ class UILogger(QObject):
             self.log_dir = Path(log_dir)
             self.log_dir.mkdir(exist_ok=True, parents=True)
             
-            # Crear nombre con timestamp
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            self.log_file = self.log_dir / f"{pipeline_name}_{timestamp}.log"
+            # Nombre simple sin timestamp (se sobreescribe en cada ejecución)
+            self.log_file = self.log_dir / f"{pipeline_name}.log"
             self._setup_file_logger()
         else:
             self.file_logger = None
@@ -193,29 +192,83 @@ class UILogger(QObject):
     @staticmethod
     def format_duration(seconds: float) -> str:
         """
-        Formatea duración en formato legible
+        Formatea duración en palabras legibles en español
         
         Args:
             seconds: Duración en segundos
             
         Returns:
-            String formateado (ej: "00:02:15.43" o "1.23s" o "123ms")
+            String formateado en palabras (ej: "2 minutos, 15 segundos y 430 ms")
         """
         if seconds < 0.001:
-            return f"{seconds*1000000:.0f}μs"
+            microseconds = seconds * 1000000
+            return f"{microseconds:.0f} microsegundos"
+        
         elif seconds < 1:
-            return f"{seconds*1000:.0f}ms"
+            milliseconds = seconds * 1000
+            return f"{milliseconds:.0f} ms"
+        
         elif seconds < 60:
-            return f"{seconds:.2f}s"
+            # Solo segundos y milisegundos
+            secs = int(seconds)
+            ms = int((seconds - secs) * 1000)
+            
+            if ms > 0:
+                return f"{secs} segundo{'s' if secs != 1 else ''} y {ms} ms"
+            else:
+                return f"{secs} segundo{'s' if secs != 1 else ''}"
+        
         elif seconds < 3600:
+            # Minutos, segundos y milisegundos
             minutes = int(seconds // 60)
-            secs = seconds % 60
-            return f"{minutes:02d}:{secs:05.2f}"
+            remaining = seconds % 60
+            secs = int(remaining)
+            ms = int((remaining - secs) * 1000)
+            
+            parts = [f"{minutes} minuto{'s' if minutes != 1 else ''}"]
+            
+            if secs > 0:
+                parts.append(f"{secs} segundo{'s' if secs != 1 else ''}")
+            
+            if ms > 0:
+                parts.append(f"{ms} ms")
+            
+            # Unir con comas y "y" antes del último elemento
+            if len(parts) == 1:
+                return parts[0]
+            elif len(parts) == 2:
+                return f"{parts[0]} y {parts[1]}"
+            else:
+                return f"{parts[0]}, {parts[1]} y {parts[2]}"
+        
         else:
+            # Horas, minutos, segundos y milisegundos
             hours = int(seconds // 3600)
-            minutes = int((seconds % 3600) // 60)
-            secs = seconds % 60
-            return f"{hours:02d}:{minutes:02d}:{secs:05.2f}"
+            remaining = seconds % 3600
+            minutes = int(remaining // 60)
+            remaining = remaining % 60
+            secs = int(remaining)
+            ms = int((remaining - secs) * 1000)
+            
+            parts = [f"{hours} hora{'s' if hours != 1 else ''}"]
+            
+            if minutes > 0:
+                parts.append(f"{minutes} minuto{'s' if minutes != 1 else ''}")
+            
+            if secs > 0:
+                parts.append(f"{secs} segundo{'s' if secs != 1 else ''}")
+            
+            if ms > 0:
+                parts.append(f"{ms} ms")
+            
+            # Unir con comas y "y" antes del último elemento
+            if len(parts) == 1:
+                return parts[0]
+            elif len(parts) == 2:
+                return f"{parts[0]} y {parts[1]}"
+            else:
+                # Todas las partes excepto la última con coma, última con "y"
+                return ", ".join(parts[:-1]) + f" y {parts[-1]}"
     
     def log_summary(self, title: str, data: Dict[str, any]):
         """

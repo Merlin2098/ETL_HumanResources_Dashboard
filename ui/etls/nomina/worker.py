@@ -44,12 +44,6 @@ class NominaWorker(BaseETLWorker):
     def get_pipeline_name(self) -> str:
         return "nomina"
     
-    def _format_duration(self, seconds: float) -> str:
-        """Formatea duración en hh:mm:ss.ms"""
-        horas, resto = divmod(seconds, 3600)
-        minutos, segundos_rest = divmod(resto, 60)
-        return f"{int(horas):02d}:{int(minutos):02d}:{segundos_rest:05.2f}"
-    
     def execute_etl(self) -> Dict:
         """
         Ejecuta el ETL completo de nómina:
@@ -113,7 +107,7 @@ class NominaWorker(BaseETLWorker):
                 self.logger.info(f"  • Columnas: {len(df_consolidado.columns)}")
                 self.logger.info(f"  • Parquet: {ruta_parquet.name}")
                 self.logger.info(f"  • Excel: {ruta_excel.name}")
-                self.logger.info(f"  ⏱️  Duración: {self._format_duration(self.timers['step1'])}")
+                self.logger.info(f"  ⏱️  Duración: {self.logger.format_duration(self.timers['step1'])}")
                 self.logger.info("-"*70)
                 
                 self.progress_updated.emit(50, f"✓ Consolidadas {len(df_consolidado):,} filas")
@@ -215,7 +209,7 @@ class NominaWorker(BaseETLWorker):
                     self.logger.info(f"  • Columnas Gold: {len(df_gold.columns)}")
                     self.logger.info(f"  • Parquet: {rutas_gold['parquet'].name}")
                     self.logger.info(f"  • Excel: {rutas_gold['excel'].name}")
-                    self.logger.info(f"  ⏱️  Duración: {self._format_duration(self.timers['step2'])}")
+                    self.logger.info(f"  ⏱️  Duración: {self.logger.format_duration(self.timers['step2'])}")
                     self.logger.info("-"*70)
                     
                     self.progress_updated.emit(100, f"✓ Gold generado: {len(df_gold):,} registros")
@@ -251,15 +245,15 @@ class NominaWorker(BaseETLWorker):
                     f"{resultado['step1']['columnas']} columnas\n"
                     f"  • Gold: {resultado['step2']['registros']:,} registros, "
                     f"{resultado['step2']['columnas']} columnas\n"
-                    f"  ⏱️  Tiempo total: {self._format_duration(self.timers['total'])}\n"
-                    f"    - Step 1 (Bronze→Silver): {self._format_duration(self.timers['step1'])}\n"
-                    f"    - Step 2 (Silver→Gold): {self._format_duration(self.timers['step2'])}"
+                    f"  ⏱️  Tiempo total: {self.logger.format_duration(self.timers['total'])}\n"
+                    f"    - Step 1 (Bronze→Silver): {self.logger.format_duration(self.timers['step1'])}\n"
+                    f"    - Step 2 (Silver→Gold): {self.logger.format_duration(self.timers['step2'])}"
                 )
             else:
                 mensaje = (
                     f"Consolidación completada:\n"
                     f"  • Silver: {resultado['step1']['registros']:,} registros\n"
-                    f"  ⏱️  Tiempo total: {self._format_duration(self.timers['total'])}"
+                    f"  ⏱️  Tiempo total: {self.logger.format_duration(self.timers['total'])}"
                 )
             
             resultado['mensaje'] = mensaje
