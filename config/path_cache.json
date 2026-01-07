@@ -1,17 +1,21 @@
 {
   "last_paths": {
     "nomina_carpeta": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Analisis de nómina\\prueba",
-    "nomina_regimen_minero_carpeta": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Contratista minero"
+    "nomina_regimen_minero_carpeta": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Contratista minero",
+    "pdt_archivo": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Movimientos\\Ingresos pdt\\Relación de ingresos 2024-2025.xlsx"
   },
   "frequent_dirs": {
     "nomina_bronze_dir": [
       "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Analisis de nómina\\prueba",
       "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\VS Code\\12. Reportabilidad"
+    ],
+    "pdt_archivo": [
+      "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Movimientos\\Ingresos pdt"
     ]
   },
   "metadata": {
     "created": "2026-01-07T12:11:25.926351",
-    "last_updated": "2026-01-07T17:48:10.172733",
+    "last_updated": "2026-01-07T18:00:41.367189",
     "version": "1.0"
   }
 }
