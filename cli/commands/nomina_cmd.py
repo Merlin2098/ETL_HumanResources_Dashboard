@@ -5,9 +5,7 @@ Bronze → Silver → Gold completo
 from pathlib import Path
 from typing import Optional
 import typer
-import time
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
 
 from utils import (
     get_logger,
@@ -17,29 +15,6 @@ from utils import (
 )
 
 console = Console()
-
-
-def format_duration(seconds: float) -> str:
-    """
-    Formatea duración en formato legible según magnitud
-    
-    Args:
-        seconds: Duración en segundos
-        
-    Returns:
-        String formateado (ej: "45.2s", "2m 15.4s", "1h 5m 23.1s")
-    """
-    if seconds < 60:
-        return f"{seconds:.2f}s"
-    elif seconds < 3600:
-        mins = int(seconds // 60)
-        secs = seconds % 60
-        return f"{mins}m {secs:.2f}s"
-    else:
-        hours = int(seconds // 3600)
-        mins = int((seconds % 3600) // 60)
-        secs = seconds % 60
-        return f"{hours}h {mins}m {secs:.1f}s"
 
 
 def run_pipeline(
@@ -153,16 +128,13 @@ def run_pipeline_with_params(
     """
     Lógica principal del pipeline con parámetros configurables
     """
-    # Inicializar logger (solo warnings/errores en consola, todo en archivo)
-    logger = get_logger("nomina")  # console_level=WARNING por defecto
+    # Inicializar logger
+    logger = get_logger("nomina", console_level=20)
     loader = get_global_loader(logger)
     
     console.print("\n[bold cyan]╔═══════════════════════════════════════════════════════╗[/bold cyan]")
     console.print("[bold cyan]║   PIPELINE DE NÓMINAS - PLANILLAS METSO              ║[/bold cyan]")
     console.print("[bold cyan]╚═══════════════════════════════════════════════════════╝[/bold cyan]\n")
-    
-    # Variable para cronómetro (se inicia después de seleccionar carpeta)
-    tiempo_inicio = None
     
     try:
         # VALIDAR DEPENDENCIAS
@@ -203,9 +175,6 @@ def run_pipeline_with_params(
                 console.print("\n[yellow]⚠ Operación cancelada[/yellow]\n")
                 return
             
-            # INICIAR CRONÓMETRO (después de seleccionar parquet)
-            tiempo_inicio = time.time()
-            
             logger.log_file_processing(parquet_silver, "Archivo Silver")
             
             # Carpeta base para gold (un nivel arriba de silver)
@@ -229,9 +198,6 @@ def run_pipeline_with_params(
                 logger.error("No se seleccionó carpeta de entrada")
                 console.print("\n[yellow]⚠ Operación cancelada[/yellow]\n")
                 return
-            
-            # INICIAR CRONÓMETRO (después de seleccionar carpeta)
-            tiempo_inicio = time.time()
             
             input_dir = Path(input_dir)
             logger.info(f"Carpeta Bronze: [cyan]{input_dir}[/cyan]")
@@ -282,17 +248,16 @@ def run_pipeline_with_params(
             
             logger.log_step_end("STEP 1: Bronze → Silver", success=True)
             
+            console.print(f"\n[green]✓[/green] Silver generado: [cyan]{parquet_silver}[/cyan]")
+            
             if only_bronze_to_silver:
-                # CALCULAR TIEMPO Y MOSTRAR RESUMEN
-                if tiempo_inicio is not None:
-                    duracion = time.time() - tiempo_inicio
-                    tiempo_formateado = format_duration(duracion)
-                else:
-                    tiempo_formateado = "N/A"
-                
-                console.print(f"\n[bold green]✓ Pipeline completado en {tiempo_formateado}[/bold green]")
-                console.print(f"📝 Log técnico: [cyan]{logger.get_log_path()}[/cyan]")
-                console.print(f"📁 Silver generado en: [cyan]{parquet_silver.parent}/[/cyan]\n")
+                # Resumen y salir
+                console.print("\n[bold green]✓ PIPELINE COMPLETADO: Bronze → Silver[/bold green]\n")
+                console.print("📊 [bold]Archivos generados:[/bold]")
+                console.print(f"   • {parquet_silver}")
+                console.print(f"   • {excel_silver}")
+                console.print(f"\n📝 [bold]Log:[/bold] [cyan]{logger.get_log_path()}[/cyan]\n")
+                loader.print_performance_report()
                 return
         
         # STEP 2: SILVER → GOLD
@@ -363,18 +328,34 @@ def run_pipeline_with_params(
         
         logger.log_step_end("STEP 2: Silver → Gold", success=True)
         
-        # CALCULAR TIEMPO DE EJECUCIÓN
-        if tiempo_inicio is not None:
-            duracion = time.time() - tiempo_inicio
-            tiempo_formateado = format_duration(duracion)
-        else:
-            tiempo_formateado = "N/A"
+        # RESUMEN FINAL
+        console.print("\n[bold green]✓ PIPELINE COMPLETADO EXITOSAMENTE[/bold green]\n")
         
-        # RESUMEN FINAL CONCISO
-        console.print(f"\n[bold green]✓ Pipeline completado en {tiempo_formateado}[/bold green]")
-        console.print(f"📝 Log técnico: [cyan]{logger.get_log_path()}[/cyan]")
-        console.print(f"📊 Registros finales: [cyan]{len(df_gold):,}[/cyan] | Columnas: [cyan]{len(df_gold.columns)}[/cyan]")
-        console.print(f"📁 Resultados en: [cyan]{parquet_gold.parent}/[/cyan]\n")
+        console.print("📊 [bold]Estadísticas:[/bold]")
+        console.print(f"   • Registros finales: [cyan]{len(df_gold):,}[/cyan]")
+        console.print(f"   • Columnas Gold: [cyan]{len(df_gold.columns)}[/cyan]")
+        
+        if not only_silver_to_gold:
+            console.print(f"   • Archivos Excel procesados: [cyan]{len(archivos_excel)}[/cyan]")
+        
+        console.print(f"\n📁 [bold]Archivos generados:[/bold]")
+        
+        if not only_silver_to_gold:
+            console.print(f"\n   [dim]Silver:[/dim]")
+            console.print(f"   • {parquet_silver}")
+        
+        console.print(f"\n   [dim]Gold (actual/):[/dim]")
+        console.print(f"   • {parquet_gold}")
+        if excel_gold:
+            console.print(f"   • {excel_gold}")
+        
+        console.print(f"\n📝 [bold]Log:[/bold] [cyan]{logger.get_log_path()}[/cyan]")
+        
+        console.print(f"\n💡 [dim]Power BI debe apuntar a: {parquet_gold.parent}/[/dim]")
+        console.print(f"💡 [dim]Versiones históricas en: {parquet_gold.parent.parent}/historico/[/dim]\n")
+        
+        # Estadísticas de performance
+        loader.print_performance_report()
         
     except KeyboardInterrupt:
         logger.warning("Pipeline interrumpido por el usuario")
