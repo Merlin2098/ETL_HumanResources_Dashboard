@@ -1,24 +1,18 @@
 """
 Script de consolidación de reportes de planilla
 Consolida múltiples archivos Excel en un solo parquet/Excel en capa Silver
+
+REFACTORIZADO para compatibilidad con worker UI:
+- consolidar_archivos(): Acepta lista de archivos directamente
+- guardar_resultados(): Guarda en carpeta silver
+- main(): Mantiene funcionalidad standalone con selección de carpeta
 """
 
 import polars as pl
 import re
 from pathlib import Path
-from tkinter import Tk, filedialog
 from datetime import datetime
 import time
-
-
-def seleccionar_carpeta():
-    """Abre diálogo para seleccionar carpeta de trabajo"""
-    root = Tk()
-    root.withdraw()
-    root.attributes('-topmost', True)
-    carpeta = filedialog.askdirectory(title="Selecciona la carpeta con los archivos de planilla")
-    root.destroy()
-    return carpeta
 
 
 def extraer_periodo(nombre_archivo):
@@ -131,29 +125,64 @@ def consolidar_archivos(archivos, carpeta_trabajo):
     Consolida múltiples archivos de planilla en un solo DataFrame
     
     Args:
-        archivos: Lista de Path de archivos Excel
-        carpeta_trabajo: Path de la carpeta de trabajo
+        archivos: Lista de Path de archivos Excel O Path de carpeta (str/Path)
+        carpeta_trabajo: Path de la carpeta de trabajo para guardar resultados
         
     Returns:
         pl.DataFrame: DataFrame consolidado
     """
+    # ====================================================================
+    # DETECTAR MODO: Lista de archivos (worker) vs carpeta (standalone)
+    # ====================================================================
+    
+    # Si recibe una lista de archivos (modo worker)
+    if isinstance(archivos, list) and len(archivos) > 0 and isinstance(archivos[0], (str, Path)):
+        archivos_excel = [Path(f) for f in archivos]
+        print(f"\n[MODO WORKER] Procesando {len(archivos_excel)} archivo(s) seleccionado(s)...")
+    
+    # Si recibe una carpeta (modo standalone o legado)
+    elif isinstance(archivos, (str, Path)):
+        carpeta = Path(archivos)
+        print(f"\n[MODO STANDALONE] Buscando archivos Excel en: {carpeta}")
+        
+        # Buscar archivos Excel en la carpeta
+        archivos_excel = list(carpeta.glob('*.xlsx')) + list(carpeta.glob('*.xls'))
+        
+        # Filtrar archivos temporales y archivos consolidados previos
+        archivos_excel = [
+            f for f in archivos_excel 
+            if not f.name.startswith('~$') 
+            and not f.name.startswith('Planilla Metso Consolidado')
+        ]
+        
+        if not archivos_excel:
+            raise Exception(f"No se encontraron archivos Excel en: {carpeta}")
+        
+        print(f"✓ Se encontraron {len(archivos_excel)} archivo(s) Excel")
+    else:
+        raise Exception("Formato de entrada inválido para consolidar_archivos()")
+    
+    # ====================================================================
+    # PROCESAMIENTO DE ARCHIVOS
+    # ====================================================================
+    
     dataframes = []
     archivos_procesados = 0
     archivos_con_error = []
     
-    print(f"\n[1/3] Procesando {len(archivos)} archivo(s)...")
+    print(f"\n[1/3] Procesando {len(archivos_excel)} archivo(s)...")
     
-    for idx, archivo in enumerate(archivos, 1):
+    for idx, archivo in enumerate(archivos_excel, 1):
         try:
             # Extraer periodo del nombre del archivo
             periodo = extraer_periodo(archivo.name)
             
             if periodo is None:
-                print(f"  [{idx}/{len(archivos)}] ⚠️  {archivo.name} - No se pudo extraer periodo, omitiendo...")
+                print(f"  [{idx}/{len(archivos_excel)}] ⚠️  {archivo.name} - No se pudo extraer periodo, omitiendo...")
                 archivos_con_error.append((archivo.name, "No se pudo extraer periodo"))
                 continue
             
-            print(f"  [{idx}/{len(archivos)}] Procesando: {archivo.name} (Periodo: {periodo})", end='', flush=True)
+            print(f"  [{idx}/{len(archivos_excel)}] Procesando: {archivo.name} (Periodo: {periodo})", end='', flush=True)
             
             # Leer archivo
             df = leer_archivo_planilla(archivo, periodo)
@@ -170,14 +199,17 @@ def consolidar_archivos(archivos, carpeta_trabajo):
     if not dataframes:
         raise Exception("No se pudo procesar ningún archivo correctamente")
     
-    print(f"\n  ✓ Archivos procesados exitosamente: {archivos_procesados}/{len(archivos)}")
+    print(f"\n  ✓ Archivos procesados exitosamente: {archivos_procesados}/{len(archivos_excel)}")
     
     if archivos_con_error:
         print(f"  ⚠️  Archivos con error: {len(archivos_con_error)}")
         for nombre, error in archivos_con_error:
             print(f"      - {nombre}: {error}")
     
-    # Consolidar todos los DataFrames
+    # ====================================================================
+    # CONSOLIDACIÓN DE DATAFRAMES
+    # ====================================================================
+    
     print(f"\n[2/3] Consolidando datos...")
     
     # Convertir todas las columnas a string para evitar conflictos de tipos
@@ -200,7 +232,10 @@ def consolidar_archivos(archivos, carpeta_trabajo):
     print(f"  ✓ Consolidación completa: {len(df_consolidado):,} registros totales")
     print(f"  ✓ Total de columnas: {len(df_consolidado.columns)}")
     
-    # Limpieza: Eliminar filas con DNI/CEX nulo
+    # ====================================================================
+    # LIMPIEZA Y ENRIQUECIMIENTO
+    # ====================================================================
+    
     print(f"\n  - Limpiando datos...")
     registros_antes = len(df_consolidado)
     
@@ -278,14 +313,26 @@ def guardar_resultados(df, carpeta_trabajo):
     return ruta_parquet, ruta_excel
 
 
+# ============================================================================
+# FUNCIÓN MAIN PARA EJECUCIÓN STANDALONE
+# ============================================================================
+
 def main():
+    """Función main para ejecución standalone con selección de carpeta"""
+    from tkinter import Tk, filedialog
+    
     print("=" * 70)
     print(" CONSOLIDADOR DE PLANILLAS METSO - CAPA SILVER ".center(70, "="))
     print("=" * 70)
     
     # 1. Seleccionar carpeta
     print("\n[PASO 1] Selecciona la carpeta con los archivos de planilla...")
-    carpeta = seleccionar_carpeta()
+    
+    root = Tk()
+    root.withdraw()
+    root.attributes('-topmost', True)
+    carpeta = filedialog.askdirectory(title="Selecciona la carpeta con los archivos de planilla")
+    root.destroy()
     
     if not carpeta:
         print("✗ No se seleccionó ninguna carpeta. Proceso cancelado.")
@@ -295,10 +342,10 @@ def main():
     tiempo_inicio = time.time()
     
     print(f"✓ Carpeta seleccionada: {carpeta}")
-    
-    # 2. Buscar archivos Excel
-    print("\n[PASO 2] Buscando archivos Excel...")
     carpeta_path = Path(carpeta)
+    
+    # 2. Mostrar archivos encontrados (previsualización)
+    print("\n[PASO 2] Buscando archivos Excel...")
     archivos_excel = list(carpeta_path.glob('*.xlsx')) + list(carpeta_path.glob('*.xls'))
     
     # Filtrar archivos temporales y archivos consolidados previos
@@ -323,13 +370,13 @@ def main():
         else:
             print(f"  {idx}. {archivo.name} → ⚠️  No se detectó periodo")
     
-    # 3. Consolidar archivos
+    # 3. Consolidar archivos (pasando carpeta en modo standalone)
     print("\n" + "=" * 70)
     print(" PROCESAMIENTO ".center(70, "="))
     print("=" * 70)
     
     try:
-        df_consolidado = consolidar_archivos(archivos_excel, carpeta_path)
+        df_consolidado = consolidar_archivos(carpeta_path, carpeta_path)
         
         # 4. Guardar resultados
         ruta_parquet, ruta_excel = guardar_resultados(df_consolidado, carpeta_path)
@@ -364,6 +411,8 @@ def main():
         
     except Exception as e:
         print(f"\n✗ Error durante el procesamiento: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return
 
 

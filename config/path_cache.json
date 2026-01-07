@@ -1,5 +1,7 @@
 {
-  "last_paths": {},
+  "last_paths": {
+    "nomina_carpeta": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Analisis de nómina\\prueba"
+  },
   "frequent_dirs": {
     "nomina_bronze_dir": [
       "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Analisis de nómina\\prueba",
@@ -8,7 +10,7 @@
   },
   "metadata": {
     "created": "2026-01-07T12:11:25.926351",
-    "last_updated": "2026-01-07T14:18:03.949730",
+    "last_updated": "2026-01-07T17:15:11.027179",
     "version": "1.0"
   }
 }

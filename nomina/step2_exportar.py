@@ -1,27 +1,18 @@
 """
 Script de transformación Silver → Gold para reportes de planilla
 Implementa versionamiento con carpetas actual/ e historico/
+
+REFACTORIZADO para compatibilidad con worker UI:
+- seleccionar_y_convertir_columnas(): Aplica transformaciones gold
+- guardar_resultados(): Guarda en estructura gold/actual y gold/historico
 """
 
 import polars as pl
 import json
 from pathlib import Path
-from tkinter import Tk, filedialog
 from datetime import datetime
 import shutil
 
-def seleccionar_archivo(titulo, tipos):
-    """Abre un diálogo para seleccionar archivo"""
-    root = Tk()
-    root.withdraw()
-    root.attributes('-topmost', True)
-    
-    archivo = filedialog.askopenfilename(
-        title=titulo,
-        filetypes=tipos
-    )
-    root.destroy()
-    return archivo
 
 def aplicar_transformaciones_gold(df, schema):
     """Aplica transformaciones según el esquema gold"""
@@ -79,6 +70,7 @@ def aplicar_transformaciones_gold(df, schema):
     
     return df
 
+
 def agregar_nombre_mes(df):
     """Agrega columna con nombre del mes en español"""
     
@@ -118,6 +110,7 @@ def agregar_nombre_mes(df):
     print(f"✓ Columna 'NOMBRE_MES' agregada después de 'MES'")
     
     return df
+
 
 def validar_constraints(df, schema):
     """Valida constraints del schema"""
@@ -200,84 +193,96 @@ def validar_constraints(df, schema):
     
     return errores, warnings
 
+
 def generar_excel_visualizacion(df, ruta_salida):
     """Genera Excel con formato para visualización"""
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     from openpyxl.utils.dataframe import dataframe_to_rows
     
-    print("\n📊 Generando Excel de visualización...")
+    print(f"  - Generando Excel con formato...")
     
+    # Convertir a pandas para openpyxl
     df_pandas = df.to_pandas()
     
+    # Crear workbook
     wb = Workbook()
     ws = wb.active
     ws.title = "Planilla Gold"
     
-    # Agregar datos
-    for r_idx, row in enumerate(dataframe_to_rows(df_pandas, index=False, header=True), 1):
-        for c_idx, value in enumerate(row, 1):
-            cell = ws.cell(row=r_idx, column=c_idx, value=value)
+    # Estilos
+    header_font = Font(name='Calibri', size=11, bold=True, color='FFFFFF')
+    header_fill = PatternFill(start_color='366092', end_color='366092', fill_type='solid')
+    header_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    
+    border_style = Border(
+        left=Side(style='thin', color='D3D3D3'),
+        right=Side(style='thin', color='D3D3D3'),
+        top=Side(style='thin', color='D3D3D3'),
+        bottom=Side(style='thin', color='D3D3D3')
+    )
+    
+    # Escribir encabezados
+    for col_idx, column in enumerate(df_pandas.columns, 1):
+        cell = ws.cell(row=1, column=col_idx, value=column)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+        cell.border = border_style
+    
+    # Escribir datos
+    for row_idx, row in enumerate(df_pandas.values, 2):
+        for col_idx, value in enumerate(row, 1):
+            cell = ws.cell(row=row_idx, column=col_idx, value=value)
+            cell.border = border_style
             
-            # Formato para encabezados
-            if r_idx == 1:
-                cell.font = Font(bold=True, color="FFFFFF")
-                cell.fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
-                cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            # Alineación según tipo de dato
+            if isinstance(value, (int, float)):
+                cell.alignment = Alignment(horizontal='right')
             else:
-                cell.alignment = Alignment(horizontal="left", vertical="center")
-            
-            thin_border = Border(
-                left=Side(style='thin'),
-                right=Side(style='thin'),
-                top=Side(style='thin'),
-                bottom=Side(style='thin')
-            )
-            cell.border = thin_border
+                cell.alignment = Alignment(horizontal='left')
     
     # Ajustar ancho de columnas
-    for column in ws.columns:
-        max_length = 0
-        column_letter = column[0].column_letter
-        for cell in column:
-            try:
-                if len(str(cell.value)) > max_length:
-                    max_length = len(str(cell.value))
-            except:
-                pass
-        adjusted_width = min(max_length + 2, 50)
-        ws.column_dimensions[column_letter].width = adjusted_width
+    for column_cells in ws.columns:
+        length = max(len(str(cell.value or "")) for cell in column_cells)
+        adjusted_width = min(length + 2, 50)
+        ws.column_dimensions[column_cells[0].column_letter].width = adjusted_width
     
     # Congelar primera fila
-    ws.freeze_panes = "A2"
+    ws.freeze_panes = 'A2'
     
+    # Guardar
     wb.save(ruta_salida)
-    print(f"✓ Excel guardado exitosamente")
+    print(f"    ✓ Excel generado con formato")
+
 
 def gestionar_versionamiento_gold(carpeta_base):
     """
-    Crea estructura de carpetas gold/ con actual/ e historico/
-    Mueve archivo anterior de actual/ a historico/ si existe
+    Gestiona la estructura de versionamiento para archivos gold
+    
+    Estructura:
+    gold/
+    ├── actual/        <- Power BI apunta aquí
+    └── historico/     <- Versiones anteriores
     
     Args:
-        carpeta_base: Path de la carpeta base donde crear la estructura
+        carpeta_base: Carpeta raíz del proyecto (donde está silver/)
         
     Returns:
         tuple: (carpeta_actual, carpeta_historico)
     """
-    # Crear estructura de carpetas
     carpeta_gold = Path(carpeta_base) / "gold"
     carpeta_actual = carpeta_gold / "actual"
     carpeta_historico = carpeta_gold / "historico"
     
+    # Crear estructura si no existe
     carpeta_actual.mkdir(parents=True, exist_ok=True)
     carpeta_historico.mkdir(parents=True, exist_ok=True)
     
-    # Nombres de archivos
+    # Archivos a verificar
     nombre_parquet = "Planilla Metso BI_Gold.parquet"
     nombre_excel = "Planilla Metso BI_Gold.xlsx"
     
-    # Verificar si existe archivo actual y moverlo a histórico
     archivo_actual_parquet = carpeta_actual / nombre_parquet
     archivo_actual_excel = carpeta_actual / nombre_excel
     
@@ -303,7 +308,101 @@ def gestionar_versionamiento_gold(carpeta_base):
     
     return carpeta_actual, carpeta_historico
 
+
+# ============================================================================
+# FUNCIONES PARA COMPATIBILIDAD CON WORKER UI
+# ============================================================================
+
+def seleccionar_y_convertir_columnas(df_silver, esquema):
+    """
+    Función de compatibilidad para el worker UI
+    Aplica todas las transformaciones gold en un solo paso
+    
+    Args:
+        df_silver: DataFrame de la capa silver
+        esquema: Diccionario con el esquema gold cargado desde JSON
+        
+    Returns:
+        pl.DataFrame: DataFrame transformado a gold
+    """
+    # Aplicar transformaciones del esquema
+    df_gold = aplicar_transformaciones_gold(df_silver, esquema)
+    
+    # Agregar columna NOMBRE_MES
+    df_gold = agregar_nombre_mes(df_gold)
+    
+    # Validar constraints (solo warnings, no detiene ejecución)
+    errores, warnings = validar_constraints(df_gold, esquema)
+    
+    if errores:
+        print("\n⚠️  ERRORES CRÍTICOS ENCONTRADOS:")
+        for error in errores:
+            print(f"  {error}")
+    
+    if warnings:
+        print("\n⚠️  ADVERTENCIAS:")
+        for warning in warnings:
+            print(f"  {warning}")
+    
+    return df_gold
+
+
+def guardar_resultados(df_gold, carpeta_silver):
+    """
+    Función de compatibilidad para el worker UI
+    Guarda los archivos gold con versionamiento
+    
+    Args:
+        df_gold: DataFrame gold procesado
+        carpeta_silver: Path de la carpeta silver (se usa para encontrar la base)
+        
+    Returns:
+        dict: Diccionario con las rutas de los archivos generados
+    """
+    # Subir desde silver/ a carpeta base del proyecto
+    carpeta_base = Path(carpeta_silver).parent
+    
+    # Gestionar versionamiento
+    carpeta_actual, carpeta_historico = gestionar_versionamiento_gold(carpeta_base)
+    
+    # Rutas de salida (sin timestamp en actual/)
+    ruta_parquet_gold = carpeta_actual / "Planilla Metso BI_Gold.parquet"
+    ruta_excel_gold = carpeta_actual / "Planilla Metso BI_Gold.xlsx"
+    
+    # Guardar archivos
+    print("\n💾 Guardando archivos en capa Gold...")
+    print(f"  📁 Carpeta actual: {carpeta_actual}")
+    print("-" * 70)
+    
+    # Guardar parquet gold
+    df_gold.write_parquet(ruta_parquet_gold)
+    print(f"✓ Parquet gold: {ruta_parquet_gold.name}")
+    
+    # Generar Excel de visualización
+    try:
+        generar_excel_visualizacion(df_gold, ruta_excel_gold)
+        print(f"✓ Excel gold: {ruta_excel_gold.name}")
+    except Exception as e:
+        print(f"⚠️  Error al generar Excel: {e}")
+    
+    print("-" * 70)
+    
+    return {
+        'parquet': ruta_parquet_gold,
+        'excel': ruta_excel_gold,
+        'carpeta_actual': carpeta_actual,
+        'carpeta_historico': carpeta_historico
+    }
+
+
+# ============================================================================
+# FUNCIÓN MAIN PARA EJECUCIÓN STANDALONE
+# ============================================================================
+
 def main():
+    """Función main para ejecución standalone con diálogos de archivo"""
+    from tkinter import Tk, filedialog
+    
     print("=" * 70)
     print("TRANSFORMACIÓN SILVER → GOLD - REPORTES DE PLANILLA")
     print("=" * 70)
@@ -311,10 +410,16 @@ def main():
     
     # Seleccionar parquet silver
     print("🔍 Seleccione el archivo Parquet Silver...")
-    ruta_parquet = seleccionar_archivo(
-        "Seleccione el archivo Parquet Silver",
-        [("Parquet files", "*.parquet"), ("All files", "*.*")]
+    
+    root = Tk()
+    root.withdraw()
+    root.attributes('-topmost', True)
+    
+    ruta_parquet = filedialog.askopenfilename(
+        title="Seleccione el archivo Parquet Silver",
+        filetypes=[("Parquet files", "*.parquet"), ("All files", "*.*")]
     )
+    root.destroy()
     
     if not ruta_parquet:
         print("❌ No se seleccionó archivo parquet. Operación cancelada.")
@@ -366,7 +471,6 @@ def main():
     # Seleccionar schema JSON de la carpeta de esquemas
     print("🔍 Seleccione el archivo JSON del esquema Gold...")
     
-    # Cambiar directorio inicial del diálogo a la carpeta de esquemas
     root = Tk()
     root.withdraw()
     root.attributes('-topmost', True)
@@ -404,10 +508,7 @@ def main():
     print("=" * 70)
     
     try:
-        df_gold = aplicar_transformaciones_gold(df, schema)
-        
-        # Agregar columna NOMBRE_MES
-        df_gold = agregar_nombre_mes(df_gold)
+        df_gold = seleccionar_y_convertir_columnas(df, schema)
         
         print(f"\n✓ Transformaciones aplicadas exitosamente")
         print(f"  - Columnas finales: {df_gold.shape[1]}")
@@ -418,48 +519,9 @@ def main():
         traceback.print_exc()
         return
     
-    # Validar constraints
-    errores, warnings = validar_constraints(df_gold, schema)
-    
-    if errores:
-        print("\n⚠️  ERRORES CRÍTICOS ENCONTRADOS:")
-        for error in errores:
-            print(f"  {error}")
-        print()
-        respuesta = input("¿Desea continuar de todos modos? (s/n): ")
-        if respuesta.lower() != 's':
-            print("❌ Operación cancelada por el usuario.")
-            return
-    
-    if warnings:
-        print("\n⚠️  ADVERTENCIAS:")
-        for warning in warnings:
-            print(f"  {warning}")
-        print()
-    
-    # Preparar carpetas gold con versionamiento
-    carpeta_base = Path(ruta_parquet).parent.parent  # Subir desde silver/ a carpeta base
-    carpeta_actual, carpeta_historico = gestionar_versionamiento_gold(carpeta_base)
-    
-    # Rutas de salida (sin timestamp en actual/)
-    ruta_parquet_gold = carpeta_actual / "Planilla Metso BI_Gold.parquet"
-    ruta_excel_gold = carpeta_actual / "Planilla Metso BI_Gold.xlsx"
-    
     # Guardar archivos
-    print("\n💾 Guardando archivos en capa Gold...")
-    print(f"  📁 Carpeta actual: {carpeta_actual}")
-    print("-" * 70)
-    
-    # Guardar parquet gold
-    df_gold.write_parquet(ruta_parquet_gold)
-    print(f"✓ Parquet gold: {ruta_parquet_gold.name}")
-    
-    # Generar Excel de visualización
-    try:
-        generar_excel_visualizacion(df_gold, ruta_excel_gold)
-        print(f"✓ Excel gold: {ruta_excel_gold.name}")
-    except Exception as e:
-        print(f"⚠️  Error al generar Excel: {e}")
+    carpeta_silver = Path(ruta_parquet).parent
+    rutas = guardar_resultados(df_gold, carpeta_silver)
     
     # Resumen final
     duracion = (datetime.now() - inicio).total_seconds()
@@ -470,20 +532,21 @@ def main():
     print(f"📊 Registros procesados: {df_gold.shape[0]:,}")
     print(f"📋 Schema utilizado: {Path(ruta_schema).name}")
     print(f"\n📁 Estructura de carpetas Gold:")
-    print(f"   {carpeta_base / 'gold'}/")
+    print(f"   {rutas['carpeta_actual'].parent}/")
     print(f"   ├── actual/        (Power BI apunta aquí)")
     print(f"   │   ├── Planilla Metso BI_Gold.parquet")
     print(f"   │   └── Planilla Metso BI_Gold.xlsx")
     print(f"   └── historico/     (versiones anteriores)")
     
     # Contar archivos en histórico
-    archivos_historico = list(carpeta_historico.glob("*.parquet"))
+    archivos_historico = list(rutas['carpeta_historico'].glob("*.parquet"))
     if archivos_historico:
         print(f"\n📦 Archivos en histórico: {len(archivos_historico)}")
     
     print("\n💡 Los archivos en actual/ se sobreescriben en cada ejecución")
     print("💡 Las versiones anteriores se guardan automáticamente en historico/")
     print("=" * 70)
+
 
 if __name__ == "__main__":
     main()

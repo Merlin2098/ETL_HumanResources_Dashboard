@@ -2,11 +2,18 @@
 """
 Logger adaptado para interfaces PySide6
 Emite señales para actualizar QTextEdit en tiempo real
+
+MEJORADO con:
+- Formateo de tiempos (hh:mm:ss.ms)
+- Separación de errores vs warnings
+- Contadores de errores/warnings
+- Registro de validaciones
 """
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict
 from PySide6.QtCore import QObject, Signal
 import logging
+from datetime import datetime
 
 
 class UILogger(QObject):
@@ -16,6 +23,7 @@ class UILogger(QObject):
     step_started = Signal(str, str)  # (nombre_paso, descripción)
     step_completed = Signal(str, bool)  # (nombre_paso, éxito)
     progress_update = Signal(int, str)  # (porcentaje, mensaje)
+    validation_result = Signal(str, bool, str)  # (tipo_validacion, éxito, mensaje)
     
     def __init__(
         self,
@@ -35,10 +43,21 @@ class UILogger(QObject):
         self.pipeline_name = pipeline_name
         self.log_to_file = log_to_file
         
+        # Contadores para resumen
+        self.stats = {
+            'errors': 0,
+            'warnings': 0,
+            'validations_passed': 0,
+            'validations_failed': 0
+        }
+        
         if log_to_file:
             self.log_dir = Path(log_dir)
             self.log_dir.mkdir(exist_ok=True, parents=True)
-            self.log_file = self.log_dir / f"{pipeline_name}.log"
+            
+            # Crear nombre con timestamp
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            self.log_file = self.log_dir / f"{pipeline_name}_{timestamp}.log"
             self._setup_file_logger()
         else:
             self.file_logger = None
@@ -65,29 +84,44 @@ class UILogger(QObject):
         """Emite señal y escribe a archivo"""
         self.log_message.emit(level, message)
         
+        # Actualizar contadores
+        if level == "ERROR":
+            self.stats['errors'] += 1
+        elif level == "WARNING":
+            self.stats['warnings'] += 1
+        
         if self.file_logger:
             log_method = getattr(self.file_logger, level.lower(), self.file_logger.info)
             log_method(message)
     
     def debug(self, message: str):
+        """Log nivel DEBUG"""
         self._emit_and_log("DEBUG", message)
     
     def info(self, message: str):
+        """Log nivel INFO"""
         self._emit_and_log("INFO", message)
     
     def warning(self, message: str):
-        self._emit_and_log("WARNING", message)
+        """Log nivel WARNING"""
+        self._emit_and_log("WARNING", f"⚠️  {message}")
     
     def error(self, message: str):
-        self._emit_and_log("ERROR", message)
+        """Log nivel ERROR"""
+        self._emit_and_log("ERROR", f"❌ {message}")
     
     def critical(self, message: str):
-        self._emit_and_log("CRITICAL", message)
+        """Log nivel CRITICAL"""
+        self._emit_and_log("CRITICAL", f"🔥 {message}")
+    
+    def success(self, message: str):
+        """Log de éxito"""
+        self._emit_and_log("INFO", f"✓ {message}")
     
     def log_step_start(self, step_name: str, description: str = ""):
         """Registra inicio de paso"""
         self.step_started.emit(step_name, description)
-        separator = "=" * 60
+        separator = "=" * 70
         self._emit_and_log("INFO", "")
         self._emit_and_log("INFO", separator)
         self._emit_and_log("INFO", f"INICIANDO: {step_name}")
@@ -95,12 +129,28 @@ class UILogger(QObject):
             self._emit_and_log("INFO", f"Descripción: {description}")
         self._emit_and_log("INFO", separator)
     
-    def log_step_end(self, step_name: str, success: bool = True):
-        """Registra fin de paso"""
+    def log_step_end(self, step_name: str, success: bool = True, duration: Optional[float] = None):
+        """
+        Registra fin de paso
+        
+        Args:
+            step_name: Nombre del paso
+            success: Si fue exitoso
+            duration: Duración en segundos (opcional)
+        """
         self.step_completed.emit(step_name, success)
+        
         status = "✓ COMPLETADO" if success else "✗ FALLIDO"
-        separator = "=" * 60
-        self._emit_and_log("INFO", f"{status}: {step_name}")
+        separator = "-" * 70
+        
+        self._emit_and_log("INFO", separator)
+        
+        if duration is not None:
+            time_str = self.format_duration(duration)
+            self._emit_and_log("INFO", f"{status}: {step_name} (⏱️  {time_str})")
+        else:
+            self._emit_and_log("INFO", f"{status}: {step_name}")
+        
         self._emit_and_log("INFO", separator)
         self._emit_and_log("INFO", "")
     
@@ -115,24 +165,131 @@ class UILogger(QObject):
     
     def log_dataframe_info(self, name: str, rows: int, cols: int):
         """Registra info de DataFrame"""
-        self._emit_and_log("INFO", f"DataFrame '{name}': {rows:,} filas x {cols} columnas")
+        self._emit_and_log("INFO", f"DataFrame '{name}': {rows:,} filas × {cols} columnas")
+    
+    def log_validation(self, validation_type: str, passed: bool, message: str):
+        """
+        Registra resultado de validación
+        
+        Args:
+            validation_type: Tipo de validación (ej: 'primary_key', 'nulls', 'ranges')
+            passed: Si pasó la validación
+            message: Mensaje descriptivo
+        """
+        self.validation_result.emit(validation_type, passed, message)
+        
+        if passed:
+            self.stats['validations_passed'] += 1
+            self._emit_and_log("INFO", f"✓ {message}")
+        else:
+            self.stats['validations_failed'] += 1
+            self._emit_and_log("WARNING", message)
     
     def log_performance(self, operation: str, duration_seconds: float):
         """Registra métricas de rendimiento"""
-        if duration_seconds < 1:
-            time_str = f"{duration_seconds*1000:.0f}ms"
-        elif duration_seconds < 60:
-            time_str = f"{duration_seconds:.2f}s"
-        else:
-            minutes = int(duration_seconds // 60)
-            seconds = duration_seconds % 60
-            time_str = f"{minutes}m {seconds:.2f}s"
+        time_str = self.format_duration(duration_seconds)
+        self._emit_and_log("INFO", f"⏱️  {operation}: {time_str}")
+    
+    @staticmethod
+    def format_duration(seconds: float) -> str:
+        """
+        Formatea duración en formato legible
         
-        self._emit_and_log("INFO", f"⏱️ {operation}: {time_str}")
+        Args:
+            seconds: Duración en segundos
+            
+        Returns:
+            String formateado (ej: "00:02:15.43" o "1.23s" o "123ms")
+        """
+        if seconds < 0.001:
+            return f"{seconds*1000000:.0f}μs"
+        elif seconds < 1:
+            return f"{seconds*1000:.0f}ms"
+        elif seconds < 60:
+            return f"{seconds:.2f}s"
+        elif seconds < 3600:
+            minutes = int(seconds // 60)
+            secs = seconds % 60
+            return f"{minutes:02d}:{secs:05.2f}"
+        else:
+            hours = int(seconds // 3600)
+            minutes = int((seconds % 3600) // 60)
+            secs = seconds % 60
+            return f"{hours:02d}:{minutes:02d}:{secs:05.2f}"
+    
+    def log_summary(self, title: str, data: Dict[str, any]):
+        """
+        Registra resumen estructurado
+        
+        Args:
+            title: Título del resumen
+            data: Diccionario con datos a mostrar
+        """
+        separator = "=" * 70
+        self._emit_and_log("INFO", "")
+        self._emit_and_log("INFO", separator)
+        self._emit_and_log("INFO", title.center(70))
+        self._emit_and_log("INFO", separator)
+        
+        for key, value in data.items():
+            if isinstance(value, (int, float)):
+                if isinstance(value, int):
+                    self._emit_and_log("INFO", f"  • {key}: {value:,}")
+                else:
+                    self._emit_and_log("INFO", f"  • {key}: {value:.2f}")
+            else:
+                self._emit_and_log("INFO", f"  • {key}: {value}")
+        
+        self._emit_and_log("INFO", separator)
+    
+    def log_error_details(self, error: Exception, context: str = ""):
+        """
+        Registra error con detalles completos
+        
+        Args:
+            error: Excepción capturada
+            context: Contexto donde ocurrió el error
+        """
+        import traceback
+        
+        if context:
+            self.error(f"Error en {context}: {str(error)}")
+        else:
+            self.error(f"Error: {str(error)}")
+        
+        # Traceback completo al archivo, resumido en UI
+        if self.file_logger:
+            self.file_logger.error("Traceback completo:")
+            self.file_logger.error(traceback.format_exc())
+        
+        # Solo primeras líneas en UI
+        tb_lines = traceback.format_exc().split('\n')
+        for line in tb_lines[:5]:  # Primeras 5 líneas
+            if line.strip():
+                self._emit_and_log("DEBUG", f"  {line}")
+    
+    def get_stats(self) -> Dict[str, int]:
+        """Retorna estadísticas del logging"""
+        return self.stats.copy()
+    
+    def reset_stats(self):
+        """Reinicia contadores de estadísticas"""
+        self.stats = {
+            'errors': 0,
+            'warnings': 0,
+            'validations_passed': 0,
+            'validations_failed': 0
+        }
     
     def get_log_path(self) -> Optional[Path]:
         """Retorna ruta del log de archivo"""
         return self.log_file if self.log_to_file else None
+    
+    def close(self):
+        """Cierra handlers del logger"""
+        if self.file_logger:
+            for handler in self.file_logger.handlers:
+                handler.close()
 
 
 def get_ui_logger(
