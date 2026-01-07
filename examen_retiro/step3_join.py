@@ -1,15 +1,27 @@
 """
-Script: Enriquecimiento de Examenes de Retiro con Centros de Costo
-Objetivo: Ejecutar JOIN entre examenes_retiro_gold y catálogos CC usando query SQL
-Arquitectura: Gold -> Gold Enriquecido (con información de CC)
+Script: step3_join.py
+Descripción: Enriquecimiento de Exámenes de Retiro con Centros de Costo
+             Ejecuta JOIN entre examenes_retiro_gold y catálogos CC usando query SQL
+             
+Arquitectura: 
+- Input: Gold + CC_ACTUAL + CC_OLD
+- Output: Gold Enriquecido (con información de CC)
+
+Salida:
+- Archivos actuales sin timestamp en gold/
+- Copias históricas con timestamp en gold/historico/
+
+Autor: Richi
+Fecha: 06.01.2025
 """
 
 import polars as pl
 import duckdb
 from pathlib import Path
 from datetime import datetime
-import tkinter as tk
-from tkinter import filedialog
+import time
+from tkinter import Tk, filedialog
+
 
 def find_queries_folder() -> Path:
     """
@@ -55,7 +67,7 @@ def seleccionar_archivo(titulo: str, tipos: list) -> Path:
     Returns:
         Path del archivo seleccionado
     """
-    root = tk.Tk()
+    root = Tk()
     root.withdraw()
     root.attributes('-topmost', True)
     
@@ -83,7 +95,7 @@ def cargar_query_sql() -> str:
     
     try:
         carpeta_queries = find_queries_folder()
-        print(f"✓ Carpeta encontrada: {carpeta_queries}")
+        print(f"  ✓ Carpeta encontrada: {carpeta_queries}")
     except FileNotFoundError as e:
         raise FileNotFoundError(str(e))
     
@@ -91,7 +103,7 @@ def cargar_query_sql() -> str:
     ruta_query = carpeta_queries / "query_cc_join.sql"
     
     if not ruta_query.exists():
-        # Listar archivos SQL disponibles para ayudar al usuario
+        # Listar archivos SQL disponibles
         queries_disponibles = list(carpeta_queries.glob("*.sql"))
         mensaje = f"No se encontró el archivo 'query_cc_join.sql' en {carpeta_queries}\n"
         
@@ -105,12 +117,12 @@ def cargar_query_sql() -> str:
         
         raise FileNotFoundError(mensaje)
     
-    print(f"✓ Query encontrada: {ruta_query.name}")
+    print(f"  ✓ Query encontrada: {ruta_query.name}")
     
     with open(ruta_query, 'r', encoding='utf-8') as f:
         query = f.read()
     
-    print(f"✓ Query cargada ({len(query)} caracteres)")
+    print(f"  ✓ Query cargada ({len(query)} caracteres)")
     
     return query
 
@@ -226,61 +238,73 @@ def analizar_resultados(df: pl.DataFrame) -> dict:
     return stats_dict
 
 
-def guardar_resultados(df: pl.DataFrame, ruta_gold: Path, stats: dict) -> tuple[Path, Path]:
+def guardar_resultados(df: pl.DataFrame, ruta_gold: Path, stats: dict):
     """
-    Guarda el resultado del JOIN en formatos parquet y Excel.
+    Guarda el resultado del JOIN en formatos parquet y Excel con versionamiento:
+    - Archivos actuales sin timestamp en gold/
+    - Copia con timestamp en gold/historico/
     
     Args:
         df: DataFrame con el resultado del JOIN
-        ruta_gold: Path del parquet gold original (para obtener carpeta de destino)
+        ruta_gold: Path del parquet gold original
         stats: Diccionario con estadísticas del JOIN
     
     Returns:
-        Tupla con (Path parquet, Path Excel)
+        tuple: (ruta_parquet_actual, ruta_excel_actual, ruta_parquet_historico, ruta_excel_historico)
     """
     print("\n💾 Guardando resultados...")
     
     # Carpeta de destino (misma que el parquet gold)
-    carpeta_destino = ruta_gold.parent
+    carpeta_gold = ruta_gold.parent
     
-    # Generar timestamp
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    # Crear carpeta historico/ si no existe
+    carpeta_historico = carpeta_gold / "historico"
+    carpeta_historico.mkdir(exist_ok=True)
     
-    # Nombres de archivos
-    nombre_parquet = f"examenes_retiro_gold_enriquecido_{timestamp}.parquet"
-    nombre_excel = f"examenes_retiro_gold_enriquecido_{timestamp}.xlsx"
+    # Timestamp para archivo histórico
+    timestamp = datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
     
-    # Paths completos
-    ruta_parquet = carpeta_destino / nombre_parquet
-    ruta_excel = carpeta_destino / nombre_excel
+    print(f"  📁 Carpeta Gold: {carpeta_gold}")
+    print(f"  📁 Carpeta Histórico: {carpeta_historico}")
     
-    # Guardar parquet
-    df.write_parquet(ruta_parquet, compression="snappy")
-    print(f"\n  ✓ Parquet guardado:")
-    print(f"    - Ubicación: {ruta_parquet}")
-    print(f"    - Tamaño: {ruta_parquet.stat().st_size / 1024:.2f} KB")
-    print(f"    - Registros: {len(df):,}")
-    print(f"    - Columnas: {len(df.columns)}")
+    # === ARCHIVOS ACTUALES (sin timestamp) ===
+    nombre_actual = "examenes_retiro_gold_enriquecido"
+    ruta_parquet_actual = carpeta_gold / f"{nombre_actual}.parquet"
+    ruta_excel_actual = carpeta_gold / f"{nombre_actual}.xlsx"
     
-    # Guardar Excel
-    df.write_excel(ruta_excel)
-    print(f"\n  ✓ Excel guardado:")
-    print(f"    - Ubicación: {ruta_excel}")
-    print(f"    - Tamaño: {ruta_excel.stat().st_size / 1024:.2f} KB")
+    print(f"\n  📄 Archivos actuales (se sobreescriben):")
+    print(f"    - Guardando parquet...", end='', flush=True)
+    df.write_parquet(ruta_parquet_actual, compression="snappy")
+    print(f" ✓")
     
-    return ruta_parquet, ruta_excel
+    print(f"    - Guardando Excel...", end='', flush=True)
+    df.write_excel(ruta_excel_actual)
+    print(f" ✓")
+    
+    # === ARCHIVOS HISTÓRICOS (con timestamp) ===
+    nombre_historico = f"examenes_retiro_gold_enriquecido_{timestamp}"
+    ruta_parquet_historico = carpeta_historico / f"{nombre_historico}.parquet"
+    ruta_excel_historico = carpeta_historico / f"{nombre_historico}.xlsx"
+    
+    print(f"\n  📦 Archivos históricos (con timestamp):")
+    print(f"    - Guardando parquet...", end='', flush=True)
+    df.write_parquet(ruta_parquet_historico, compression="snappy")
+    print(f" ✓")
+    
+    print(f"    - Guardando Excel...", end='', flush=True)
+    df.write_excel(ruta_excel_historico)
+    print(f" ✓")
+    
+    return ruta_parquet_actual, ruta_excel_actual, ruta_parquet_historico, ruta_excel_historico
 
 
 def main():
-    """
-    Función principal del script.
-    """
+    """Función principal del script"""
     print("=" * 80)
-    print("ENRIQUECIMIENTO DE EXAMENES DE RETIRO CON CENTROS DE COSTO")
-    print("Gold -> Gold Enriquecido (JOIN con CC)")
+    print(" ENRIQUECIMIENTO DE EXÁMENES DE RETIRO CON CENTROS DE COSTO ".center(80, "="))
     print("=" * 80)
     
-    inicio = datetime.now()
+    inicio = time.time()
     
     try:
         # 1. Cargar query SQL
@@ -326,24 +350,42 @@ def main():
         
         # 7. Guardar resultados
         print("\n[5/5] Guardado de Resultados")
-        ruta_parquet, ruta_excel = guardar_resultados(df_resultado, ruta_gold, stats)
+        ruta_parquet_actual, ruta_excel_actual, ruta_parquet_historico, ruta_excel_historico = guardar_resultados(
+            df_resultado, ruta_gold, stats
+        )
         
         # Resumen final
-        duracion = (datetime.now() - inicio).total_seconds()
+        duracion = time.time() - inicio
         print("\n" + "=" * 80)
-        print("✓ PROCESO COMPLETADO EXITOSAMENTE")
+        print(" RESUMEN ".center(80, "="))
         print("=" * 80)
+        
+        print(f"\n✓ Proceso completado exitosamente")
+        
         print(f"\n⏱️  Tiempo de ejecución: {duracion:.2f} segundos")
-        print(f"\n📊 RESUMEN DE ENRIQUECIMIENTO:")
+        
+        print(f"\n📊 Estadísticas de Enriquecimiento:")
         print(f"  - Total registros procesados: {stats['total']:,}")
         print(f"  - Enriquecidos exitosamente:  {stats['ok']:,} ({stats['ok']/stats['total']*100:.1f}%)")
         print(f"  - Sin código CC:              {stats['sin_codigo']:,} ({stats['sin_codigo']/stats['total']*100:.1f}%)")
         print(f"  - Código no encontrado:       {stats['no_encontrado']:,} ({stats['no_encontrado']/stats['total']*100:.1f}%)")
-        print(f"\n📁 ARCHIVOS GENERADOS:")
-        print(f"  - Parquet: {ruta_parquet.name}")
-        print(f"  - Excel:   {ruta_excel.name}")
-        print(f"\n📂 Ubicación: {ruta_parquet.parent}")
-        print("=" * 80)
+        
+        print(f"\n📁 Archivos generados:")
+        print(f"\n  Actuales (para Power BI):")
+        print(f"    - {ruta_parquet_actual.name}")
+        print(f"    - {ruta_excel_actual.name}")
+        
+        print(f"\n  Históricos (con timestamp):")
+        print(f"    - {ruta_parquet_historico.name}")
+        print(f"    - {ruta_excel_historico.name}")
+        
+        print(f"\n📂 Ubicación: {ruta_gold.parent}")
+        
+        print("\n💡 Notas:")
+        print("  - Archivos actuales: se sobreescriben en cada ejecución (rutas estables para Power BI)")
+        print("  - Archivos históricos: se archivan con timestamp para auditoría")
+        
+        print("\n" + "=" * 80)
         
     except Exception as e:
         print(f"\n❌ ERROR: {str(e)}")

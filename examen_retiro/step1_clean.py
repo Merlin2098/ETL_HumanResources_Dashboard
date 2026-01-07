@@ -1,65 +1,107 @@
 """
-ETL para Programación de Exámenes de Retiro
-Procesa archivo Excel con información de empleados cesados y sus exámenes médicos
-
+Script: step1_clean.py
+Descripción: Procesa archivo Excel de Programación de Exámenes de Retiro
+             - Hoja DATA: headers en fila 3, datos desde fila 4
+             
 Arquitectura:
-- Bronze: Excel con hoja DATA, headers en fila 3, datos desde fila 4
+- Bronze: Excel con información de empleados cesados y exámenes médicos
 - Silver: Parquet limpio y estandarizado (SE SOBRESCRIBE EN CADA EJECUCIÓN)
-- Output: Excel para visualización de usuario (SE SOBRESCRIBE EN CADA EJECUCIÓN)
+
+Salida: Archivos sin timestamp en carpeta silver/
+    - examenes_retiro.parquet
+    - examenes_retiro.xlsx
+
+Autor: Richi
+Fecha: 06.01.2025
 """
 
 import polars as pl
 import openpyxl
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, date
 import time
 import sys
+from tkinter import Tk, filedialog
 
 
-def extraer_bronze_examenes_retiro(ruta_excel: str) -> pl.DataFrame:
+def seleccionar_archivo_excel() -> Path | None:
+    """Abre diálogo para seleccionar archivo Excel"""
+    root = Tk()
+    root.withdraw()
+    root.attributes('-topmost', True)
+    
+    archivo = filedialog.askopenfilename(
+        title="Seleccionar archivo Excel - Exámenes de Retiro (Bronze)",
+        filetypes=[("Excel files", "*.xlsx *.xlsm *.xls"), ("All files", "*.*")]
+    )
+    
+    root.destroy()
+    
+    return Path(archivo) if archivo else None
+
+
+def extraer_bronze_examenes_retiro(ruta_excel: Path) -> pl.DataFrame:
     """
     Extrae datos de la hoja DATA del archivo Excel
     Headers en fila 3, datos desde fila 4
+    
+    OPTIMIZACIÓN: Usa iter_rows con values_only para mejor rendimiento
+    
+    Args:
+        ruta_excel: Path al archivo Excel Bronze
+        
+    Returns:
+        DataFrame de Polars con los datos extraídos
     """
-    print("📂 Extrayendo datos de la capa Bronze...")
+    print("\n📂 Extrayendo datos de la capa Bronze...")
+    print(f"   Archivo: {ruta_excel.name}")
     
     try:
-        import pandas as pd
-        from datetime import datetime, date
+        # Cargar workbook con openpyxl
+        wb = openpyxl.load_workbook(ruta_excel, data_only=True, read_only=True)
         
-        # Cargar workbook con openpyxl para extraer headers correctamente
-        wb = openpyxl.load_workbook(ruta_excel, data_only=True)
+        if 'DATA' not in wb.sheetnames:
+            raise ValueError(f"La hoja 'DATA' no existe. Hojas disponibles: {wb.sheetnames}")
+        
         ws = wb['DATA']
         
-        # Extraer headers de la fila 3
+        # Extraer headers de la fila 3 (más eficiente con iter_rows)
         headers = []
-        for col in range(1, ws.max_column + 1):
-            cell_value = ws.cell(row=3, column=col).value
-            if cell_value:
-                headers.append(str(cell_value).strip())
+        for cell in ws[3]:  # Fila 3
+            if cell.value is not None:
+                headers.append(str(cell.value).strip())
             else:
-                break  # Detenerse cuando no haya más headers
+                break
         
         print(f"   ✓ {len(headers)} columnas identificadas")
         
-        # Extraer datos desde fila 4
+        # OPTIMIZACIÓN: Usar iter_rows con values_only=True para mejor rendimiento
+        # Solo iteramos hasta la columna que tiene headers
         data = []
-        for row in range(4, ws.max_row + 1):
-            first_cell = ws.cell(row=row, column=1).value
-            
-            # Si la primera celda está vacía, asumir que no hay más datos
-            if first_cell is None or str(first_cell).strip() == '':
+        
+        for row in ws.iter_rows(min_row=4, max_col=len(headers), values_only=True):
+            # Detener si la primera celda está vacía (fin de datos)
+            if row[0] is None or (isinstance(row[0], str) and row[0].strip() == ''):
                 break
             
+            # Convertir fila a lista y procesar valores
             row_data = []
-            for col_idx in range(1, len(headers) + 1):
-                cell_value = ws.cell(row=row, column=col_idx).value
-                
+            for cell_value in row:
                 # Convertir #N/A y errores de Excel a None
                 if isinstance(cell_value, str) and cell_value.startswith('#'):
                     cell_value = None
+                # Convertir datetime/date a string ISO
+                elif isinstance(cell_value, datetime):
+                    cell_value = cell_value.strftime('%Y-%m-%d %H:%M:%S')
+                elif isinstance(cell_value, date):
+                    cell_value = cell_value.strftime('%Y-%m-%d')
+                # Convertir números a string para evitar problemas con DNI
+                elif isinstance(cell_value, (int, float)):
+                    if isinstance(cell_value, float) and cell_value == int(cell_value):
+                        cell_value = str(int(cell_value))
+                    else:
+                        cell_value = str(cell_value)
                 
-                # Mantener datetime/date tal cual, no convertir a string
                 row_data.append(cell_value)
             
             data.append(row_data)
@@ -68,34 +110,34 @@ def extraer_bronze_examenes_retiro(ruta_excel: str) -> pl.DataFrame:
         
         print(f"   ✓ {len(data)} filas de datos extraídas")
         
-        # Convertir a diccionario de listas
-        # Convertir datetime a string ISO para evitar problemas de tipos mixtos
-        data_dict = {header: [] for header in headers}
+        # Crear DataFrame de Polars
+        if not data:
+            print("   ⚠️  No se encontraron datos")
+            return pl.DataFrame()
         
-        for row_data in data:
-            for idx, (header, value) in enumerate(zip(headers, row_data)):
-                # Convertir datetime a string ISO para preservar la fecha
-                if isinstance(value, (datetime, date)):
-                    value = value.strftime('%Y-%m-%d') if isinstance(value, date) else value.strftime('%Y-%m-%d %H:%M:%S')
-                # Convertir números a string para evitar problemas con DNI
-                elif isinstance(value, (int, float)):
-                    value = str(int(value)) if isinstance(value, float) and value == int(value) else str(value)
-                
-                data_dict[header].append(value)
+        # Crear diccionario para DataFrame
+        data_dict = {header: [row[i] if i < len(row) else None for row in data] 
+                     for i, header in enumerate(headers)}
         
-        # Crear DataFrame de Polars desde diccionario
-        df = pl.DataFrame(data_dict)
+        # Crear DataFrame con strict=False para manejar tipos mixtos
+        df = pl.DataFrame(data_dict, strict=False)
         
         return df
         
     except Exception as e:
-        print(f"❌ Error al extraer datos Bronze: {str(e)}")
+        print(f"   ❌ Error al extraer datos Bronze: {str(e)}")
         raise
 
 
 def limpiar_silver_examenes_retiro(df_bronze: pl.DataFrame) -> pl.DataFrame:
     """
     Limpia y estandariza los datos para la capa Silver
+    
+    Args:
+        df_bronze: DataFrame extraído de Bronze
+        
+    Returns:
+        DataFrame limpio para Silver
     """
     print("\n🧹 Procesando capa Silver...")
     
@@ -109,24 +151,33 @@ def limpiar_silver_examenes_retiro(df_bronze: pl.DataFrame) -> pl.DataFrame:
                     pl.col(col).str.strip_chars().alias(col)
                 )
         
-        # Convertir campos de fecha
+        # Convertir campos de fecha desde string a Date
         columnas_fecha = ['F. NACIMIENTO', 'FECHA DE CESE', 
                          'UTLIMA FECHA PARA EXAMEN MEDICO', 
                          '2DA CONVOCATORIA EXAMEN MEDICO']
         
         for col in columnas_fecha:
             if col in df_silver.columns:
-                # Intentar conversión de fecha
+                # Intentar conversión desde string con timestamp
                 try:
-                    # Primero intentar como datetime
                     df_silver = df_silver.with_columns(
-                        pl.col(col).cast(pl.Date, strict=False).alias(col)
+                        pl.col(col)
+                        .str.to_datetime(format="%Y-%m-%d %H:%M:%S", strict=False)
+                        .cast(pl.Date, strict=False)
+                        .alias(col)
                     )
                 except:
-                    # Si falla, intentar como string y luego parsear
-                    df_silver = df_silver.with_columns(
-                        pl.col(col).cast(pl.Utf8, strict=False).alias(col)
-                    )
+                    # Si falla con timestamp, intentar solo fecha
+                    try:
+                        df_silver = df_silver.with_columns(
+                            pl.col(col)
+                            .str.to_datetime(format="%Y-%m-%d", strict=False)
+                            .cast(pl.Date, strict=False)
+                            .alias(col)
+                        )
+                    except:
+                        # Si todo falla, dejar como string
+                        pass
         
         # Limpiar columna DNI (convertir a string y quitar decimales)
         if 'DNI' in df_silver.columns:
@@ -147,153 +198,131 @@ def limpiar_silver_examenes_retiro(df_bronze: pl.DataFrame) -> pl.DataFrame:
         return df_silver
         
     except Exception as e:
-        print(f"❌ Error en procesamiento Silver: {str(e)}")
+        print(f"   ❌ Error en procesamiento Silver: {str(e)}")
         raise
 
 
-def guardar_silver_parquet(df_silver: pl.DataFrame, ruta_salida: str) -> None:
+def guardar_resultados(df_silver: pl.DataFrame, carpeta_trabajo: Path):
     """
-    Guarda el DataFrame Silver en formato Parquet (SOBRESCRIBE archivo existente)
-    """
-    print(f"\n💾 Guardando capa Silver (Parquet)...")
+    Guarda el DataFrame Silver como parquet y Excel en carpeta silver/
+    Sin timestamp - se sobreescribe en cada ejecución
     
-    try:
-        df_silver.write_parquet(ruta_salida)
+    Args:
+        df_silver: DataFrame a guardar
+        carpeta_trabajo: Path de la carpeta de trabajo
         
-        # Verificar tamaño del archivo
-        tamanio_mb = Path(ruta_salida).stat().st_size / (1024 * 1024)
-        print(f"   ✓ Archivo guardado: {Path(ruta_salida).name}")
-        print(f"   ✓ Tamaño: {tamanio_mb:.2f} MB")
-        print(f"   ℹ️  Archivo sobrescrito (sin historial)")
-        
-    except Exception as e:
-        print(f"❌ Error al guardar Parquet: {str(e)}")
-        raise
-
-
-def exportar_excel_usuario(df_silver: pl.DataFrame, ruta_salida: str) -> None:
+    Returns:
+        tuple: (ruta_parquet, ruta_excel)
     """
-    Exporta el DataFrame Silver a Excel para visualización de usuario (SOBRESCRIBE archivo existente)
-    """
-    print(f"\n📊 Exportando Excel para usuario...")
+    # Crear carpeta silver si no existe
+    carpeta_silver = carpeta_trabajo / "silver"
+    carpeta_silver.mkdir(exist_ok=True)
     
-    try:
-        # Convertir fechas a string para Excel
-        df_export = df_silver.clone()
-        
-        for col in df_export.columns:
-            if df_export[col].dtype == pl.Date:
-                df_export = df_export.with_columns(
-                    pl.col(col).cast(pl.Utf8, strict=False).alias(col)
-                )
-        
-        # Exportar a Excel
-        df_export.write_excel(ruta_salida)
-        
-        print(f"   ✓ Excel guardado: {Path(ruta_salida).name}")
-        print(f"   ✓ {df_export.height} filas exportadas")
-        print(f"   ℹ️  Archivo sobrescrito (sin historial)")
-        
-    except Exception as e:
-        print(f"❌ Error al exportar Excel: {str(e)}")
-        raise
-
-
-def ejecutar_etl_examenes_retiro(ruta_bronze: str, 
-                                   carpeta_silver: str = None) -> None:
-    """
-    Ejecuta el pipeline ETL completo para exámenes de retiro
-    SIN TIMESTAMP - SOBRESCRIBE archivos existentes
-    """
-    inicio = time.time()
+    # Nombres fijos sin timestamp
+    nombre_base = "examenes_retiro"
+    ruta_parquet = carpeta_silver / f"{nombre_base}.parquet"
+    ruta_excel = carpeta_silver / f"{nombre_base}.xlsx"
     
+    print(f"\n[2/2] Guardando resultados en capa Silver...")
+    print(f"  📁 Carpeta: {carpeta_silver}")
+    
+    # Guardar Parquet
+    print(f"  - Guardando parquet...", end='', flush=True)
+    df_silver.write_parquet(ruta_parquet, compression="snappy")
+    print(f" ✓")
+    print(f"    Ubicación: {ruta_parquet.name}")
+    
+    # Guardar Excel
+    print(f"  - Guardando Excel...", end='', flush=True)
+    # Convertir fechas a string para Excel
+    df_export = df_silver.clone()
+    for col in df_export.columns:
+        if df_export[col].dtype == pl.Date:
+            df_export = df_export.with_columns(
+                pl.col(col).cast(pl.Utf8, strict=False).alias(col)
+            )
+    df_export.write_excel(ruta_excel)
+    print(f" ✓")
+    print(f"    Ubicación: {ruta_excel.name}")
+    
+    return ruta_parquet, ruta_excel
+
+
+def main():
+    """Función principal de procesamiento"""
     print("=" * 80)
-    print("ETL - PROGRAMACIÓN DE EXÁMENES DE RETIRO")
+    print(" PROCESADOR DE EXÁMENES DE RETIRO - CAPA SILVER ".center(80, "="))
     print("=" * 80)
-    print(f"Inicio: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+    
+    # 1. Seleccionar archivo
+    print("\n[PASO 1] Selecciona el archivo Excel de Exámenes de Retiro (Bronze)...")
+    archivo_bronze = seleccionar_archivo_excel()
+    
+    if not archivo_bronze:
+        print("❌ No se seleccionó ningún archivo. Proceso cancelado.")
+        return
+    
+    # Iniciar cronómetro después de la selección
+    tiempo_inicio = time.time()
+    
+    print(f"✓ Archivo seleccionado: {archivo_bronze.name}")
+    carpeta_trabajo = archivo_bronze.parent
+    
+    # 2. Procesar datos
+    print("\n" + "=" * 80)
+    print(" PROCESAMIENTO ".center(80, "="))
+    print("=" * 80)
+    print(f"\n[1/2] Extrayendo y limpiando datos...")
     
     try:
-        # Definir ruta de salida
-        if carpeta_silver is None:
-            carpeta_silver = Path(ruta_bronze).parent / 'silver'
+        # 2.1 Extraer Bronze
+        df_bronze = extraer_bronze_examenes_retiro(archivo_bronze)
         
-        # Crear carpeta si no existe
-        Path(carpeta_silver).mkdir(parents=True, exist_ok=True)
+        if df_bronze.is_empty():
+            print("❌ No se encontraron datos en el archivo.")
+            return
         
-        # NOMBRES FIJOS SIN TIMESTAMP (se sobrescriben en cada ejecución)
-        ruta_parquet = Path(carpeta_silver) / "examenes_retiro.parquet"
-        ruta_excel_output = Path(carpeta_silver) / "examenes_retiro.xlsx"
-        
-        # 1. Extraer Bronze
-        df_bronze = extraer_bronze_examenes_retiro(ruta_bronze)
-        
-        # 2. Limpiar Silver
+        # 2.2 Limpiar Silver
         df_silver = limpiar_silver_examenes_retiro(df_bronze)
         
-        # 3. Guardar Parquet (sobrescribe)
-        guardar_silver_parquet(df_silver, str(ruta_parquet))
+        # 3. Guardar resultados
+        ruta_parquet, ruta_excel = guardar_resultados(df_silver, carpeta_trabajo)
         
-        # 4. Exportar Excel (sobrescribe)
-        exportar_excel_usuario(df_silver, str(ruta_excel_output))
+        # Calcular tiempo total
+        tiempo_total = time.time() - tiempo_inicio
         
-        # Resumen final
-        duracion = time.time() - inicio
+        # 4. Resumen final
         print("\n" + "=" * 80)
-        print("✅ ETL COMPLETADO EXITOSAMENTE")
+        print(" RESUMEN ".center(80, "="))
         print("=" * 80)
-        print(f"Registros procesados: {df_silver.height}")
-        print(f"Columnas: {df_silver.width}")
-        print(f"Tiempo de ejecución: {duracion:.2f} segundos")
-        print(f"\nArchivos generados en: {carpeta_silver}")
-        print(f"  📦 Parquet: {ruta_parquet.name}")
-        print(f"  📊 Excel:   {ruta_excel_output.name}")
-        print("\n⚠️  NOTA: Los archivos se sobrescriben en cada ejecución (sin historial)")
-        print("=" * 80)
+        
+        print(f"\n✓ Procesamiento completado exitosamente")
+        print(f"\n📊 Estadísticas:")
+        print(f"  - Total de registros: {len(df_silver):,}")
+        print(f"  - Total de columnas: {len(df_silver.columns)}")
+        
+        print(f"\n📁 Archivos generados en carpeta silver/:")
+        print(f"  - Parquet: {ruta_parquet.name}")
+        print(f"  - Excel:   {ruta_excel.name}")
+        
+        print(f"\n⏱️  Tiempo de ejecución: {tiempo_total:.2f}s")
+        
+        print("\n💡 Los archivos se sobreescriben en cada ejecución (sin historial)")
+        
+        print("\n" + "=" * 80)
         
     except Exception as e:
-        print(f"\n❌ ERROR EN ETL: {str(e)}")
+        print(f"\n❌ Error durante el procesamiento: {str(e)}")
         import traceback
         traceback.print_exc()
-        sys.exit(1)
+        return
 
 
 if __name__ == "__main__":
-    import tkinter as tk
-    from tkinter import filedialog
-    
-    # Ocultar ventana principal de tkinter
-    root = tk.Tk()
-    root.withdraw()
-    
-    print("=" * 80)
-    print("ETL - PROGRAMACIÓN DE EXÁMENES DE RETIRO")
-    print("=" * 80)
-    print("\n📂 Seleccione el archivo Excel de exámenes de retiro...\n")
-    
-    # Abrir explorador de archivos
-    ruta_bronze = filedialog.askopenfilename(
-        title="Seleccionar archivo Excel - Exámenes de Retiro",
-        filetypes=[
-            ("Archivos Excel", "*.xlsx *.xlsm *.xls"),
-            ("Todos los archivos", "*.*")
-        ]
-    )
-    
-    # Verificar si se seleccionó un archivo
-    if not ruta_bronze:
-        print("❌ No se seleccionó ningún archivo. Proceso cancelado.")
-        sys.exit(0)
-    
-    print(f"✓ Archivo seleccionado: {Path(ruta_bronze).name}\n")
-    
-    # Definir carpeta silver en la misma ubicación del archivo bronze
-    carpeta_bronze = Path(ruta_bronze).parent
-    carpeta_silver = carpeta_bronze / 'silver'
-    
-    print(f"📁 Estructura de salida:")
-    print(f"   📂 Archivo Bronze: {carpeta_bronze}")
-    print(f"   📦 Carpeta Silver: {carpeta_silver} (parquet + excel)")
-    print(f"   ⚠️  Modo: SOBRESCRITURA (sin historial)\n")
-    
-    # Ejecutar ETL
-    ejecutar_etl_examenes_retiro(ruta_bronze, str(carpeta_silver))
+    try:
+        main()
+    except Exception as e:
+        print(f"\n❌ Error fatal: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
