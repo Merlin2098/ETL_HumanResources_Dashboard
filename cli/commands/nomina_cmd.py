@@ -5,6 +5,7 @@ Bronze → Silver → Gold completo
 from pathlib import Path
 from typing import Optional
 import typer
+import time
 from rich.console import Console
 
 from utils import (
@@ -15,6 +16,29 @@ from utils import (
 )
 
 console = Console()
+
+
+def format_duration(seconds: float) -> str:
+    """
+    Formatea duración en formato legible según magnitud
+    
+    Args:
+        seconds: Duración en segundos
+        
+    Returns:
+        String formateado (ej: "45.2s", "2m 15.4s", "1h 5m 23.1s")
+    """
+    if seconds < 60:
+        return f"{seconds:.2f}s"
+    elif seconds < 3600:
+        mins = int(seconds // 60)
+        secs = seconds % 60
+        return f"{mins}m {secs:.2f}s"
+    else:
+        hours = int(seconds // 3600)
+        mins = int((seconds % 3600) // 60)
+        secs = seconds % 60
+        return f"{hours}h {mins}m {secs:.1f}s"
 
 
 def run_pipeline(
@@ -137,6 +161,9 @@ def run_pipeline_with_params(
     console.print("[bold cyan]╚═══════════════════════════════════════════════════════╝[/bold cyan]\n")
     
     try:
+        # Variable para medir tiempo de ejecución
+        tiempo_inicio = None
+        
         # VALIDAR DEPENDENCIAS
         logger.log_step_start(
             "Validación de Dependencias",
@@ -177,6 +204,9 @@ def run_pipeline_with_params(
             
             logger.log_file_processing(parquet_silver, "Archivo Silver")
             
+            # INICIAR CRONÓMETRO
+            tiempo_inicio = time.time()
+            
             # Carpeta base para gold (un nivel arriba de silver)
             carpeta_base = parquet_silver.parent.parent
             
@@ -201,6 +231,9 @@ def run_pipeline_with_params(
             
             input_dir = Path(input_dir)
             logger.info(f"Carpeta Bronze: [cyan]{input_dir}[/cyan]")
+            
+            # INICIAR CRONÓMETRO
+            tiempo_inicio = time.time()
             
             # Buscar archivos Excel
             archivos_excel = list(input_dir.glob('*.xlsx')) + list(input_dir.glob('*.xls'))
@@ -248,16 +281,17 @@ def run_pipeline_with_params(
             
             logger.log_step_end("STEP 1: Bronze → Silver", success=True)
             
-            console.print(f"\n[green]✓[/green] Silver generado: [cyan]{parquet_silver}[/cyan]")
-            
             if only_bronze_to_silver:
-                # Resumen y salir
-                console.print("\n[bold green]✓ PIPELINE COMPLETADO: Bronze → Silver[/bold green]\n")
-                console.print("📊 [bold]Archivos generados:[/bold]")
-                console.print(f"   • {parquet_silver}")
-                console.print(f"   • {excel_silver}")
-                console.print(f"\n📝 [bold]Log:[/bold] [cyan]{logger.get_log_path()}[/cyan]\n")
-                loader.print_performance_report()
+                # CALCULAR TIEMPO Y MOSTRAR RESUMEN
+                if tiempo_inicio is not None:
+                    duracion = time.time() - tiempo_inicio
+                    tiempo_formateado = format_duration(duracion)
+                else:
+                    tiempo_formateado = "N/A"
+                
+                console.print(f"\n[bold green]✓ Pipeline completado en {tiempo_formateado}[/bold green]")
+                console.print(f"📝 Log: [cyan]{logger.get_log_path()}[/cyan]")
+                console.print(f"📁 Silver: [cyan]{parquet_silver.parent}/[/cyan]\n")
                 return
         
         # STEP 2: SILVER → GOLD
@@ -328,34 +362,18 @@ def run_pipeline_with_params(
         
         logger.log_step_end("STEP 2: Silver → Gold", success=True)
         
+        # CALCULAR TIEMPO DE EJECUCIÓN
+        if tiempo_inicio is not None:
+            duracion = time.time() - tiempo_inicio
+            tiempo_formateado = format_duration(duracion)
+        else:
+            tiempo_formateado = "N/A"
+        
         # RESUMEN FINAL
-        console.print("\n[bold green]✓ PIPELINE COMPLETADO EXITOSAMENTE[/bold green]\n")
-        
-        console.print("📊 [bold]Estadísticas:[/bold]")
-        console.print(f"   • Registros finales: [cyan]{len(df_gold):,}[/cyan]")
-        console.print(f"   • Columnas Gold: [cyan]{len(df_gold.columns)}[/cyan]")
-        
-        if not only_silver_to_gold:
-            console.print(f"   • Archivos Excel procesados: [cyan]{len(archivos_excel)}[/cyan]")
-        
-        console.print(f"\n📁 [bold]Archivos generados:[/bold]")
-        
-        if not only_silver_to_gold:
-            console.print(f"\n   [dim]Silver:[/dim]")
-            console.print(f"   • {parquet_silver}")
-        
-        console.print(f"\n   [dim]Gold (actual/):[/dim]")
-        console.print(f"   • {parquet_gold}")
-        if excel_gold:
-            console.print(f"   • {excel_gold}")
-        
-        console.print(f"\n📝 [bold]Log:[/bold] [cyan]{logger.get_log_path()}[/cyan]")
-        
-        console.print(f"\n💡 [dim]Power BI debe apuntar a: {parquet_gold.parent}/[/dim]")
-        console.print(f"💡 [dim]Versiones históricas en: {parquet_gold.parent.parent}/historico/[/dim]\n")
-        
-        # Estadísticas de performance
-        loader.print_performance_report()
+        console.print(f"\n[bold green]✓ Pipeline completado en {tiempo_formateado}[/bold green]")
+        console.print(f"📝 Log: [cyan]{logger.get_log_path()}[/cyan]")
+        console.print(f"📊 Registros: [cyan]{len(df_gold):,}[/cyan] | Columnas: [cyan]{len(df_gold.columns)}[/cyan]")
+        console.print(f"📁 Resultados: [cyan]{parquet_gold.parent}/[/cyan]\n")
         
     except KeyboardInterrupt:
         logger.warning("Pipeline interrumpido por el usuario")
