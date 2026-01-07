@@ -10,6 +10,12 @@ from PySide6.QtCore import Qt
 from pathlib import Path
 from typing import List, Optional
 from abc import ABC, abstractmethod
+import sys
+
+# Agregar path del proyecto
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from utils.file_selector_qt import quick_file_select_qt
 
 
 class BaseETLWidget(QWidget, ABC):
@@ -111,8 +117,6 @@ class BaseETLWidget(QWidget, ABC):
     
     def _select_files(self):
         """Abre diálogo para seleccionar archivos"""
-        from utils.file_selector_qt import quick_file_select_qt
-        
         files = quick_file_select_qt(
             parent=self,
             title=f"Seleccionar archivos - {self.title}",
@@ -125,7 +129,7 @@ class BaseETLWidget(QWidget, ABC):
             count = len(files)
             self.label_files.setText(
                 f"✓ {count} archivo{'s' if count > 1 else ''} seleccionado{'s' if count > 1 else ''}:\n" +
-                "\n".join([f"  • {Path(f).name}" for f in files[:5]]) +
+                "\n".join([f"  • {f.name}" for f in files[:5]]) +
                 (f"\n  ... y {count - 5} más" if count > 5 else "")
             )
             self.btn_process.setEnabled(True)

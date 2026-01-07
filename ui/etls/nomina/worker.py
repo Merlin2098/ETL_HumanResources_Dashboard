@@ -7,12 +7,11 @@ from pathlib import Path
 from typing import Dict, List
 import sys
 
-# Importar el worker base
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
-from ui.workers.base_worker import BaseETLWorker
+# Asegurar que el directorio raíz del proyecto esté en el path
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
 
-# Importar funciones core de nómina
-from nomina.api_step1 import consolidar_planillas_bronze_to_silver
+from ui.workers.base_worker import BaseETLWorker
 
 
 class NominaWorker(BaseETLWorker):
@@ -37,49 +36,83 @@ class NominaWorker(BaseETLWorker):
             self.progress_updated.emit(10, "Consolidando planillas...")
             self.logger.log_step_start("Consolidación", "Bronze → Silver")
             
-            df_consolidado, ruta_parquet, ruta_excel = consolidar_planillas_bronze_to_silver(
-                archivos_bronze=self.archivos,
-                output_dir=self.output_dir,
-                logger=self.logger
-            )
-            
-            resultado['step1'] = {
-                'dataframe': df_consolidado,
-                'parquet': ruta_parquet,
-                'excel': ruta_excel,
-                'registros': len(df_consolidado)
-            }
-            
-            self.logger.log_step_end("Consolidación", success=True)
-            self.progress_updated.emit(50, f"✓ Consolidadas {len(df_consolidado):,} filas")
+            # Importar step1
+            try:
+                from nomina.step1_consolidar_planillas import consolidar_archivos, guardar_resultados
+                
+                # Ejecutar consolidación
+                df_consolidado = consolidar_archivos(self.archivos, self.output_dir)
+                
+                # Guardar resultados
+                ruta_parquet, ruta_excel = guardar_resultados(df_consolidado, self.output_dir)
+                
+                resultado['step1'] = {
+                    'dataframe': df_consolidado,
+                    'parquet': ruta_parquet,
+                    'excel': ruta_excel,
+                    'registros': len(df_consolidado)
+                }
+                
+                self.logger.log_step_end("Consolidación", success=True)
+                self.progress_updated.emit(50, f"✓ Consolidadas {len(df_consolidado):,} filas")
+                
+            except ImportError as e:
+                self.logger.error(f"No se pudo importar step1: {e}")
+                return {
+                    'success': False,
+                    'error': f'No se encontró nomina/step1_consolidar_planillas.py: {e}'
+                }
             
             # ============ STEP 2: Silver → Gold ============
             self.progress_updated.emit(60, "Procesando capa Gold...")
             self.logger.log_step_start("Exportación", "Silver → Gold")
             
-            # Importar función de step2
             try:
-                from nomina.step2_exportar import procesar_silver_to_gold
+                from nomina.step2_exportar import seleccionar_y_convertir_columnas, guardar_resultados as guardar_gold
                 
-                resultado_gold = procesar_silver_to_gold(
-                    archivo_silver=ruta_parquet,
-                    output_dir=self.output_dir,
-                    logger=self.logger
-                )
+                # Buscar esquema
+                from pathlib import Path
+                esquema_path = Path(project_root) / "esquemas" / "esquema_nominas.json"
                 
-                resultado['step2'] = resultado_gold
+                if not esquema_path.exists():
+                    self.logger.warning("Esquema no encontrado, saltando Step 2")
+                    self.progress_updated.emit(100, "✓ Consolidación completada (sin Gold)")
+                    resultado['step2'] = {'warning': 'Esquema no encontrado'}
+                else:
+                    import json
+                    with open(esquema_path, 'r', encoding='utf-8') as f:
+                        esquema = json.load(f)
+                    
+                    # Leer silver
+                    import polars as pl
+                    df_silver = pl.read_parquet(ruta_parquet)
+                    
+                    # Transformar a gold
+                    df_gold = seleccionar_y_convertir_columnas(df_silver, esquema)
+                    
+                    # Guardar gold
+                    carpeta_silver = ruta_parquet.parent
+                    rutas_gold = guardar_gold(df_gold, carpeta_silver)
+                    
+                    resultado['step2'] = {
+                        'registros': len(df_gold),
+                        'archivos': rutas_gold
+                    }
+                    
+                    self.logger.log_step_end("Exportación", success=True)
+                    self.progress_updated.emit(100, "✓ Proceso completado")
                 
-                self.logger.log_step_end("Exportación", success=True)
-                self.progress_updated.emit(100, "✓ Proceso completado")
-                
-            except ImportError:
-                # Si no existe step2, marcar como éxito parcial
-                self.logger.warning("Step 2 no disponible, solo se ejecutó consolidación")
+            except ImportError as e:
+                self.logger.warning(f"Step 2 no disponible: {e}")
                 self.progress_updated.emit(100, "✓ Consolidación completada (Step 2 no disponible)")
-                resultado['step2'] = {'warning': 'Step 2 no implementado'}
+                resultado['step2'] = {'warning': f'Step 2 no implementado: {e}'}
+            except Exception as e:
+                self.logger.error(f"Error en Step 2: {e}")
+                resultado['step2'] = {'error': str(e)}
             
             resultado['success'] = True
-            resultado['mensaje'] = f"ETL completado: {len(df_consolidado):,} registros procesados"
+            mensaje = f"ETL completado: {resultado['step1']['registros']:,} registros procesados"
+            resultado['mensaje'] = mensaje
             
             return resultado
             
