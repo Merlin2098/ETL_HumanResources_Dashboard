@@ -6,6 +6,7 @@ pyarrow
 openpyxl
 polars
 python-calamine
+pyside6
 wheel
 setuptools
 duckdb
@@ -13,10 +14,6 @@ tabulate
 tqdm
 xlsxwriter
 
-#Para UI de data
-typer
-rich
-questionary
 
 #utils
 pydantic
