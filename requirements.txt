@@ -17,3 +17,7 @@ xlsxwriter
 typer
 rich
 questionary
+
+#utils
+pydantic
+python-dateutil
