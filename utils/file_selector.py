@@ -1,14 +1,16 @@
 """
 Selector interactivo de archivos con integración de cache
 Proporciona diálogos intuitivos para selección de archivos usando Questionary
+Incluye soporte para exploradores gráficos con tkinter
 """
 from pathlib import Path
-from typing import Optional, List, Tuple
+from typing import Optional, List
 import questionary
 from questionary import Style
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+from tkinter import Tk, filedialog
 
 from .path_cache import get_path_cache
 from .logger import PipelineLogger
@@ -27,6 +29,73 @@ custom_style = Style([
     ('instruction', ''),
     ('text', ''),
 ])
+
+
+def _open_file_dialog_gui(
+    allowed_extensions: Optional[List[str]] = None,
+    initial_dir: Optional[Path] = None
+) -> Optional[Path]:
+    """
+    Abre explorador gráfico para seleccionar archivo usando tkinter
+    
+    Args:
+        allowed_extensions: Lista de extensiones permitidas
+        initial_dir: Directorio inicial sugerido
+        
+    Returns:
+        Path del archivo seleccionado o None si se cancela
+    """
+    root = Tk()
+    root.withdraw()
+    root.attributes('-topmost', True)
+    
+    # Construir filetypes para el diálogo
+    if allowed_extensions:
+        filetypes = []
+        for ext in allowed_extensions:
+            filetypes.append((f"Archivos {ext}", f"*{ext}"))
+        filetypes.append(("Todos los archivos", "*.*"))
+    else:
+        filetypes = [("Todos los archivos", "*.*")]
+    
+    # Abrir diálogo
+    archivo = filedialog.askopenfilename(
+        title="Selecciona el archivo",
+        initialdir=str(initial_dir) if initial_dir else None,
+        filetypes=filetypes
+    )
+    
+    root.destroy()
+    
+    if archivo:
+        return Path(archivo)
+    return None
+
+
+def _open_dir_dialog_gui(initial_dir: Optional[Path] = None) -> Optional[Path]:
+    """
+    Abre explorador gráfico para seleccionar directorio usando tkinter
+    
+    Args:
+        initial_dir: Directorio inicial sugerido
+        
+    Returns:
+        Path del directorio seleccionado o None si se cancela
+    """
+    root = Tk()
+    root.withdraw()
+    root.attributes('-topmost', True)
+    
+    directorio = filedialog.askdirectory(
+        title="Selecciona el directorio",
+        initialdir=str(initial_dir) if initial_dir else None
+    )
+    
+    root.destroy()
+    
+    if directorio:
+        return Path(directorio)
+    return None
 
 
 class FileSelector:
@@ -75,8 +144,8 @@ class FileSelector:
             choices = self._build_file_choices()
             
             if not choices:
-                # No hay cache, ir directo a ingreso manual
-                return self._manual_file_input(must_exist)
+                # No hay cache, abrir explorador directo
+                return self._gui_file_dialog()
             
             # Mostrar selector
             selection = questionary.select(
@@ -91,7 +160,13 @@ class FileSelector:
                 return None  # Usuario canceló
             
             # Procesar selección
-            if selection == "🔍 Buscar archivo manualmente...":
+            if selection == "🪟 Abrir explorador de archivos...":
+                file_path = self._gui_file_dialog()
+                if file_path:
+                    return file_path
+                continue  # Volver al menú si no seleccionó nada
+            
+            elif selection == "🔍 Buscar archivo manualmente...":
                 file_path = self._manual_file_input(must_exist)
                 if file_path:
                     return file_path
@@ -135,7 +210,8 @@ class FileSelector:
             choices = self._build_dir_choices()
             
             if not choices:
-                return self._manual_dir_input(must_exist)
+                # No hay cache, abrir explorador directo
+                return self._gui_dir_dialog()
             
             selection = questionary.select(
                 prompt,
@@ -145,6 +221,12 @@ class FileSelector:
             
             if selection is None or selection == "❌ Cancelar":
                 return None
+            
+            elif selection == "🪟 Abrir explorador de carpetas...":
+                dir_path = self._gui_dir_dialog()
+                if dir_path:
+                    return dir_path
+                continue
             
             elif selection == "🔍 Ingresar ruta manualmente...":
                 dir_path = self._manual_dir_input(must_exist)
@@ -159,6 +241,49 @@ class FileSelector:
                 else:
                     console.print("[yellow]⚠ El directorio ya no existe[/yellow]")
                     continue
+    
+    def _gui_file_dialog(self) -> Optional[Path]:
+        """
+        Abre explorador gráfico para seleccionar archivo
+        """
+        # Obtener directorio inicial del cache
+        last_path = self.cache.get_last_path(self.cache_key)
+        initial_dir = last_path.parent if last_path and last_path.exists() else None
+        
+        if self.logger:
+            self.logger.info("Abriendo explorador de archivos...")
+        
+        file_path = _open_file_dialog_gui(
+            allowed_extensions=self.allowed_extensions,
+            initial_dir=initial_dir
+        )
+        
+        if file_path:
+            self._update_cache(file_path)
+            if self.logger:
+                self.logger.info(f"Archivo seleccionado: {file_path.name}")
+        
+        return file_path
+    
+    def _gui_dir_dialog(self) -> Optional[Path]:
+        """
+        Abre explorador gráfico para seleccionar directorio
+        """
+        # Obtener directorio frecuente como sugerencia
+        frequent_dirs = self.cache.get_frequent_dirs(self.cache_key, limit=1)
+        initial_dir = frequent_dirs[0] if frequent_dirs else None
+        
+        if self.logger:
+            self.logger.info("Abriendo explorador de carpetas...")
+        
+        dir_path = _open_dir_dialog_gui(initial_dir=initial_dir)
+        
+        if dir_path:
+            self._update_cache_dir(dir_path)
+            if self.logger:
+                self.logger.info(f"Carpeta seleccionada: {dir_path.name}")
+        
+        return dir_path
     
     def _build_file_choices(self) -> List[str]:
         """
@@ -180,6 +305,7 @@ class FileSelector:
         
         # Opciones adicionales
         choices.extend([
+            "🪟 Abrir explorador de archivos...",
             "🔍 Buscar archivo manualmente...",
             "❌ Cancelar"
         ])
@@ -199,6 +325,7 @@ class FileSelector:
         
         # Opciones adicionales
         choices.extend([
+            "🪟 Abrir explorador de carpetas...",
             "🔍 Ingresar ruta manualmente...",
             "❌ Cancelar"
         ])

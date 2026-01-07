@@ -21,7 +21,7 @@ class PipelineLogger:
         self,
         pipeline_name: str,
         log_dir: Path = Path("logs"),
-        console_level: int = logging.INFO,
+        console_level: int = logging.WARNING,
         file_level: int = logging.DEBUG,
         keep_last_n_logs: int = 10
     ):
@@ -31,7 +31,7 @@ class PipelineLogger:
         Args:
             pipeline_name: Nombre del pipeline (ej: 'nomina', 'examen_retiro')
             log_dir: Directorio donde se guardarán los logs
-            console_level: Nivel de logging para consola (default: INFO)
+            console_level: Nivel de logging para consola (default: WARNING)
             file_level: Nivel de logging para archivo (default: DEBUG)
             keep_last_n_logs: Cantidad de logs históricos a mantener
         """
@@ -40,14 +40,13 @@ class PipelineLogger:
         self.log_dir.mkdir(exist_ok=True, parents=True)
         
         self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.log_file = self.log_dir / f"{pipeline_name}_{self.timestamp}.log"
+        self.log_file = self.log_dir / f"{pipeline_name}.log"
         
         self.logger = self._setup_logger(console_level, file_level)
-        self._cleanup_old_logs(keep_last_n_logs)
     
     def _setup_logger(self, console_level: int, file_level: int) -> logging.Logger:
         """
-        Configura el logger con handlers para archivo y consola
+        Configura el logger con handler solo para archivo (sin consola)
         """
         logger = logging.getLogger(f"pipeline.{self.pipeline_name}")
         logger.setLevel(logging.DEBUG)
@@ -69,43 +68,10 @@ class PipelineLogger:
         )
         file_handler.setFormatter(file_formatter)
         
-        # Handler para consola con Rich
-        console_handler = RichHandler(
-            console=console,
-            rich_tracebacks=True,
-            tracebacks_show_locals=True,
-            markup=True,
-            show_time=True,
-            show_path=False,
-            omit_repeated_times=False
-        )
-        console_handler.setLevel(console_level)
-        
+        # Solo agregar handler de archivo (sin consola)
         logger.addHandler(file_handler)
-        logger.addHandler(console_handler)
         
         return logger
-    
-    def _cleanup_old_logs(self, keep_last_n: int):
-        """
-        Elimina logs antiguos manteniendo solo los últimos N
-        """
-        if keep_last_n <= 0:
-            return
-        
-        log_files = sorted(
-            self.log_dir.glob(f"{self.pipeline_name}_*.log"),
-            key=lambda x: x.stat().st_mtime,
-            reverse=True
-        )
-        
-        # Eliminar logs excedentes
-        for old_log in log_files[keep_last_n:]:
-            try:
-                old_log.unlink()
-                self.logger.debug(f"Log antiguo eliminado: {old_log.name}")
-            except Exception as e:
-                self.logger.warning(f"No se pudo eliminar log antiguo {old_log.name}: {e}")
     
     def log_step_start(self, step_name: str, description: str = ""):
         """

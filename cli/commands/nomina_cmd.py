@@ -1,11 +1,13 @@
 """
 Comando CLI para el pipeline de Nóminas (Planillas)
-Integra logger, cache, file_selector y lazy_loader
+Bronze → Silver → Gold completo
 """
 from pathlib import Path
 from typing import Optional
 import typer
+import time
 from rich.console import Console
+from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
 
 from utils import (
     get_logger,
@@ -17,23 +19,62 @@ from utils import (
 console = Console()
 
 
+def format_duration(seconds: float) -> str:
+    """
+    Formatea duración en formato legible según magnitud
+    
+    Args:
+        seconds: Duración en segundos
+        
+    Returns:
+        String formateado (ej: "45.2s", "2m 15.4s", "1h 5m 23.1s")
+    """
+    if seconds < 60:
+        return f"{seconds:.2f}s"
+    elif seconds < 3600:
+        mins = int(seconds // 60)
+        secs = seconds % 60
+        return f"{mins}m {secs:.2f}s"
+    else:
+        hours = int(seconds // 3600)
+        mins = int((seconds % 3600) // 60)
+        secs = seconds % 60
+        return f"{hours}h {mins}m {secs:.1f}s"
+
+
 def run_pipeline(
-    bronze_file: Optional[Path] = typer.Option(
+    input_dir: Optional[Path] = typer.Option(
         None,
-        "--input",
+        "--input-dir",
         "-i",
-        help="Archivo Bronze de entrada (.xlsx, .xls)"
+        help="[Ignorado] Siempre usa explorador para carpeta Bronze"
     ),
-    silver_dir: Optional[Path] = typer.Option(
+    output_dir: Optional[Path] = typer.Option(
         None,
-        "--output",
+        "--output-dir",
         "-o",
-        help="Directorio de salida Silver"
+        help="Carpeta base de salida (se crearán silver/ y gold/)"
+    ),
+    schema_json: Optional[Path] = typer.Option(
+        None,
+        "--schema",
+        "-s",
+        help="Archivo JSON con esquema Gold"
     ),
     skip_validation: bool = typer.Option(
         False,
         "--skip-validation",
-        help="Omitir validación de esquema JSON"
+        help="Omitir validación de constraints"
+    ),
+    only_bronze_to_silver: bool = typer.Option(
+        False,
+        "--only-bronze-silver",
+        help="Ejecutar solo Bronze → Silver (sin Gold)"
+    ),
+    only_silver_to_gold: bool = typer.Option(
+        False,
+        "--only-silver-gold",
+        help="Ejecutar solo Silver → Gold"
     ),
     export_excel: bool = typer.Option(
         True,
@@ -44,19 +85,43 @@ def run_pipeline(
     """
     📊 Pipeline de Nóminas (Planillas)
     
-    Procesa archivos de planillas desde Bronze hasta Silver:
-    - Consolidación de datos
-    - Validación de esquema
+    Pipeline completo Bronze → Silver → Gold:
+    - Selecciona la carpeta con archivos Excel Bronze
+    - Se crean automáticamente carpetas silver/ y gold/ en esa ubicación
+    - Consolidación de múltiples Excel mensuales
+    - Validación de esquema (usa esquema_nominas.json automáticamente si existe)
+    - Generación de columnas derivadas (MES, AÑO, NOMBRE_MES)
+    - Versionamiento automático (actual/ + historico/)
     - Exportación a Parquet y Excel
     
+    Estructura generada:
+        carpeta_bronze/
+        ├── archivo1.xlsx, archivo2.xlsx... (Bronze)
+        ├── silver/                  (se crea automáticamente)
+        │   └── Planilla Metso Consolidado.parquet/.xlsx
+        └── gold/                    (se crea automáticamente)
+            ├── actual/
+            │   └── Planilla Metso BI_Gold.parquet/.xlsx
+            └── historico/
+                └── (versiones anteriores)
+    
     Ejemplos:
-        tawa-etl nomina --input data/bronze/planillas.xlsx --output data/silver/
-        tawa-etl nomina --skip-validation
+        # Pipeline completo (se abre explorador para carpeta Bronze)
+        tawa-etl nomina
+        
+        # Solo Bronze → Silver
+        tawa-etl nomina --only-bronze-silver
+        
+        # Solo Silver → Gold (se abre explorador para parquet Silver)
+        tawa-etl nomina --only-silver-gold
     """
     run_pipeline_with_params(
-        bronze_file=bronze_file,
-        silver_dir=silver_dir,
+        input_dir=input_dir,
+        output_dir=output_dir,
+        schema_json=schema_json,
         skip_validation=skip_validation,
+        only_bronze_to_silver=only_bronze_to_silver,
+        only_silver_to_gold=only_silver_to_gold,
         export_excel=export_excel
     )
 
@@ -66,174 +131,250 @@ def run_pipeline_interactive():
     Versión interactiva del pipeline (llamada desde el menú TUI)
     """
     run_pipeline_with_params(
-        bronze_file=None,
-        silver_dir=None,
+        input_dir=None,
+        output_dir=None,
+        schema_json=None,
         skip_validation=False,
+        only_bronze_to_silver=False,
+        only_silver_to_gold=False,
         export_excel=True
     )
 
 
 def run_pipeline_with_params(
-    bronze_file: Optional[Path],
-    silver_dir: Optional[Path],
+    input_dir: Optional[Path],
+    output_dir: Optional[Path],
+    schema_json: Optional[Path],
     skip_validation: bool,
+    only_bronze_to_silver: bool,
+    only_silver_to_gold: bool,
     export_excel: bool
 ):
     """
     Lógica principal del pipeline con parámetros configurables
     """
-    # Inicializar logger
-    logger = get_logger("nomina", console_level=20)  # INFO level
+    # Inicializar logger (solo warnings/errores en consola, todo en archivo)
+    logger = get_logger("nomina")  # console_level=WARNING por defecto
     loader = get_global_loader(logger)
     
-    console.print("\n[bold cyan]═══════════════════════════════════════════════════════════[/bold cyan]")
-    console.print("[bold cyan]   PIPELINE DE NÓMINAS - BRONZE → SILVER                   [/bold cyan]")
-    console.print("[bold cyan]═══════════════════════════════════════════════════════════[/bold cyan]\n")
+    console.print("\n[bold cyan]╔═══════════════════════════════════════════════════════╗[/bold cyan]")
+    console.print("[bold cyan]║   PIPELINE DE NÓMINAS - PLANILLAS METSO              ║[/bold cyan]")
+    console.print("[bold cyan]╚═══════════════════════════════════════════════════════╝[/bold cyan]\n")
+    
+    # Variable para cronómetro (se inicia después de seleccionar carpeta)
+    tiempo_inicio = None
     
     try:
-        # STEP 0: Validar dependencias
+        # VALIDAR DEPENDENCIAS
         logger.log_step_start(
             "Validación de Dependencias",
             "Verificar módulos requeridos están disponibles"
         )
         
-        required_modules = [
-            'nomina.step1_consolidar_planillas',
-            'nomina.step2_exportar'
-        ]
+        required_modules = ['nomina.api_step1', 'nomina.api_step2']
         
         for module in required_modules:
             if not loader.validate_dependencies(module):
                 logger.error(f"✗ Módulo faltante: {module}")
                 console.print(f"\n[red]Error: El módulo {module} no está disponible[/red]")
-                console.print("[yellow]Verifica que el directorio 'nomina' contenga los scripts necesarios[/yellow]\n")
+                console.print("[yellow]Verifica que la carpeta 'nomina' contenga api_step1.py y api_step2.py[/yellow]\n")
                 return
         
         logger.log_step_end("Validación de Dependencias", success=True)
         
-        # STEP 1: Selección de archivos
-        logger.log_step_start(
-            "Configuración de Rutas",
-            "Selección de archivos de entrada y salida"
-        )
-        
-        # Seleccionar archivo Bronze
-        if bronze_file is None:
-            bronze_file = quick_file_select(
-                cache_key="nomina_bronze",
-                prompt="📄 Selecciona el archivo Bronze de nómina",
-                allowed_extensions=['.xlsx', '.xls'],
+        # CONFIGURACIÓN DE RUTAS (SIEMPRE CON EXPLORADOR)
+        if only_silver_to_gold:
+            # Modo: Solo Silver → Gold
+            logger.log_step_start(
+                "Modo: Silver → Gold",
+                "Ejecutar solo transformación Gold"
+            )
+            
+            # SIEMPRE abrir explorador para seleccionar parquet Silver
+            parquet_silver = quick_file_select(
+                cache_key="nomina_silver_parquet",
+                prompt="📄 Selecciona el archivo Parquet Silver",
+                allowed_extensions=['.parquet'],
                 logger=logger
             )
             
-            if bronze_file is None:
-                logger.error("No se seleccionó archivo de entrada")
+            if parquet_silver is None:
+                logger.error("No se seleccionó archivo Parquet Silver")
                 console.print("\n[yellow]⚠ Operación cancelada[/yellow]\n")
                 return
-        
-        logger.log_file_processing(bronze_file, "Archivo de entrada")
-        
-        # Seleccionar directorio de salida
-        if silver_dir is None:
-            silver_dir = quick_dir_select(
-                cache_key="nomina_silver_output",
-                prompt="📁 Selecciona el directorio de salida Silver",
+            
+            # INICIAR CRONÓMETRO (después de seleccionar parquet)
+            tiempo_inicio = time.time()
+            
+            logger.log_file_processing(parquet_silver, "Archivo Silver")
+            
+            # Carpeta base para gold (un nivel arriba de silver)
+            carpeta_base = parquet_silver.parent.parent
+            
+        else:
+            # Modo: Bronze → Silver (o completo)
+            logger.log_step_start(
+                "Configuración de Rutas",
+                "Selección de archivos de entrada y salida"
+            )
+            
+            # SIEMPRE abrir explorador para seleccionar carpeta Bronze
+            input_dir = quick_dir_select(
+                cache_key="nomina_bronze_dir",
+                prompt="📁 Selecciona la carpeta con archivos Excel Bronze",
                 logger=logger
             )
             
-            if silver_dir is None:
-                logger.error("No se seleccionó directorio de salida")
+            if input_dir is None:
+                logger.error("No se seleccionó carpeta de entrada")
                 console.print("\n[yellow]⚠ Operación cancelada[/yellow]\n")
                 return
+            
+            # INICIAR CRONÓMETRO (después de seleccionar carpeta)
+            tiempo_inicio = time.time()
+            
+            input_dir = Path(input_dir)
+            logger.info(f"Carpeta Bronze: [cyan]{input_dir}[/cyan]")
+            
+            # Buscar archivos Excel
+            archivos_excel = list(input_dir.glob('*.xlsx')) + list(input_dir.glob('*.xls'))
+            archivos_excel = [
+                f for f in archivos_excel 
+                if not f.name.startswith('~$') 
+                and not f.name.startswith('Planilla Metso Consolidado')
+            ]
+            
+            if not archivos_excel:
+                logger.error("No se encontraron archivos Excel en la carpeta")
+                console.print("\n[red]Error: No hay archivos Excel válidos en la carpeta seleccionada[/red]\n")
+                return
+            
+            logger.info(f"Archivos Excel encontrados: [cyan]{len(archivos_excel)}[/cyan]")
+            
+            # output_dir es la misma carpeta donde están los archivos Bronze
+            output_dir = input_dir
+            carpeta_base = output_dir
+            
+            logger.log_step_end("Configuración de Rutas", success=True)
         
-        # Crear directorio si no existe
-        silver_dir = Path(silver_dir)
-        silver_dir.mkdir(parents=True, exist_ok=True)
-        logger.info(f"Directorio de salida: [cyan]{silver_dir}[/cyan]")
+        # STEP 1: BRONZE → SILVER
+        if not only_silver_to_gold:
+            logger.log_step_start(
+                "STEP 1: Bronze → Silver",
+                f"Consolidar {len(archivos_excel)} archivo(s) Excel"
+            )
+            
+            # Lazy import
+            consolidar_func = loader.import_function(
+                'nomina.api_step1',
+                'consolidar_planillas_bronze_to_silver'
+            )
+            
+            if consolidar_func is None:
+                raise ImportError("No se pudo importar consolidar_planillas_bronze_to_silver")
+            
+            # Ejecutar consolidación
+            df_silver, parquet_silver, excel_silver = consolidar_func(
+                archivos_bronze=archivos_excel,
+                output_dir=carpeta_base,
+                logger=logger
+            )
+            
+            logger.log_step_end("STEP 1: Bronze → Silver", success=True)
+            
+            if only_bronze_to_silver:
+                # CALCULAR TIEMPO Y MOSTRAR RESUMEN
+                if tiempo_inicio is not None:
+                    duracion = time.time() - tiempo_inicio
+                    tiempo_formateado = format_duration(duracion)
+                else:
+                    tiempo_formateado = "N/A"
+                
+                console.print(f"\n[bold green]✓ Pipeline completado en {tiempo_formateado}[/bold green]")
+                console.print(f"📝 Log técnico: [cyan]{logger.get_log_path()}[/cyan]")
+                console.print(f"📁 Silver generado en: [cyan]{parquet_silver.parent}/[/cyan]\n")
+                return
         
-        logger.log_step_end("Configuración de Rutas", success=True)
-        
-        # STEP 2: Consolidar planillas (LAZY LOADING)
+        # STEP 2: SILVER → GOLD
         logger.log_step_start(
-            "STEP 1: Consolidar Planillas",
-            "Lectura y consolidación de datos Bronze"
+            "STEP 2: Silver → Gold",
+            "Aplicar esquema y validaciones"
         )
         
-        logger.info("📦 Cargando módulo de consolidación...")
+        # Seleccionar esquema JSON
+        if schema_json is None:
+            # Buscar carpeta esquemas
+            carpeta_esquemas = None
+            carpeta_actual = Path.cwd()
+            
+            for _ in range(4):
+                posible_esquemas = carpeta_actual / "esquemas"
+                if posible_esquemas.exists() and posible_esquemas.is_dir():
+                    carpeta_esquemas = posible_esquemas
+                    break
+                carpeta_actual = carpeta_actual.parent
+            
+            if carpeta_esquemas is None:
+                logger.error("No se encontró carpeta 'esquemas'")
+                console.print("\n[red]Error: No se encontró la carpeta 'esquemas'[/red]")
+                console.print("[yellow]Coloca los archivos JSON de esquemas en una carpeta 'esquemas/'[/yellow]\n")
+                return
+            
+            # Buscar esquema de nóminas
+            esquema_nominas = carpeta_esquemas / "esquema_nominas.json"
+            
+            if not esquema_nominas.exists():
+                logger.warning("esquema_nominas.json no encontrado, seleccionando manualmente...")
+                schema_json = quick_file_select(
+                    cache_key="nomina_schema_json",
+                    prompt="📋 Selecciona el esquema JSON Gold",
+                    allowed_extensions=['.json'],
+                    logger=logger
+                )
+                
+                if schema_json is None:
+                    logger.error("No se seleccionó esquema JSON")
+                    console.print("\n[yellow]⚠ Operación cancelada[/yellow]\n")
+                    return
+            else:
+                schema_json = esquema_nominas
         
-        # Lazy import y ejecución
-        consolidar_func = loader.import_function(
-            'nomina.step1_consolidar_planillas',
-            'consolidar_planillas'
-        )
+        schema_json = Path(schema_json)
+        logger.log_file_processing(schema_json, "Esquema Gold")
         
-        if consolidar_func is None:
-            raise ImportError("No se pudo importar la función de consolidación")
-        
-        # Ejecutar consolidación
-        # NOTA: Adaptar los parámetros según tu implementación real
-        logger.info("Procesando archivo Bronze...")
-        
-        # df_consolidado = consolidar_func(
-        #     input_path=bronze_file,
-        #     skip_validation=skip_validation
-        # )
-        
-        # Para este template, simulamos la ejecución
-        logger.info("✓ Consolidación completada")
-        logger.log_dataframe_info("df_consolidado", rows=1250, cols=18)
-        
-        if not skip_validation:
-            logger.log_validation_result(True, "Esquema validado correctamente")
-        
-        logger.log_step_end("STEP 1: Consolidar Planillas", success=True)
-        
-        # STEP 3: Exportar a Silver (LAZY LOADING)
-        logger.log_step_start(
-            "STEP 2: Exportar a Silver",
-            "Guardar datos en formato Parquet" + (" y Excel" if export_excel else "")
-        )
-        
-        logger.info("📦 Cargando módulo de exportación...")
-        
+        # Lazy import
         exportar_func = loader.import_function(
-            'nomina.step2_exportar',
-            'exportar_datos'
+            'nomina.api_step2',
+            'exportar_silver_to_gold'
         )
         
         if exportar_func is None:
-            raise ImportError("No se pudo importar la función de exportación")
+            raise ImportError("No se pudo importar exportar_silver_to_gold")
         
-        # Ejecutar exportación
-        # output_files = exportar_func(
-        #     df=df_consolidado,
-        #     output_dir=silver_dir,
-        #     export_excel=export_excel
-        # )
+        # Ejecutar transformación Gold
+        df_gold, parquet_gold, excel_gold = exportar_func(
+            parquet_silver=parquet_silver,
+            schema_json=schema_json,
+            carpeta_base=carpeta_base,
+            skip_validation=skip_validation,
+            export_excel=export_excel,
+            logger=logger
+        )
         
-        # Para este template, simulamos
-        output_parquet = silver_dir / "nomina.parquet"
-        logger.log_file_processing(output_parquet, "Exportando")
+        logger.log_step_end("STEP 2: Silver → Gold", success=True)
         
-        if export_excel:
-            output_excel_file = silver_dir / "nomina.xlsx"
-            logger.log_file_processing(output_excel_file, "Exportando")
+        # CALCULAR TIEMPO DE EJECUCIÓN
+        if tiempo_inicio is not None:
+            duracion = time.time() - tiempo_inicio
+            tiempo_formateado = format_duration(duracion)
+        else:
+            tiempo_formateado = "N/A"
         
-        logger.log_step_end("STEP 2: Exportar a Silver", success=True)
-        
-        # RESUMEN FINAL
-        console.print("\n[bold green]✓ PIPELINE COMPLETADO EXITOSAMENTE[/bold green]\n")
-        
-        console.print("📊 [bold]Archivos generados:[/bold]")
-        console.print(f"   • {output_parquet}")
-        if export_excel:
-            console.print(f"   • {output_excel_file}")
-        
-        console.print(f"\n📝 [bold]Log guardado en:[/bold] [cyan]{logger.get_log_path()}[/cyan]")
-        
-        # Mostrar estadísticas de performance
-        console.print()
-        loader.print_performance_report()
+        # RESUMEN FINAL CONCISO
+        console.print(f"\n[bold green]✓ Pipeline completado en {tiempo_formateado}[/bold green]")
+        console.print(f"📝 Log técnico: [cyan]{logger.get_log_path()}[/cyan]")
+        console.print(f"📊 Registros finales: [cyan]{len(df_gold):,}[/cyan] | Columnas: [cyan]{len(df_gold.columns)}[/cyan]")
+        console.print(f"📁 Resultados en: [cyan]{parquet_gold.parent}/[/cyan]\n")
         
     except KeyboardInterrupt:
         logger.warning("Pipeline interrumpido por el usuario")
