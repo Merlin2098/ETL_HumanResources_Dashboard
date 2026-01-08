@@ -1,12 +1,13 @@
 """
 Sistema de cache de rutas para facilitar la navegación de archivos
-Almacena rutas recientes y frecuentes por pipeline/contexto
+Almacena rutas recientes y frecuentes por pipeline/contexto.
+Adaptado para funcionar tanto en script Python como en EXE congelado.
 """
 import json
 from pathlib import Path
 from typing import Optional, Dict, List
 from datetime import datetime
-
+from utils.paths import get_project_root  # Importamos el helper de rutas
 
 class PathCache:
     """
@@ -14,14 +15,22 @@ class PathCache:
     Almacena rutas recientes y frecuentes por contexto
     """
     
-    def __init__(self, cache_file: Path = Path("config/path_cache.json")):
+    def __init__(self, cache_file: Optional[Path] = None):
         """
-        Inicializa el cache de rutas
+        Inicializa el cache de rutas.
         
         Args:
-            cache_file: Ruta del archivo JSON de cache
+            cache_file: Ruta opcional. Si es None, se calcula automáticamente
+                       en base a la ubicación del ejecutable o proyecto.
         """
-        self.cache_file = cache_file
+        if cache_file is None:
+            # Usamos get_project_root para asegurar que se cree al lado del exe/script
+            # y no en carpetas temporales de PyInstaller
+            self.cache_file = get_project_root() / "config" / "path_cache.json"
+        else:
+            self.cache_file = cache_file
+            
+        # Asegurar que el directorio config exista
         self.cache_file.parent.mkdir(exist_ok=True, parents=True)
         self.cache: Dict = self._load_cache()
     
@@ -61,17 +70,11 @@ class PathCache:
             with open(self.cache_file, 'w', encoding='utf-8') as f:
                 json.dump(self.cache, f, indent=2, ensure_ascii=False)
         except IOError as e:
-            print(f"Error: No se pudo guardar cache: {e}")
+            print(f"Error: No se pudo guardar cache en {self.cache_file}: {e}")
     
     def get_last_path(self, key: str) -> Optional[Path]:
         """
         Obtiene la última ruta usada para una key específica
-        
-        Args:
-            key: Identificador del contexto (ej: 'nomina_bronze', 'examen_retiro_input')
-        
-        Returns:
-            Path si existe y es válido, None en caso contrario
         """
         path_str = self.cache["last_paths"].get(key)
         if path_str:
@@ -86,10 +89,6 @@ class PathCache:
     def set_last_path(self, key: str, path: Path):
         """
         Guarda la última ruta usada para una key
-        
-        Args:
-            key: Identificador del contexto
-            path: Ruta del archivo o directorio
         """
         self.cache["last_paths"][key] = str(path.resolve())
         self.save()
@@ -105,13 +104,6 @@ class PathCache:
     def get_frequent_dirs(self, key: str, limit: int = 5) -> List[Path]:
         """
         Obtiene los directorios más frecuentes para una key
-        
-        Args:
-            key: Identificador del contexto
-            limit: Cantidad máxima de directorios a retornar
-        
-        Returns:
-            Lista de Path con directorios frecuentes y válidos
         """
         freq_list = self.cache["frequent_dirs"].get(key, [])
         
@@ -127,11 +119,6 @@ class PathCache:
     def add_to_frequent(self, key: str, path: Path, max_items: int = 10):
         """
         Agrega un directorio a la lista de frecuentes
-        
-        Args:
-            key: Identificador del contexto
-            path: Ruta del archivo (se extraerá el directorio padre)
-            max_items: Cantidad máxima de items a mantener en el historial
         """
         # Obtener el directorio padre si path es un archivo
         if path.is_file():
@@ -158,9 +145,6 @@ class PathCache:
     def get_all_last_paths(self) -> Dict[str, Path]:
         """
         Obtiene todas las últimas rutas almacenadas
-        
-        Returns:
-            Diccionario con key -> Path de todas las rutas válidas
         """
         result = {}
         for key, path_str in self.cache["last_paths"].items():
@@ -203,9 +187,6 @@ class PathCache:
     def clear_key(self, key: str):
         """
         Limpia todas las entradas relacionadas con una key específica
-        
-        Args:
-            key: Identificador del contexto a limpiar
         """
         if key in self.cache["last_paths"]:
             del self.cache["last_paths"][key]
@@ -218,9 +199,6 @@ class PathCache:
     def get_statistics(self) -> Dict:
         """
         Obtiene estadísticas del cache
-        
-        Returns:
-            Diccionario con estadísticas de uso
         """
         total_last_paths = len(self.cache["last_paths"])
         total_frequent_keys = len(self.cache["frequent_dirs"])
@@ -241,13 +219,9 @@ class PathCache:
     def export_readable(self) -> str:
         """
         Exporta el cache en formato legible
-        
-        Returns:
-            String formateado con el contenido del cache
         """
         lines = ["=== PATH CACHE ===\n"]
         
-        # Últimas rutas
         lines.append("ÚLTIMAS RUTAS:")
         for key, path in self.cache["last_paths"].items():
             status = "✓" if Path(path).exists() else "✗"
@@ -271,17 +245,13 @@ class PathCache:
 _cache_instance: Optional[PathCache] = None
 
 
-def get_path_cache(cache_file: Path = Path("config/path_cache.json")) -> PathCache:
+def get_path_cache(cache_file: Optional[Path] = None) -> PathCache:
     """
-    Obtiene la instancia singleton del PathCache
-    
-    Args:
-        cache_file: Ruta del archivo de cache
-    
-    Returns:
-        Instancia de PathCache
+    Obtiene la instancia singleton del PathCache.
+    Ahora no requiere argumentos obligatorios.
     """
     global _cache_instance
     if _cache_instance is None:
+        # Se inicializará con la ruta por defecto definida en __init__
         _cache_instance = PathCache(cache_file)
     return _cache_instance
