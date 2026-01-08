@@ -3,7 +3,7 @@ Script de Generación de Ejecutable Onedir
 Proyecto: Sistema ETL / Nóminas
 Genera un ejecutable Windows con carpeta distribuible que incluye esquemas y queries.
 
-Adaptado para estructura modular (BD, Nómina, PDT, Examen Retiro).
+Adaptado para estructura modular (BD, Nómina, PDT, Examen Retiro, Régimen Minero).
 """
 
 import os
@@ -22,16 +22,16 @@ import threading
 NOMBRE_EXE = "GestorETL.exe" 
 
 # Script principal que lanza la interfaz gráfica
-# NOTA: Ajusta esto si tu punto de entrada es etl_manager.py
-MAIN_SCRIPT = "etl_manager.py" 
+MAIN_SCRIPT = "etl_manager.py"  # ✅ Punto de entrada correcto
 
 DIST_PATH = "dist"
 BUILD_PATH = "build"
 SPEC_PATH = "spec"
 
-# Exclusiones para reducir tamaño (Librerías pesadas no usadas habitualmente en UI simple)
+# Exclusiones para reducir tamaño (Librerías pesadas no usadas)
+# NOTA: tkinter NO se excluye porque algunos ETLs lo necesitan
 EXCLUSIONES = [
-    "tkinter", "test", "unittest",
+    "test", "unittest",
     "scipy", "matplotlib", "notebook", "jupyter",
     "numpy.testing", "pandas.tests"
 ]
@@ -91,7 +91,7 @@ def limpiar_builds():
             try:
                 shutil.rmtree(carpeta)
             except Exception as e:
-                print(f"   ⚠️  No se pudo eliminar {carpeta}: {e}")
+                print(f"   ⚠️ No se pudo eliminar {carpeta}: {e}")
     print("   ✅ Limpieza completada.\n")
 
 # ==========================================================
@@ -125,16 +125,64 @@ def construir_comando():
         # Librerías de UI
         "PySide6.QtCore", "PySide6.QtGui", "PySide6.QtWidgets",
         
-        # Procesamiento de Datos (Asumidos por nombres de archivos)
+        # Procesamiento de Datos
         "pandas", "openpyxl", "json", "sqlite3", "decimal", "datetime",
+        "polars", "duckdb",
         
-        # Módulos internos del proyecto (Para asegurar su inclusión)
-        "bd", "bd.step1_capasilver", "bd.step2_capagold",
-        "nomina", "nomina.step1_consolidar_planillas",
-        "pdt", "pdt.step1_consolidar_ingresos",
-        "examen_retiro",
-        "utils", "utils.logger_qt", "utils.file_selector_qt",
-        "ui.widgets", "ui.workers", "ui.theme_loader"
+        # ✅ UI ETLs (módulos principales)
+        "ui.etls",
+        "ui.etls.bd", "ui.etls.bd.config", "ui.etls.bd.widget", "ui.etls.bd.worker",
+        "ui.etls.nomina", "ui.etls.nomina.config", "ui.etls.nomina.widget", "ui.etls.nomina.worker",
+        "ui.etls.pdt", "ui.etls.pdt.config", "ui.etls.pdt.widget", "ui.etls.pdt.worker",
+        "ui.etls.nomina_regimen_minero", "ui.etls.nomina_regimen_minero.config", 
+        "ui.etls.nomina_regimen_minero.widget", "ui.etls.nomina_regimen_minero.worker",
+        "ui.etls.examen_retiro", "ui.etls.examen_retiro.config", 
+        "ui.etls.examen_retiro.widget", "ui.etls.examen_retiro.worker",
+        
+        # ✅ CRÍTICO: TODOS los steps de cada ETL (imports dinámicos)
+        # BD
+        "bd", 
+        "bd.step1_capasilver", 
+        "bd.step1.5_centrosdecosto", 
+        "bd.step2_capagold", 
+        "bd.step3_flags_empleados",
+        
+        # Nómina
+        "nomina", 
+        "nomina.step1_consolidar_planillas", 
+        "nomina.step2_exportar",
+        
+        # Nómina Régimen Minero
+        "nomina_regimen_minero", 
+        "nomina_regimen_minero.step1_consolidar_regimen_minero",
+        "nomina_regimen_minero.step2_exportar_regimen_minero",
+        
+        # PDT
+        "pdt", 
+        "pdt.step1_consolidar_ingresos",
+        "pdt.step2_exportar_ingresos",
+        
+        # Examen Retiro
+        "examen_retiro", 
+        "examen_retiro.step1_clean",
+        "examen_retiro.step2_gold", 
+        "examen_retiro.step3_join",
+        
+        # Utils
+        "utils", 
+        "utils.logger_qt", 
+        "utils.file_selector_qt",
+        "utils.paths", 
+        "utils.lazy_loader", 
+        "utils.path_cache",
+        
+        # UI Base
+        "ui.widgets", 
+        "ui.widgets.base_etl_widget",
+        "ui.workers", 
+        "ui.workers.base_worker",
+        "ui.theme_loader", 
+        "ui.etl_registry"
     ]
     
     for imp in hidden_imports:
@@ -148,21 +196,31 @@ def construir_comando():
     config_path = base_dir / "config"
     if config_path.exists():
         comando += ["--add-data", f"{config_path}{os.pathsep}config"]
+        print(f"   ✅ Agregando config: {config_path}")
     
     # 2. Esquemas (JSONs críticos)
     esquemas_path = base_dir / "esquemas"
     if esquemas_path.exists():
         comando += ["--add-data", f"{esquemas_path}{os.pathsep}esquemas"]
+        print(f"   ✅ Agregando esquemas: {esquemas_path}")
 
     # 3. Queries (Archivos SQL)
     queries_path = base_dir / "queries"
     if queries_path.exists():
         comando += ["--add-data", f"{queries_path}{os.pathsep}queries"]
+        print(f"   ✅ Agregando queries: {queries_path}")
+
+    # 4. ✅ CRÍTICO: Carpeta ui/etls completa (para auto-discovery)
+    etls_path = base_dir / "ui" / "etls"
+    if etls_path.exists():
+        comando += ["--add-data", f"{etls_path}{os.pathsep}ui/etls"]
+        print(f"   ✅ Agregando ui/etls: {etls_path}")
 
     # --- ICONO ---
     ico_path = base_dir / "config" / "app.ico"
     if ico_path.exists():
         comando += ["--icon", str(ico_path)]
+        print(f"   ✅ Icono configurado: {ico_path}")
     
     # --- EXCLUSIONES ---
     for excl in EXCLUSIONES:
@@ -214,9 +272,17 @@ def generar_exe():
             print("=" * 60)
             print(f"📂 Ubicación: {carpeta_final.absolute()}")
             print(f"🚀 Ejecutable: {exe_final.name}")
-            print("\nNOTA IMPORTANTE:")
-            print("   Debes distribuir la CARPETA COMPLETA, no solo el .exe.")
-            print("   La carpeta '_internal' contiene tus esquemas, queries y configuraciones.")
+            print("\n" + "=" * 60)
+            print("📋 NOTAS IMPORTANTES:")
+            print("=" * 60)
+            print("1. Debes distribuir la CARPETA COMPLETA, no solo el .exe")
+            print("2. La carpeta '_internal' contiene:")
+            print("   • Esquemas JSON (validación de datos)")
+            print("   • Queries SQL (transformaciones)")
+            print("   • Configuración y temas")
+            print("   • Módulos ETL")
+            print("\n3. Para probar, ejecuta directamente el .exe desde la carpeta")
+            print("=" * 60)
         else:
             print("❌ ERROR EN LA COMPILACIÓN")
             print("=" * 60)
@@ -234,13 +300,23 @@ if __name__ == "__main__":
         validar_entorno_virtual()
         verificar_estructura()
         
+        print("\n" + "=" * 60)
+        print(" CONFIGURACIÓN DEL EJECUTABLE ".center(60))
+        print("=" * 60)
+        print(f"📦 Nombre: {NOMBRE_EXE}")
+        print(f"🎯 Entry Point: {MAIN_SCRIPT}")
+        print(f"📂 Salida: {DIST_PATH}/")
+        print("=" * 60 + "\n")
+        
         confirm = input(f"¿Generar '{NOMBRE_EXE}' ahora? (S/N): ").lower()
-        if confirm in ["s", "si"]:
+        if confirm in ["s", "si", "y", "yes"]:
             generar_exe()
         else:
-            print("Cancelado.")
+            print("❌ Cancelado por el usuario.")
             
     except KeyboardInterrupt:
-        print("\nInterrumpido por el usuario.")
+        print("\n\n❌ Interrumpido por el usuario.")
     except Exception as e:
-        print(f"\nError inesperado: {e}")
+        print(f"\n❌ Error inesperado: {e}")
+        import traceback
+        traceback.print_exc()

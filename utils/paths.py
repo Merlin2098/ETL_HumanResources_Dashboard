@@ -3,38 +3,67 @@ import sys
 import os
 from pathlib import Path
 
+
 def get_project_root() -> Path:
     """
     Retorna la ruta base del proyecto.
-    - En Dev: La raíz del proyecto (donde está main.py).
+    - En Dev: La raíz del proyecto (donde está etl_manager.py).
     - En Exe (Onedir): La carpeta donde está el .exe.
     """
     if getattr(sys, 'frozen', False):
-        # Si es ejecutable (PyInstaller)
+        # Ejecutable de PyInstaller
+        # sys.executable apunta al .exe
         return Path(sys.executable).parent
     else:
-        # Si es desarrollo (asumiendo que este archivo está en /utils)
-        # Subimos un nivel desde utils/ para llegar a la raíz
+        # Desarrollo (este archivo está en /utils)
         return Path(__file__).parent.parent
+
 
 def get_resource_path(relative_path: str) -> Path:
     """
-    Resuelve la ruta absoluta para recursos (lectura).
-    Maneja la diferencia entre estructura dev y estructura interna de PyInstaller (_internal).
+    Resuelve la ruta absoluta para recursos.
+    Maneja tanto desarrollo como PyInstaller onedir.
+    
+    Args:
+        relative_path: Ruta relativa desde la raíz (ej: "config/app.ico")
+    
+    Returns:
+        Path absoluto al recurso
     """
     base_path = get_project_root()
     
-    # En PyInstaller v6+ onedir, a veces los recursos van a _internal
-    # Verificamos si existe en la raíz, sino intentamos _internal (si aplica)
-    full_path = base_path / relative_path
+    if getattr(sys, 'frozen', False):
+        # En ejecutable PyInstaller onedir
+        # Los recursos están en _internal/ dentro de la carpeta del exe
+        internal_path = base_path / "_internal" / relative_path
+        
+        # Si existe en _internal, usarlo
+        if internal_path.exists():
+            return internal_path
+        
+        # Sino, intentar en la raíz (por si hay archivos externos)
+        root_path = base_path / relative_path
+        if root_path.exists():
+            return root_path
+        
+        # Si no existe en ninguno, retornar el path de _internal
+        # (para que los logs muestren dónde debería estar)
+        return internal_path
+    else:
+        # En desarrollo, ruta relativa normal
+        return base_path / relative_path
+
+
+def get_data_path(relative_path: str) -> Path:
+    """
+    Resuelve rutas para archivos de DATOS (lectura/escritura).
+    Estos NO están empaquetados, siempre están junto al .exe.
     
-    # Si no existe en la raíz del exe y estamos congelados, 
-    # podría estar en la carpeta temporal o _internal (depende de tu config de pyinstaller)
-    if not full_path.exists() and getattr(sys, 'frozen', False):
-        if hasattr(sys, '_MEIPASS'):
-             # _MEIPASS se usa más en onefile, pero a veces en onedir para temporales
-            temp_path = Path(sys._MEIPASS) / relative_path
-            if temp_path.exists():
-                return temp_path
-                
-    return full_path
+    Args:
+        relative_path: Ruta relativa (ej: "data/output.xlsx")
+    
+    Returns:
+        Path absoluto para datos
+    """
+    base_path = get_project_root()
+    return base_path / relative_path
