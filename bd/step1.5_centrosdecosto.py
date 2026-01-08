@@ -4,16 +4,19 @@ Descripción: Extrae tabla única de Centros de Costo desde BD Silver
              
 Arquitectura:
 - Input: Silver BD (bd_silver.parquet)
-- Output: Archivos con timestamp en centros_costo/
+- Output: Sistema de versionado dual
+  * /actual: Archivos SIN timestamp (para Power BI - paths estables)
+  * /historico: Archivos CON timestamp (para auditoría)
 
 Nota importante:
-- TODOS los archivos se guardan CON TIMESTAMP
-- Usuario selecciona manualmente cuál es CC_ACTUAL y cuál(es) son CC_OLD
-- Cada ejecución genera un nuevo archivo versionado
-- No hay sobreescritura automática
+- SISTEMA DE VERSIONADO DUAL implementado
+- /actual: CC_ACTUAL.parquet y .xlsx (sin timestamp, Power BI lo usa)
+- /historico: CC_ACTUAL_YYYYMMDD_HHMMSS.parquet y .xlsx (con timestamp)
+- Cada ejecución actualiza /actual y crea nueva versión en /historico
 
 Autor: Richi
 Fecha: 06.01.2025
+Actualizado: 08.01.2026 - Sistema de versionado dual
 """
 
 import polars as pl
@@ -146,52 +149,84 @@ def extraer_centros_costo(df: pl.DataFrame, esquema: dict) -> pl.DataFrame:
     return df_cc
 
 
-def guardar_centros_costo(df: pl.DataFrame, carpeta_trabajo: Path) -> tuple[Path, Path]:
+def guardar_centros_costo(df: pl.DataFrame, carpeta_trabajo: Path) -> dict:
     """
-    Guarda el DataFrame de centros de costo con timestamp.
-    TODOS los archivos se guardan con timestamp para historial completo.
+    Guarda el DataFrame de centros de costo con sistema de versionado dual.
+    
+    Sistema de archivos:
+    - /actual: Archivos SIN timestamp (para Power BI - paths estables)
+    - /historico: Archivos CON timestamp (para auditoría)
     
     Args:
         df: DataFrame con los centros de costo procesados
         carpeta_trabajo: Path de la carpeta de trabajo
     
     Returns:
-        Tupla con (Path del parquet, Path del Excel)
+        Dict con paths de archivos generados
     """
     print("\n💾 Guardando centros de costo...")
     
-    # Crear carpeta "centros_costo" en el mismo nivel que silver/
+    # Crear estructura de carpetas
     carpeta_cc = carpeta_trabajo / "centros_costo"
-    carpeta_cc.mkdir(exist_ok=True)
+    carpeta_actual = carpeta_cc / "actual"
+    carpeta_historico = carpeta_cc / "historico"
     
-    # Generar timestamp para el nombre del archivo
-    timestamp = datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
-    nombre_parquet = f"cc_{timestamp}.parquet"
-    nombre_excel = f"cc_{timestamp}.xlsx"
+    carpeta_actual.mkdir(parents=True, exist_ok=True)
+    carpeta_historico.mkdir(parents=True, exist_ok=True)
     
-    # Paths completos
-    ruta_parquet = carpeta_cc / nombre_parquet
-    ruta_excel = carpeta_cc / nombre_excel
+    # Generar timestamp para archivos históricos
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
-    print(f"  📁 Carpeta: {carpeta_cc}")
+    # ========== ARCHIVOS EN /actual (SIN timestamp) ==========
+    print("\n  📂 Guardando en /actual (para Power BI)...")
     
-    # Guardar parquet
-    print(f"  - Guardando parquet...", end='', flush=True)
-    df.write_parquet(ruta_parquet, compression="snappy")
-    tamanio_kb = ruta_parquet.stat().st_size / 1024
-    print(f" ✓")
-    print(f"    Ubicación: {ruta_parquet.name}")
-    print(f"    Tamaño: {tamanio_kb:.2f} KB")
+    nombre_base_actual = "CC_ACTUAL"
+    ruta_parquet_actual = carpeta_actual / f"{nombre_base_actual}.parquet"
+    ruta_excel_actual = carpeta_actual / f"{nombre_base_actual}.xlsx"
     
-    # Guardar Excel para visualización
-    print(f"  - Guardando Excel...", end='', flush=True)
-    df.write_excel(ruta_excel)
-    tamanio_kb = ruta_excel.stat().st_size / 1024
-    print(f" ✓")
-    print(f"    Ubicación: {ruta_excel.name}")
-    print(f"    Tamaño: {tamanio_kb:.2f} KB")
+    # Guardar parquet actual
+    print(f"    - {nombre_base_actual}.parquet...", end='', flush=True)
+    df.write_parquet(ruta_parquet_actual, compression="snappy")
+    tamanio_kb = ruta_parquet_actual.stat().st_size / 1024
+    print(f" ✓ ({tamanio_kb:.2f} KB)")
     
-    return ruta_parquet, ruta_excel
+    # Guardar Excel actual
+    print(f"    - {nombre_base_actual}.xlsx...", end='', flush=True)
+    df.write_excel(ruta_excel_actual)
+    tamanio_kb = ruta_excel_actual.stat().st_size / 1024
+    print(f" ✓ ({tamanio_kb:.2f} KB)")
+    
+    # ========== ARCHIVOS EN /historico (CON timestamp) ==========
+    print("\n  📂 Guardando en /historico (auditoría)...")
+    
+    nombre_base_historico = f"CC_ACTUAL_{timestamp}"
+    ruta_parquet_historico = carpeta_historico / f"{nombre_base_historico}.parquet"
+    ruta_excel_historico = carpeta_historico / f"{nombre_base_historico}.xlsx"
+    
+    # Guardar parquet histórico
+    print(f"    - {nombre_base_historico}.parquet...", end='', flush=True)
+    df.write_parquet(ruta_parquet_historico, compression="snappy")
+    tamanio_kb = ruta_parquet_historico.stat().st_size / 1024
+    print(f" ✓ ({tamanio_kb:.2f} KB)")
+    
+    # Guardar Excel histórico
+    print(f"    - {nombre_base_historico}.xlsx...", end='', flush=True)
+    df.write_excel(ruta_excel_historico)
+    tamanio_kb = ruta_excel_historico.stat().st_size / 1024
+    print(f" ✓ ({tamanio_kb:.2f} KB)")
+    
+    print(f"\n  ✓ Archivos guardados exitosamente")
+    print(f"    📁 Actual: {carpeta_actual}")
+    print(f"    📁 Histórico: {carpeta_historico}")
+    
+    return {
+        'parquet_actual': ruta_parquet_actual,
+        'excel_actual': ruta_excel_actual,
+        'parquet_historico': ruta_parquet_historico,
+        'excel_historico': ruta_excel_historico,
+        'carpeta_actual': carpeta_actual,
+        'carpeta_historico': carpeta_historico
+    }
 
 
 def main():
@@ -208,7 +243,7 @@ def main():
         ruta_esquema = buscar_esquema_json()
         
         if not ruta_esquema:
-            print("⚠️  No se encontró el esquema JSON automáticamente.")
+            print("⚠️ No se encontró el esquema JSON automáticamente.")
             print("   Buscando manualmente...")
             
             ruta_esquema = seleccionar_archivo(
@@ -232,9 +267,9 @@ def main():
         print("\n[3/3] Procesamiento de Centros de Costo")
         df_cc = extraer_centros_costo(df_silver, esquema)
         
-        # 4. Guardar resultado
+        # 4. Guardar resultado con versionado dual
         carpeta_trabajo = ruta_parquet.parent.parent  # Subir de silver/ a bd/
-        ruta_parquet_cc, ruta_excel_cc = guardar_centros_costo(df_cc, carpeta_trabajo)
+        rutas = guardar_centros_costo(df_cc, carpeta_trabajo)
         
         # Resumen final
         duracion = (datetime.now() - inicio).total_seconds()
@@ -248,15 +283,20 @@ def main():
         print(f"  - Tiempo de ejecución: {duracion:.2f}s")
         
         print(f"\n📁 Archivos generados:")
-        print(f"  - Parquet: {ruta_parquet_cc.name}")
-        print(f"  - Excel:   {ruta_excel_cc.name}")
+        print(f"\n  Carpeta /actual (Power BI):")
+        print(f"    - {rutas['parquet_actual'].name}")
+        print(f"    - {rutas['excel_actual'].name}")
         
-        print(f"\n📂 Ubicación: {ruta_parquet_cc.parent}")
+        print(f"\n  Carpeta /historico (Auditoría):")
+        print(f"    - {rutas['parquet_historico'].name}")
+        print(f"    - {rutas['excel_historico'].name}")
         
-        print("\n💡 Notas:")
-        print("  - Todos los archivos se guardan CON TIMESTAMP")
-        print("  - No hay sobreescritura automática")
-        print("  - Usuario selecciona manualmente CC_ACTUAL y CC_OLD(s)")
+        print(f"\n📂 Ubicación base: {rutas['carpeta_actual'].parent}")
+        
+        print("\n💡 Sistema de Versionado:")
+        print("  ✓ /actual: Archivos SIN timestamp → Power BI siempre lee el mismo path")
+        print("  ✓ /historico: Archivos CON timestamp → Auditoría completa")
+        print("  ✓ Cada ejecución actualiza /actual y crea versión en /historico")
         
         print("\n" + "=" * 80)
         

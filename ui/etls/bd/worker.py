@@ -5,7 +5,7 @@ Ejecuta: Bronze → Silver → Centros de Costo → Gold → Flags
 
 ARQUITECTURA:
 - Step 1: Bronze → Silver (Excel con headers en fila 10)
-- Step 1.5: Extracción de Centros de Costo (con timestamp)
+- Step 1.5: Extracción de Centros de Costo (versionado dual: /actual + /historico)
 - Step 2: Silver → Gold (Empleados + Practicantes)
 - Step 3: Aplicación de Flags (opcional, requiere archivos CC)
 """
@@ -114,7 +114,7 @@ class BDWorker(BaseETLWorker):
         # Step 3: Aplicación de Flags (usa el CC_ACTUAL recién generado)
         self.progress_updated.emit(80, "🔄 Step 3: Aplicando Flags")
         try:
-            resultado['step3'] = self._step3_aplicar_flags_automatico(resultado['step1.5']['parquet'])
+            resultado['step3'] = self._step3_aplicar_flags_automatico(resultado['step1.5']['parquet_actual'])
             self.progress_updated.emit(100, "✓ Step 3 completado")
         except Exception as e:
             self.logger.warning(f"⚠️  Step 3 (Flags) falló: {str(e)}")
@@ -309,70 +309,103 @@ class BDWorker(BaseETLWorker):
     # ========================================================================
     
     def _step1_5_extraer_centros_costo(self, ruta_silver):
-        """Extrae tabla única de Centros de Costo desde Silver"""
-        tiempo_inicio = time.time()
-        
-        self.logger.info("")
-        self.logger.info("="*70)
-        self.logger.info("STEP 1.5: EXTRACCIÓN DE CENTROS DE COSTO")
-        self.logger.info("="*70)
-        
-        import polars as pl
-        
-        # Cargar esquema CC
-        esquema_path = self._buscar_esquema('esquema_cc.json')
-        if not esquema_path:
-            raise FileNotFoundError("No se encontró esquema_cc.json")
-        
-        with open(esquema_path, 'r', encoding='utf-8') as f:
-            esquema_cc = json.load(f)
-        
-        self.logger.info(f"📋 Esquema CC cargado")
-        
-        # Cargar Silver
-        df_silver = pl.read_parquet(ruta_silver)
-        self.logger.info(f"📊 Silver cargado: {len(df_silver):,} filas")
-        
-        # Extraer y deduplicar
-        columnas_cc = esquema_cc['columnas_requeridas']
-        columna_dedupe = esquema_cc['columna_deduplicacion']
-        
-        df_cc = df_silver.select(columnas_cc)
-        df_cc = df_cc.unique(subset=[columna_dedupe], keep='first')
-        df_cc = df_cc.sort(columna_dedupe)
-        
-        self.logger.info(f"🔄 Centros de costo únicos: {len(df_cc):,}")
-        
-        # Guardar con timestamp
-        carpeta_trabajo = ruta_silver.parent.parent
-        carpeta_cc = carpeta_trabajo / "centros_costo"
-        carpeta_cc.mkdir(exist_ok=True)
-        
-        timestamp = datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
-        ruta_parquet = carpeta_cc / f"cc_{timestamp}.parquet"
-        ruta_excel = carpeta_cc / f"cc_{timestamp}.xlsx"
-        
-        df_cc.write_parquet(ruta_parquet, compression="snappy")
-        self.logger.info(f"  ✓ Parquet: {ruta_parquet.name}")
-        
-        df_cc.write_excel(ruta_excel)
-        self.logger.info(f"  ✓ Excel: {ruta_excel.name}")
-        
-        self.timers['step1.5'] = time.time() - tiempo_inicio
-        
-        self.logger.info("-"*70)
-        self.logger.info(f"✓ Step 1.5 completado")
-        self.logger.info(f"  ⏱️  Duración: {self.logger.format_duration(self.timers['step1.5'])}")
-        self.logger.info("  ℹ️  Usuario debe seleccionar manualmente CC_ACTUAL y CC_OLD(s)")
-        self.logger.info("-"*70)
-        
-        return {
-            'registros': len(df_cc),
-            'parquet': ruta_parquet,
-            'excel': ruta_excel,
-            'duracion': self.timers['step1.5']
-        }
-    
+            """
+            Extrae tabla única de Centros de Costo desde Silver.
+            Implementa sistema de versionado dual:
+            - /actual: CC_ACTUAL.* (sin timestamp, para Power BI)
+            - /historico: CC_ACTUAL_YYYYMMDD_HHMMSS.* (con timestamp, auditoría)
+            """
+            tiempo_inicio = time.time()
+            
+            self.logger.info("")
+            self.logger.info("="*70)
+            self.logger.info("STEP 1.5: EXTRACCIÓN DE CENTROS DE COSTO")
+            self.logger.info("="*70)
+            
+            import polars as pl
+            
+            # Cargar esquema CC
+            esquema_path = self._buscar_esquema('esquema_cc.json')
+            if not esquema_path:
+                raise FileNotFoundError("No se encontró esquema_cc.json")
+            
+            with open(esquema_path, 'r', encoding='utf-8') as f:
+                esquema_cc = json.load(f)
+            
+            self.logger.info(f"📋 Esquema CC cargado")
+            
+            # Cargar Silver
+            df_silver = pl.read_parquet(ruta_silver)
+            self.logger.info(f"📊 Silver cargado: {len(df_silver):,} filas")
+            
+            # Extraer y deduplicar
+            columnas_cc = esquema_cc['columnas_requeridas']
+            columna_dedupe = esquema_cc['columna_deduplicacion']
+            
+            df_cc = df_silver.select(columnas_cc)
+            df_cc = df_cc.unique(subset=[columna_dedupe], keep='first')
+            df_cc = df_cc.sort(columna_dedupe)
+            
+            self.logger.info(f"🔄 Centros de costo únicos: {len(df_cc):,}")
+            
+            # ========== SISTEMA DE VERSIONADO DUAL ==========
+            carpeta_trabajo = ruta_silver.parent.parent
+            carpeta_cc = carpeta_trabajo / "centros_costo"
+            carpeta_actual = carpeta_cc / "actual"
+            carpeta_historico = carpeta_cc / "historico"
+            
+            carpeta_actual.mkdir(parents=True, exist_ok=True)
+            carpeta_historico.mkdir(parents=True, exist_ok=True)
+            
+            # Generar timestamp para históricos
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            
+            # --- ARCHIVOS EN /actual (SIN timestamp) ---
+            self.logger.info("💾 Guardando en /actual (Power BI)...")
+            
+            nombre_actual = "CC_ACTUAL"
+            ruta_parquet_actual = carpeta_actual / f"{nombre_actual}.parquet"
+            ruta_excel_actual = carpeta_actual / f"{nombre_actual}.xlsx"
+            
+            df_cc.write_parquet(ruta_parquet_actual, compression="snappy")
+            self.logger.info(f"  ✓ {nombre_actual}.parquet")
+            
+            df_cc.write_excel(ruta_excel_actual)
+            self.logger.info(f"  ✓ {nombre_actual}.xlsx")
+            
+            # --- ARCHIVOS EN /historico (CON timestamp) ---
+            self.logger.info("💾 Guardando en /historico (auditoría)...")
+            
+            nombre_historico = f"CC_ACTUAL_{timestamp}"
+            ruta_parquet_historico = carpeta_historico / f"{nombre_historico}.parquet"
+            ruta_excel_historico = carpeta_historico / f"{nombre_historico}.xlsx"
+            
+            df_cc.write_parquet(ruta_parquet_historico, compression="snappy")
+            self.logger.info(f"  ✓ {nombre_historico}.parquet")
+            
+            df_cc.write_excel(ruta_excel_historico)
+            self.logger.info(f"  ✓ {nombre_historico}.xlsx")
+            
+            self.timers['step1.5'] = time.time() - tiempo_inicio
+            
+            self.logger.info("-"*70)
+            self.logger.info(f"✓ Step 1.5 completado")
+            self.logger.info(f"  • Centros de costo: {len(df_cc):,}")
+            self.logger.info(f"  • Carpeta actual: {carpeta_actual.name}/")
+            self.logger.info(f"  • Carpeta histórico: {carpeta_historico.name}/")
+            self.logger.info(f"  ⏱️  Duración: {self.logger.format_duration(self.timers['step1.5'])}")
+            self.logger.info("-"*70)
+            
+            return {
+                'registros': len(df_cc),
+                'parquet_actual': ruta_parquet_actual,
+                'excel_actual': ruta_excel_actual,
+                'parquet_historico': ruta_parquet_historico,
+                'excel_historico': ruta_excel_historico,
+                'carpeta_actual': carpeta_actual,
+                'carpeta_historico': carpeta_historico,
+                'duracion': self.timers['step1.5']
+            }
     # ========================================================================
     # STEP 2: SILVER → GOLD
     # ========================================================================
@@ -534,97 +567,95 @@ class BDWorker(BaseETLWorker):
     # ========================================================================
     
     def _step3_aplicar_flags_automatico(self, ruta_cc_actual):
-        """
-        Aplica flags de negocio a empleados
-        Solo necesita bd_empleados_gold.parquet, NO usa CC
-        """
-        tiempo_inicio = time.time()
-        
-        self.logger.info("")
-        self.logger.info("="*70)
-        self.logger.info("STEP 3: APLICACIÓN DE FLAGS")
-        self.logger.info("="*70)
-        
-        import polars as pl
-        
-        # Cargar DuckDB (lazy: solo se importa aquí, no al inicio)
-        if not self.duckdb:
-            self.logger.info("📦 Cargando DuckDB...")
-            try:
-                import duckdb
-                self.duckdb = duckdb
-                self.logger.info("✓ DuckDB cargado")
-            except ImportError:
-                raise ImportError("DuckDB no está instalado. Instala con: pip install duckdb")
-        
-        # Buscar bd_empleados_gold.parquet
-        carpeta_trabajo = ruta_cc_actual.parent.parent
-        ruta_empleados = carpeta_trabajo / "gold" / "bd_empleados_gold.parquet"
-        
-        if not ruta_empleados.exists():
-            raise FileNotFoundError(f"No se encontró {ruta_empleados}")
-        
-        # Cargar datos de empleados
-        self.logger.info("📊 Cargando datos de empleados...")
-        df_empleados = pl.read_parquet(ruta_empleados)
-        self.logger.info(f"  ✓ Empleados: {len(df_empleados):,} registros")
-        
-        # Registrar tabla en DuckDB
-        self.logger.info("🦆 Registrando tabla en DuckDB...")
-        conn = self.duckdb.connect()
-        conn.execute("CREATE OR REPLACE TABLE empleados AS SELECT * FROM df_empleados")
-        
-        # Cargar query SQL
-        self.logger.info("📜 Cargando query SQL...")
-        ruta_query_flags = self._buscar_query('queries_flags_gold.sql')
-        
-        if not ruta_query_flags:
-            raise FileNotFoundError("No se encontró queries_flags_gold.sql")
-        
-        with open(ruta_query_flags, 'r', encoding='utf-8') as f:
-            query_flags = f.read()
-        
-        # Ejecutar query
-        self.logger.info("⚙️  Aplicando flags de negocio...")
-        result = conn.execute(query_flags).pl()
-        
-        conn.close()
-        
-        self.logger.info(f"  ✓ Flags aplicados: {len(result):,} registros")
-        
-        # Guardar resultado con timestamp en carpeta historico
-        timestamp = datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
-        nombre_archivo = f"bd_empleados_gold_flags_{timestamp}.parquet"
-        
-        # Crear carpeta historico si no existe
-        carpeta_historico = carpeta_trabajo / "gold" / "historico"
-        carpeta_historico.mkdir(parents=True, exist_ok=True)
-        
-        ruta_output = carpeta_historico / nombre_archivo
-        ruta_excel = carpeta_historico / f"bd_empleados_gold_flags_{timestamp}.xlsx"
-        
-        result.write_parquet(ruta_output, compression="snappy")
-        self.logger.info(f"  ✓ Parquet: {ruta_output.name}")
-        
-        result.write_excel(ruta_excel)
-        self.logger.info(f"  ✓ Excel: {ruta_excel.name}")
-        self.logger.info(f"  📁 Ubicación: gold/historico/")
-        
-        self.timers['step3'] = time.time() - tiempo_inicio
-        
-        self.logger.info("-"*70)
-        self.logger.info(f"✓ Step 3 completado")
-        self.logger.info(f"  • Registros con flags: {len(result):,}")
-        self.logger.info(f"  • Archivo: {nombre_archivo}")
-        self.logger.info(f"  ⏱️  Duración: {self.logger.format_duration(self.timers['step3'])}")
-        self.logger.info("-"*70)
-        
-        return {
-            'registros': len(result),
-            'archivo': nombre_archivo,
-            'duracion': self.timers['step3']
-        }
-    
+            """
+            Aplica flags de negocio a empleados
+            Solo necesita bd_empleados_gold.parquet, NO usa CC
+            """
+            tiempo_inicio = time.time()
+            
+            self.logger.info("")
+            self.logger.info("="*70)
+            self.logger.info("STEP 3: APLICACIÓN DE FLAGS")
+            self.logger.info("="*70)
+            
+            import polars as pl
+            
+            # Cargar DuckDB (lazy: solo se importa aquí, no al inicio)
+            if not self.duckdb:
+                self.logger.info("📦 Cargando DuckDB...")
+                try:
+                    import duckdb
+                    self.duckdb = duckdb
+                    self.logger.info("✓ DuckDB cargado")
+                except ImportError:
+                    raise ImportError("DuckDB no está instalado. Instala con: pip install duckdb")
+            
+            # ✅ CORRECCIÓN: Usar self.output_dir en lugar de calcular desde ruta_cc_actual
+            ruta_empleados = self.output_dir / "gold" / "bd_empleados_gold.parquet"
+            
+            if not ruta_empleados.exists():
+                raise FileNotFoundError(f"No se encontró {ruta_empleados}")
+            
+            # Cargar datos de empleados
+            self.logger.info("📊 Cargando datos de empleados...")
+            df_empleados = pl.read_parquet(ruta_empleados)
+            self.logger.info(f"  ✓ Empleados: {len(df_empleados):,} registros")
+            
+            # Registrar tabla en DuckDB
+            self.logger.info("🦆 Registrando tabla en DuckDB...")
+            conn = self.duckdb.connect()
+            conn.execute("CREATE OR REPLACE TABLE empleados AS SELECT * FROM df_empleados")
+            
+            # Cargar query SQL
+            self.logger.info("📜 Cargando query SQL...")
+            ruta_query_flags = self._buscar_query('queries_flags_gold.sql')
+            
+            if not ruta_query_flags:
+                raise FileNotFoundError("No se encontró queries_flags_gold.sql")
+            
+            with open(ruta_query_flags, 'r', encoding='utf-8') as f:
+                query_flags = f.read()
+            
+            # Ejecutar query
+            self.logger.info("⚙️  Aplicando flags de negocio...")
+            result = conn.execute(query_flags).pl()
+            
+            conn.close()
+            
+            self.logger.info(f"  ✓ Flags aplicados: {len(result):,} registros")
+            
+            # Guardar resultado con timestamp en carpeta historico
+            timestamp = datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
+            nombre_archivo = f"bd_empleados_gold_flags_{timestamp}.parquet"
+            
+            # Crear carpeta historico si no existe
+            carpeta_historico = self.output_dir / "gold" / "historico"
+            carpeta_historico.mkdir(parents=True, exist_ok=True)
+            
+            ruta_output = carpeta_historico / nombre_archivo
+            ruta_excel = carpeta_historico / f"bd_empleados_gold_flags_{timestamp}.xlsx"
+            
+            result.write_parquet(ruta_output, compression="snappy")
+            self.logger.info(f"  ✓ Parquet: {ruta_output.name}")
+            
+            result.write_excel(ruta_excel)
+            self.logger.info(f"  ✓ Excel: {ruta_excel.name}")
+            self.logger.info(f"  📁 Ubicación: gold/historico/")
+            
+            self.timers['step3'] = time.time() - tiempo_inicio
+            
+            self.logger.info("-"*70)
+            self.logger.info(f"✓ Step 3 completado")
+            self.logger.info(f"  • Registros con flags: {len(result):,}")
+            self.logger.info(f"  • Archivo: {nombre_archivo}")
+            self.logger.info(f"  ⏱️  Duración: {self.logger.format_duration(self.timers['step3'])}")
+            self.logger.info("-"*70)
+            
+            return {
+                'registros': len(result),
+                'archivo': nombre_archivo,
+                'duracion': self.timers['step3']
+            }
     # ========================================================================
     # UTILIDADES
     # ========================================================================

@@ -13,7 +13,6 @@ logs/
 
 # Archivos específicos
 ignorar/
-treemap.py
 treemap.md
 diagnostico.py
 validar_esquema.py
