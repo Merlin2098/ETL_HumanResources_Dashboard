@@ -1,14 +1,27 @@
+# ui/etls/bd/config.py
 """
 Configuración del ETL de Base de Datos Consolidada
-Define metadata y parámetros para registro en el sistema
 """
+from dataclasses import dataclass
 
-ETL_CONFIG = {
-    'id': 'bd',
-    'nombre': 'Base de Datos',
-    'descripcion': 'Procesamiento completo de BD: Bronze→Silver→Gold + Centros de Costo + Flags',
-    'icono': '🗄️',
-    'color': '#7C3AED',  # Púrpura
-    'orden': 4,
-    'tags': ['bd', 'empleados', 'practicantes', 'centros_costo', 'flags']
-}
+
+@dataclass
+class ETLConfig:
+    """Metadata del ETL"""
+    id: str
+    name: str
+    icon: str
+    description: str
+    enabled: bool = True
+    order: int = 0
+
+
+# Configuración de este ETL
+CONFIG = ETLConfig(
+    id="bd",
+    name="Base de Datos",
+    icon="🗄️",
+    description="Procesamiento completo: Bronze→Silver→Gold + Centros de Costo + Flags",
+    enabled=True,
+    order=4
+)

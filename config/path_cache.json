@@ -5,7 +5,8 @@
     "pdt_archivo": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Movimientos\\Ingresos pdt\\Relación de ingresos 2024-2025.xlsx",
     "examen_retiro_bronze": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Analisis de nómina\\motivo_cese\\Programación de examen de Retiro3.xlsm",
     "examen_retiro_cc_actual": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Base de datos\\centros de costo\\CC_ACTUAL.parquet",
-    "examen_retiro_cc_old": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Base de datos\\centros de costo\\CC_OLD.parquet"
+    "examen_retiro_cc_old": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Base de datos\\centros de costo\\CC_OLD.parquet",
+    "bd_bronze": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Base de datos\\Prueba\\BD. 06.01.2026..xlsm"
   },
   "frequent_dirs": {
     "nomina_bronze_dir": [
@@ -23,11 +24,14 @@
     ],
     "examen_retiro_cc_old": [
       "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Base de datos\\centros de costo"
+    ],
+    "bd_bronze": [
+      "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Base de datos\\Prueba"
     ]
   },
   "metadata": {
     "created": "2026-01-07T12:11:25.926351",
-    "last_updated": "2026-01-08T10:23:48.822454",
+    "last_updated": "2026-01-08T11:54:50.139560",
     "version": "1.0"
   }
 }
