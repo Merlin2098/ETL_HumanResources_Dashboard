@@ -7,6 +7,9 @@ from pathlib import Path
 from typing import List, Dict
 from importlib import import_module
 
+# ✅ Import para rutas compatibles con PyInstaller
+from utils.paths import get_resource_path
+
 
 class ETLRegistry:
     """
@@ -16,7 +19,8 @@ class ETLRegistry:
     
     def __init__(self):
         self.etls: Dict[str, Dict] = {}
-        self.etls_dir = Path(__file__).parent / "etls"
+        # ✅ Usar helper de paths para desarrollo y producción
+        self.etls_dir = get_resource_path("ui/etls")
     
     def discover_etls(self) -> List[Dict]:
         """

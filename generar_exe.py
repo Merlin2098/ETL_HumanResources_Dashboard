@@ -23,7 +23,7 @@ NOMBRE_EXE = "GestorETL.exe"
 
 # Script principal que lanza la interfaz gráfica
 # NOTA: Ajusta esto si tu punto de entrada es etl_manager.py
-MAIN_SCRIPT = os.path.join("ui", "main_app.py") 
+MAIN_SCRIPT = "etl_manager.py" 
 
 DIST_PATH = "dist"
 BUILD_PATH = "build"

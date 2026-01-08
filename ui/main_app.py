@@ -4,10 +4,12 @@ Ventana principal con tabs dinámicos.
 Los tabs se cargan automáticamente desde el registry.
 """
 from PySide6.QtWidgets import QMainWindow, QTabWidget, QMessageBox
-from pathlib import Path
+from PySide6.QtGui import QIcon
 
-from .theme_loader import load_theme
-from .etl_registry import get_registry
+# ✅ Imports absolutos (compatibles con PyInstaller)
+from ui.theme_loader import load_theme
+from ui.etl_registry import get_registry
+from utils.paths import get_resource_path
 
 
 class ETLManagerWindow(QMainWindow):
@@ -80,8 +82,8 @@ class ETLManagerWindow(QMainWindow):
     def _apply_theme(self):
         """Aplica tema desde JSON."""
         try:
-            # Buscar theme_light.json en config/
-            theme_path = Path(__file__).parent.parent / "config" / "theme_light.json"
+            # ✅ Usar helper de paths para desarrollo y producción
+            theme_path = get_resource_path("config/theme_light.json")
             
             if not theme_path.exists():
                 print(f"⚠️ Tema no encontrado en: {theme_path}")
@@ -98,10 +100,8 @@ class ETLManagerWindow(QMainWindow):
     def _set_app_icon(self):
         """Aplica ícono de la aplicación desde config/app.ico"""
         try:
-            from PySide6.QtGui import QIcon
-            
-            # Buscar app.ico en config/
-            icon_path = Path(__file__).parent.parent / "config" / "app.ico"
+            # ✅ Usar helper de paths
+            icon_path = get_resource_path("config/app.ico")
             
             if not icon_path.exists():
                 print(f"⚠️ Ícono no encontrado en: {icon_path}")

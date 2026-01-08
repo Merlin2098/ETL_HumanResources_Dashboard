@@ -7,11 +7,15 @@ Entry point principal de la aplicación
 import sys
 from pathlib import Path
 
-# Agregar directorio actual al path
-sys.path.insert(0, str(Path(__file__).parent))
+# Agregar directorio raíz al path
+project_root = Path(__file__).parent.resolve()
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
 from PySide6.QtWidgets import QApplication
-from ui import ETLManagerWindow
+from PySide6.QtGui import QIcon
+from ui.main_app import ETLManagerWindow  # ✅ Import absoluto correcto
+from utils.paths import get_resource_path  # ✅ Para rutas en producción
 
 
 def main():
@@ -26,11 +30,12 @@ def main():
     
     # Configurar ícono de la aplicación
     try:
-        from PySide6.QtGui import QIcon
-        icon_path = Path(__file__).parent / "config" / "app.ico"
+        icon_path = get_resource_path("config/app.ico")  # ✅ Usar helper
         if icon_path.exists():
             app.setWindowIcon(QIcon(str(icon_path)))
             print("✅ Ícono de aplicación configurado")
+        else:
+            print(f"⚠️ Ícono no encontrado en: {icon_path}")
     except Exception as e:
         print(f"⚠️ No se pudo configurar el ícono: {e}")
     
