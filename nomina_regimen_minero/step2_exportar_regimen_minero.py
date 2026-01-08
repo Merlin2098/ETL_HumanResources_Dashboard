@@ -82,48 +82,6 @@ def aplicar_transformaciones_gold(df, schema):
     return df
 
 
-def agregar_total_costo_laboral(df):
-    """
-    Agrega columna TOTAL COSTO LABORAL = TOTAL INGRESOS + TOTAL APORTACIONES
-    
-    Args:
-        df: DataFrame de Polars
-        
-    Returns:
-        pl.DataFrame: DataFrame con columna TOTAL COSTO LABORAL agregada
-    """
-    print("💰 Calculando TOTAL COSTO LABORAL...")
-    
-    # Verificar que existan las columnas necesarias
-    if "TOTAL INGRESOS" not in df.columns or "TOTAL APORTACIONES" not in df.columns:
-        print("  ⚠️  No se encontraron las columnas TOTAL INGRESOS o TOTAL APORTACIONES")
-        return df
-    
-    # Calcular TOTAL COSTO LABORAL
-    df = df.with_columns(
-        (pl.col("TOTAL INGRESOS").fill_null(0) + pl.col("TOTAL APORTACIONES").fill_null(0))
-        .alias("TOTAL COSTO LABORAL")
-    )
-    
-    # Posicionar TOTAL COSTO LABORAL después de TOTAL APORTACIONES
-    columnas = df.columns
-    if "TOTAL APORTACIONES" in columnas:
-        indice_aportaciones = columnas.index("TOTAL APORTACIONES")
-        
-        # Crear nuevo orden
-        nuevo_orden = (
-            columnas[:indice_aportaciones + 1] +  # Hasta TOTAL APORTACIONES inclusive
-            ["TOTAL COSTO LABORAL"] +              # TOTAL COSTO LABORAL
-            [col for col in columnas[indice_aportaciones + 1:] if col != "TOTAL COSTO LABORAL"]  # Resto
-        )
-        
-        df = df.select(nuevo_orden)
-    
-    print(f"✓ Columna 'TOTAL COSTO LABORAL' calculada (TOTAL INGRESOS + TOTAL APORTACIONES)")
-    
-    return df
-
-
 def agregar_nombre_mes(df):
     """Agrega columna con nombre del mes en español"""
     
@@ -363,9 +321,6 @@ def main():
     try:
         # Aplicar transformaciones según esquema
         df_gold = aplicar_transformaciones_gold(df, schema)
-        
-        # Calcular TOTAL COSTO LABORAL
-        df_gold = agregar_total_costo_laboral(df_gold)
         
         # Agregar columna NOMBRE_MES
         df_gold = agregar_nombre_mes(df_gold)

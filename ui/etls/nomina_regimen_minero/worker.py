@@ -171,7 +171,6 @@ class NominaRegimenMineroWorker(BaseETLWorker):
                     
                     # LAZY LOADING: step2 se carga AQUÍ
                     aplicar_transformaciones_gold = self.loader.step2.aplicar_transformaciones_gold
-                    agregar_total_costo_laboral = self.loader.step2.agregar_total_costo_laboral
                     agregar_nombre_mes = self.loader.step2.agregar_nombre_mes
                     gestionar_versionamiento_gold = self.loader.step2.gestionar_versionamiento_gold
                     generar_excel_visualizacion = self.loader.step2.generar_excel_visualizacion
@@ -182,9 +181,6 @@ class NominaRegimenMineroWorker(BaseETLWorker):
                     
                     # Transformar a gold
                     df_gold = aplicar_transformaciones_gold(df_silver, esquema)
-                    
-                    # Agregar TOTAL COSTO LABORAL
-                    df_gold = agregar_total_costo_laboral(df_gold)
                     
                     # Agregar NOMBRE_MES
                     df_gold = agregar_nombre_mes(df_gold)

@@ -115,10 +115,9 @@
     "unique_keys": [],
     "business_rules": [
       "NETO deberia ser aproximadamente igual a TOTAL INGRESOS - TOTAL DESCUENTOS",
-      "TOTAL COSTO LABORAL = TOTAL INGRESOS + TOTAL APORTACIONES",
       "DIAS TRABAJADOS debe ser mayor o igual a 0 y menor o igual a 31",
       "FECHA DE INGRESO debe ser anterior a PERIODO si ambas existen",
-      "Los montos (TOTAL INGRESOS, TOTAL DESCUENTOS, TOTAL APORTACIONES, TOTAL COSTO LABORAL, NETO) deben ser no negativos"
+      "Los montos (TOTAL INGRESOS, TOTAL DESCUENTOS, TOTAL APORTACIONES, NETO) deben ser no negativos"
     ]
   },
   "transformations": {
@@ -127,8 +126,7 @@
     "string_trimming": true,
     "null_handling": "explicit",
     "enrichment": [
-      "NOMBRE_MES se genera automáticamente desde columna MES (agregada después de MES)",
-      "TOTAL COSTO LABORAL se calcula como TOTAL INGRESOS + TOTAL APORTACIONES (agregada después de TOTAL APORTACIONES)"
+      "NOMBRE_MES se genera automáticamente desde columna MES (agregada después de MES)"
     ]
   },
   "column_order_base": [
@@ -170,7 +168,6 @@
     "TOTAL INGRESOS",
     "TOTAL DESCUENTOS",
     "TOTAL APORTACIONES",
-    "TOTAL COSTO LABORAL",
     "NETO"
   ]
 }
