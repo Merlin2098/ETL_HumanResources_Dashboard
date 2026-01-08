@@ -12,6 +12,7 @@ logs/
 *.log
 
 # Archivos específicos
+ignorar/
 treemap.py
 treemap.md
 diagnostico.py
