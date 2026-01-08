@@ -57,63 +57,68 @@ class ExamenRetiroWidget(QWidget):
         
         # --- ARCHIVO BRONZE ---
         row_bronze = QHBoxLayout()
-        row_bronze.addWidget(QLabel("📂 Archivo Bronze (Excel):"))
-        self.btn_bronze = QPushButton("Seleccionar")
-        self.btn_bronze.setFixedWidth(120)
+        self.btn_bronze = QPushButton("📂 SELECCIONAR ARCHIVO EXCEL")
+        self.btn_bronze.setMinimumWidth(300)
+        self.btn_bronze.setMaximumWidth(500)
         self.btn_bronze.clicked.connect(self._select_bronze)
         row_bronze.addWidget(self.btn_bronze)
-        row_bronze.addStretch()
-        layout_files.addLayout(row_bronze)
         
-        self.label_bronze = QLabel("   ⚠️ No seleccionado")
-        self.label_bronze.setProperty("labelStyle", "secondary")
-        layout_files.addWidget(self.label_bronze)
-        layout_files.addSpacing(8)
+        self.label_bronze_status = QLabel("✗")
+        self.label_bronze_status.setStyleSheet("color: red; font-size: 16px; font-weight: bold;")
+        self.label_bronze_status.setFixedWidth(30)
+        self.label_bronze_status.setAlignment(Qt.AlignCenter)
+        row_bronze.addWidget(self.label_bronze_status)
+        row_bronze.addStretch()
+        
+        layout_files.addLayout(row_bronze)
+        layout_files.addSpacing(5)
         
         # --- CC_ACTUAL ---
         row_cc_actual = QHBoxLayout()
-        row_cc_actual.addWidget(QLabel("📊 Centro de Costos Actual:"))
-        self.btn_cc_actual = QPushButton("Seleccionar")
-        self.btn_cc_actual.setFixedWidth(120)
+        self.btn_cc_actual = QPushButton("📦 SELECCIONAR CC_ACTUAL")
+        self.btn_cc_actual.setMinimumWidth(300)
+        self.btn_cc_actual.setMaximumWidth(500)
         self.btn_cc_actual.clicked.connect(self._select_cc_actual)
         row_cc_actual.addWidget(self.btn_cc_actual)
-        row_cc_actual.addStretch()
-        layout_files.addLayout(row_cc_actual)
         
-        self.label_cc_actual = QLabel("   ⚠️ No seleccionado")
-        self.label_cc_actual.setProperty("labelStyle", "secondary")
-        layout_files.addWidget(self.label_cc_actual)
-        layout_files.addSpacing(8)
+        self.label_cc_actual_status = QLabel("✗")
+        self.label_cc_actual_status.setStyleSheet("color: red; font-size: 16px; font-weight: bold;")
+        self.label_cc_actual_status.setFixedWidth(30)
+        self.label_cc_actual_status.setAlignment(Qt.AlignCenter)
+        row_cc_actual.addWidget(self.label_cc_actual_status)
+        row_cc_actual.addStretch()
+        
+        layout_files.addLayout(row_cc_actual)
+        layout_files.addSpacing(5)
         
         # --- CC_OLD ---
         row_cc_old = QHBoxLayout()
-        row_cc_old.addWidget(QLabel("📊 Centro de Costos Histórico:"))
-        self.btn_cc_old = QPushButton("Seleccionar")
-        self.btn_cc_old.setFixedWidth(120)
+        self.btn_cc_old = QPushButton("📦 SELECCIONAR CC_OLD")
+        self.btn_cc_old.setMinimumWidth(300)
+        self.btn_cc_old.setMaximumWidth(500)
         self.btn_cc_old.clicked.connect(self._select_cc_old)
         row_cc_old.addWidget(self.btn_cc_old)
+        
+        self.label_cc_old_status = QLabel("✗")
+        self.label_cc_old_status.setStyleSheet("color: red; font-size: 16px; font-weight: bold;")
+        self.label_cc_old_status.setFixedWidth(30)
+        self.label_cc_old_status.setAlignment(Qt.AlignCenter)
+        row_cc_old.addWidget(self.label_cc_old_status)
         row_cc_old.addStretch()
+        
         layout_files.addLayout(row_cc_old)
+        layout_files.addSpacing(10)
         
-        self.label_cc_old = QLabel("   ⚠️ No seleccionado")
-        self.label_cc_old.setProperty("labelStyle", "secondary")
-        layout_files.addWidget(self.label_cc_old)
-        layout_files.addSpacing(12)
-        
-        # Nota informativa y botón limpiar
-        row_bottom = QHBoxLayout()
-        nota = QLabel("💡 Los 3 archivos son necesarios")
-        nota.setProperty("labelStyle", "secondary")
-        row_bottom.addWidget(nota)
-        row_bottom.addStretch()
-        
-        self.btn_clear = QPushButton("🗑️ Limpiar")
-        self.btn_clear.setFixedWidth(100)
+        # --- BOTÓN LIMPIAR ---
+        row_clear = QHBoxLayout()
+        row_clear.addStretch()
+        self.btn_clear = QPushButton("🗑️ LIMPIAR")
+        self.btn_clear.setFixedWidth(120)
         self.btn_clear.clicked.connect(self._clear_files)
         self.btn_clear.setEnabled(False)
-        row_bottom.addWidget(self.btn_clear)
+        row_clear.addWidget(self.btn_clear)
         
-        layout_files.addLayout(row_bottom)
+        layout_files.addLayout(row_clear)
         
         group_files.setLayout(layout_files)
         main_layout.addWidget(group_files)
@@ -159,7 +164,7 @@ class ExamenRetiroWidget(QWidget):
         files = quick_file_select_qt(
             parent=self,
             title="Seleccionar archivo Excel - Exámenes de Retiro",
-            file_filter="Archivos Excel (*.xlsx *.xls);;Todos los archivos (*.*)",
+            file_filter="Archivos Excel (*.xlsx *.xlsm *.xls);;Todos los archivos (*.*)",
             multiple=False,
             cache_key="examen_retiro_bronze"
         )
@@ -169,14 +174,13 @@ class ExamenRetiroWidget(QWidget):
         
         archivo = files[0] if isinstance(files, list) else files
         
-        if archivo.suffix.lower() not in ['.xlsx', '.xls']:
-            self._log(f"⚠️ El archivo debe ser Excel (.xlsx o .xls)")
-            self.label_bronze.setText("⚠️ Archivo no válido")
+        if archivo.suffix.lower() not in ['.xlsx', '.xlsm', '.xls']:
+            self._log(f"⚠️ El archivo debe ser Excel (.xlsx, .xlsm o .xls)")
             return
         
         self.archivo_bronze = archivo
-        self.label_bronze.setText(f"   ✓ {archivo.name}")
-        self.label_bronze.setStyleSheet("color: green;")
+        self.label_bronze_status.setText("✓")
+        self.label_bronze_status.setStyleSheet("color: green; font-size: 16px; font-weight: bold;")
         self._log(f"📂 Archivo Bronze seleccionado: {archivo.name}")
         self._check_all_files_selected()
     
@@ -201,9 +205,9 @@ class ExamenRetiroWidget(QWidget):
             return
         
         self.archivo_cc_actual = archivo
-        self.label_cc_actual.setText(f"   ✓ {archivo.name}")
-        self.label_cc_actual.setStyleSheet("color: green;")
-        self._log(f"📊 CC_ACTUAL seleccionado: {archivo.name}")
+        self.label_cc_actual_status.setText("✓")
+        self.label_cc_actual_status.setStyleSheet("color: green; font-size: 16px; font-weight: bold;")
+        self._log(f"📦 CC_ACTUAL seleccionado: {archivo.name}")
         self._check_all_files_selected()
     
     def _select_cc_old(self):
@@ -227,9 +231,9 @@ class ExamenRetiroWidget(QWidget):
             return
         
         self.archivo_cc_old = archivo
-        self.label_cc_old.setText(f"   ✓ {archivo.name}")
-        self.label_cc_old.setStyleSheet("color: green;")
-        self._log(f"📊 CC_OLD seleccionado: {archivo.name}")
+        self.label_cc_old_status.setText("✓")
+        self.label_cc_old_status.setStyleSheet("color: green; font-size: 16px; font-weight: bold;")
+        self._log(f"📦 CC_OLD seleccionado: {archivo.name}")
         self._check_all_files_selected()
     
     def _check_all_files_selected(self):
@@ -267,12 +271,14 @@ class ExamenRetiroWidget(QWidget):
         self.archivo_cc_actual = None
         self.archivo_cc_old = None
         
-        self.label_bronze.setText("   ⚠️ No seleccionado")
-        self.label_bronze.setStyleSheet("")
-        self.label_cc_actual.setText("   ⚠️ No seleccionado")
-        self.label_cc_actual.setStyleSheet("")
-        self.label_cc_old.setText("   ⚠️ No seleccionado")
-        self.label_cc_old.setStyleSheet("")
+        self.label_bronze_status.setText("✗")
+        self.label_bronze_status.setStyleSheet("color: red; font-size: 16px; font-weight: bold;")
+        
+        self.label_cc_actual_status.setText("✗")
+        self.label_cc_actual_status.setStyleSheet("color: red; font-size: 16px; font-weight: bold;")
+        
+        self.label_cc_old_status.setText("✗")
+        self.label_cc_old_status.setStyleSheet("color: red; font-size: 16px; font-weight: bold;")
         
         self.btn_process.setEnabled(False)
         self.btn_clear.setEnabled(False)

@@ -2,7 +2,10 @@
   "last_paths": {
     "nomina_carpeta": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Analisis de nómina\\prueba",
     "nomina_regimen_minero_carpeta": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Contratista minero",
-    "pdt_archivo": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Movimientos\\Ingresos pdt\\Relación de ingresos 2024-2025.xlsx"
+    "pdt_archivo": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Movimientos\\Ingresos pdt\\Relación de ingresos 2024-2025.xlsx",
+    "examen_retiro_bronze": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Analisis de nómina\\motivo_cese\\Programación de examen de Retiro3.xlsm",
+    "examen_retiro_cc_actual": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Base de datos\\centros de costo\\CC_ACTUAL.parquet",
+    "examen_retiro_cc_old": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Base de datos\\centros de costo\\CC_OLD.parquet"
   },
   "frequent_dirs": {
     "nomina_bronze_dir": [
@@ -11,11 +14,20 @@
     ],
     "pdt_archivo": [
       "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Movimientos\\Ingresos pdt"
+    ],
+    "examen_retiro_bronze": [
+      "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Analisis de nómina\\motivo_cese"
+    ],
+    "examen_retiro_cc_actual": [
+      "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Base de datos\\centros de costo"
+    ],
+    "examen_retiro_cc_old": [
+      "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Base de datos\\centros de costo"
     ]
   },
   "metadata": {
     "created": "2026-01-07T12:11:25.926351",
-    "last_updated": "2026-01-08T09:28:38.039236",
+    "last_updated": "2026-01-08T10:23:48.822454",
     "version": "1.0"
   }
 }
