@@ -1,14 +1,11 @@
 fastexcel
-pre-commit
-pathspec
 pandas
 pyarrow
 openpyxl
 polars
 python-calamine
 pyside6
-wheel
-setuptools
+
 duckdb
 tabulate
 tqdm
@@ -18,3 +15,8 @@ xlsxwriter
 #utils
 pydantic
 python-dateutil
+pyinstaller
+pre-commit
+pathspec
+wheel
+setuptools
