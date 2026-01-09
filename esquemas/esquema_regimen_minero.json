@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "version": "1.3",
+    "version": "1.4",
     "capa": "gold",
     "fecha_creacion": "2025-01-06",
-    "fecha_actualizacion": "2025-01-06",
+    "fecha_actualizacion": "2025-01-09",
     "descripcion": "Esquema de datos para la capa gold - Régimen Minero - columnas base del parquet silver (sin columnas enriquecidas)"
   },
   "schema": {
@@ -82,6 +82,34 @@
       "max_value": 31,
       "description": "Número de días trabajados en el periodo"
     },
+    "DIAS DESC MEDICO (P)": {
+      "type": "float",
+      "nullable": true,
+      "min_value": 0,
+      "precision": 2,
+      "description": "Días de descanso médico en el periodo"
+    },
+    "#HRS EXTRAS DOBLES": {
+      "type": "float",
+      "nullable": true,
+      "min_value": 0,
+      "precision": 2,
+      "description": "Número de horas extras dobles en el periodo"
+    },
+    "HORAS EXTRAS 100%": {
+      "type": "float",
+      "nullable": true,
+      "min_value": 0,
+      "precision": 2,
+      "description": "Horas extras al 100% en el periodo"
+    },
+    "DESCANSO MEDICO": {
+      "type": "float",
+      "nullable": true,
+      "min_value": 0,
+      "precision": 2,
+      "description": "Días de descanso médico"
+    },
     "TOTAL INGRESOS": {
       "type": "float",
       "nullable": true,
@@ -117,7 +145,8 @@
       "NETO deberia ser aproximadamente igual a TOTAL INGRESOS - TOTAL DESCUENTOS",
       "DIAS TRABAJADOS debe ser mayor o igual a 0 y menor o igual a 31",
       "FECHA DE INGRESO debe ser anterior a PERIODO si ambas existen",
-      "Los montos (TOTAL INGRESOS, TOTAL DESCUENTOS, TOTAL APORTACIONES, NETO) deben ser no negativos"
+      "Los montos (TOTAL INGRESOS, TOTAL DESCUENTOS, TOTAL APORTACIONES, NETO) deben ser no negativos",
+      "DIAS DESC MEDICO (P), #HRS EXTRAS DOBLES, HORAS EXTRAS 100%, DESCANSO MEDICO deben ser no negativos"
     ]
   },
   "transformations": {
@@ -144,6 +173,10 @@
     "DESC. CENTRO DE COSTO",
     "FECHA DE INGRESO",
     "DIAS TRABAJADOS",
+    "DIAS DESC MEDICO (P)",
+    "#HRS EXTRAS DOBLES",
+    "HORAS EXTRAS 100%",
+    "DESCANSO MEDICO",
     "TOTAL INGRESOS",
     "TOTAL DESCUENTOS",
     "TOTAL APORTACIONES",
@@ -165,6 +198,10 @@
     "DESC. CENTRO DE COSTO",
     "FECHA DE INGRESO",
     "DIAS TRABAJADOS",
+    "DIAS DESC MEDICO (P)",
+    "#HRS EXTRAS DOBLES",
+    "HORAS EXTRAS 100%",
+    "DESCANSO MEDICO",
     "TOTAL INGRESOS",
     "TOTAL DESCUENTOS",
     "TOTAL APORTACIONES",
