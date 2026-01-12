@@ -32,11 +32,7 @@
           "nullable": false,
           "description": "DNI o documento de identidad del practicante"
         },
-        "CODIGO SAP": {
-          "type": "string",
-          "nullable": true,
-          "description": "Código SAP (valores '#N/D' o 'Error' se convierten a null)"
-        },
+        
         "Sexo": {
           "type": "string",
           "nullable": true,
@@ -50,11 +46,11 @@
           "type": "string",
           "nullable": true
         },
-        "Jefe responsable de área": {
+        "Jefe Directo": {
           "type": "string",
           "nullable": true
         },
-        "Sede de Trabajo": {
+        "Lugar de Trabajo": {
           "type": "string",
           "nullable": true
         },
@@ -66,7 +62,6 @@
       "constraints": {
         "primary_key": ["PERIODO", "Numero Documento"],
         "business_rules": [
-          "CODIGO SAP con '#N/D', '#N/A' o 'Error' debe ser null",
           "PERIODO debe ser calculado como AÑO-MES en formato YYYY-MM",
           "Universidad de Procedencia: Si es nulo, transformar a 'POR DEFINIR'"
         ]
