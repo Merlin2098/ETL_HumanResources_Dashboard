@@ -222,8 +222,9 @@ class ExamenRetiroWorker(QThread):
             tiempo_inicio_step2 = time.time()
             
             try:
-                # Buscar esquema
-                esquema_path = Path(project_root) / "esquemas" / "esquema_examen_retiro.json"
+                # Buscar esquema usando get_resource_path (compatible con PyInstaller)
+                from utils.paths import get_resource_path
+                esquema_path = get_resource_path("esquemas/esquema_examen_retiro.json")
                 
                 if not esquema_path.exists():
                     self.logger.warning("⚠️ Esquema no encontrado, saltando Step 2")
@@ -333,7 +334,6 @@ class ExamenRetiroWorker(QThread):
                     self.progress_updated.emit(78, "⚙️ Cargando módulo de JOIN...")
                     
                     # LAZY LOADING: step3
-                    find_queries_folder = self.loader.step3.find_queries_folder
                     cargar_parquets = self.loader.step3.cargar_parquets
                     ejecutar_join_sql = self.loader.step3.ejecutar_join_sql
                     analizar_resultados = self.loader.step3.analizar_resultados
@@ -343,13 +343,13 @@ class ExamenRetiroWorker(QThread):
                     
                     self.progress_updated.emit(80, "📄 Cargando query SQL...")
                     
-                    # Buscar y cargar query SQL
+                    # Buscar y cargar query SQL usando get_resource_path
                     try:
-                        carpeta_queries = find_queries_folder()
-                        ruta_query = carpeta_queries / "query_cc_join.sql"
+                        from utils.paths import get_resource_path
+                        ruta_query = get_resource_path("queries/query_cc_join.sql")
                         
                         if not ruta_query.exists():
-                            raise FileNotFoundError(f"No se encontró query_cc_join.sql en {carpeta_queries}")
+                            raise FileNotFoundError(f"No se encontró query_cc_join.sql en {ruta_query.parent}")
                         
                         with open(ruta_query, 'r', encoding='utf-8') as f:
                             query = f.read()

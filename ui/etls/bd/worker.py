@@ -661,31 +661,29 @@ class BDWorker(BaseETLWorker):
     # ========================================================================
     
     def _buscar_esquema(self, nombre_archivo):
-        """Busca archivo de esquema en ubicaciones comunes"""
-        rutas_posibles = [
-            Path(f"../esquemas/{nombre_archivo}"),
-            Path(f"esquemas/{nombre_archivo}"),
-            Path(f"../../esquemas/{nombre_archivo}"),
-            Path(nombre_archivo),
-        ]
+        """Busca archivo de esquema usando get_resource_path (compatible con PyInstaller)"""
+        from utils.paths import get_resource_path
         
-        for ruta in rutas_posibles:
-            if ruta.exists():
-                return ruta
+        # Usar get_resource_path que maneja correctamente dev y PyInstaller
+        ruta_esquema = get_resource_path(f"esquemas/{nombre_archivo}")
         
+        if ruta_esquema.exists():
+            return ruta_esquema
+        
+        self.logger.warning(f"⚠️ Esquema no encontrado: {nombre_archivo}")
+        self.logger.warning(f"   Ruta buscada: {ruta_esquema}")
         return None
     
     def _buscar_query(self, nombre_archivo):
-        """Busca archivo SQL en ubicaciones comunes"""
-        rutas_posibles = [
-            Path(f"../queries/{nombre_archivo}"),
-            Path(f"queries/{nombre_archivo}"),
-            Path(f"../../queries/{nombre_archivo}"),
-            Path(nombre_archivo),
-        ]
+        """Busca archivo SQL usando get_resource_path (compatible con PyInstaller)"""
+        from utils.paths import get_resource_path
         
-        for ruta in rutas_posibles:
-            if ruta.exists():
-                return ruta
+        # Usar get_resource_path que maneja correctamente dev y PyInstaller
+        ruta_query = get_resource_path(f"queries/{nombre_archivo}")
         
+        if ruta_query.exists():
+            return ruta_query
+        
+        self.logger.warning(f"⚠️ Query no encontrado: {nombre_archivo}")
+        self.logger.warning(f"   Ruta buscada: {ruta_query}")
         return None

@@ -140,8 +140,9 @@ class NominaRegimenMineroWorker(BaseETLWorker):
             tiempo_inicio_step2 = time.time()
             
             try:
-                # Buscar esquema
-                esquema_path = Path(project_root) / "esquemas" / "esquema_regimen_minero.json"
+                # Buscar esquema usando get_resource_path (compatible con PyInstaller)
+                from utils.paths import get_resource_path
+                esquema_path = get_resource_path("esquemas/esquema_regimen_minero.json")
                 
                 if not esquema_path.exists():
                     self.logger.warning("⚠️ Esquema no encontrado, saltando Step 2")
