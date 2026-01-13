@@ -161,6 +161,7 @@ def construir_comando():
         "pdt", 
         "pdt.step1_consolidar_ingresos",
         "pdt.step2_exportar_ingresos",
+        "pdt.step3_exportar_practicantes",  # ← ÚNICO CAMBIO NECESARIO
         
         # Examen Retiro
         "examen_retiro", 
@@ -172,7 +173,7 @@ def construir_comando():
         "utils", 
         "utils.logger_qt", 
         "utils.file_selector_qt",
-        "utils.paths", 
+        "utils.paths",  # ← CRÍTICO para get_resource_path
         "utils.lazy_loader", 
         "utils.path_cache",
         

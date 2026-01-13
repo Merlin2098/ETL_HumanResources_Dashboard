@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Dict
 import sys
 import time
+from utils.paths import get_resource_path
 
 # Asegurar que el directorio raíz del proyecto esté en el path
 project_root = Path(__file__).parent.parent.parent.parent
