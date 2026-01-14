@@ -23,6 +23,7 @@ Flags generadas:
 
 Autor: Richi
 Fecha: 06.01.2025
+Última modificación: 14.01.2025 - Corrección patrón dual /actual + /historico
 """
 
 import polars as pl
@@ -230,9 +231,8 @@ def generar_resumen_flags(df: pl.DataFrame, columnas_originales: list) -> dict:
     # Identificar columnas de flags (nuevas columnas)
     flags_cols = [col for col in df.columns if col not in columnas_originales]
     
-    # Estadísticas de cada flag (solo booleanas, excluir texto)
+    # Contar empleados por cada flag booleana
     for flag_col in flags_cols:
-        # Verificar si la columna es booleana
         if df[flag_col].dtype == pl.Boolean:
             count = df[flag_col].sum()
             stats["flags_generadas"][flag_col] = {
