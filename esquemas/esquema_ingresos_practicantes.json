@@ -3,7 +3,7 @@
     "version": "2.0",
     "capa": "gold",
     "fecha_creacion": "2025-01-07",
-    "fecha_actualizacion": "2025-01-07",
+    "fecha_actualizacion": "2025-01-15",
     "descripcion": "Esquema de datos para Relación de Ingresos - Solo PRACTICANTES va a Gold"
   },
   "hojas": {
@@ -32,7 +32,6 @@
           "nullable": false,
           "description": "DNI o documento de identidad del practicante"
         },
-        
         "Sexo": {
           "type": "string",
           "nullable": true,
@@ -57,6 +56,11 @@
         "Universidad de Procedencia": {
           "type": "string",
           "nullable": true
+        },
+        "Modalidad": {
+          "type": "string",
+          "nullable": true,
+          "description": "Tipo de modalidad (ej. Remoto, Presencial, Híbrido)"
         }
       },
       "constraints": {
