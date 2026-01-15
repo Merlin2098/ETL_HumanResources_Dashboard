@@ -58,7 +58,7 @@ Si deseas modificar el código fuente:
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/tu-usuario/ETL_KPIS_AdministracionPersonal.git
+git clone https://github.com/Merlin2098/ETL_HumanResources_Dashboard
 cd ETL_KPIS_AdministracionPersonal
 
 # Crear entorno virtual
