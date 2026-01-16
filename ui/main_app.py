@@ -17,7 +17,7 @@ class ETLManagerWindow(QMainWindow):
     
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("ETL Manager - Tawa Consulting")
+        self.setWindowTitle("ETL Manager - Data RRHH")
         self.setMinimumSize(900, 650)
         
         self._setup_ui()
