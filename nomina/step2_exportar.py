@@ -550,3 +550,72 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
+"""
+Función exportar_a_gold para nomina/step2_exportar.py
+
+AGREGAR ESTA FUNCIÓN AL FINAL DEL ARCHIVO
+"""
+
+def exportar_a_gold(ruta_parquet_silver: Path, carpeta_trabajo: Path) -> dict:
+    """
+    Procesa Silver a Gold sin interfaz gráfica (modo headless)
+    Usado por el pipeline executor
+    
+    Args:
+        ruta_parquet_silver: Path al parquet Silver de nómina
+        carpeta_trabajo: Path a la carpeta de trabajo base
+        
+    Returns:
+        dict con resultados del procesamiento
+    """
+    print(f"\n🔄 Procesando Silver → Gold (modo headless)...")
+    print(f"   Silver: {ruta_parquet_silver.name}")
+    print(f"   Carpeta trabajo: {carpeta_trabajo}")
+    
+    try:
+        # Cargar esquema
+        from utils.paths import get_resource_path
+        esquema_path = get_resource_path("esquemas/esquema_nominas.json")
+        
+        if not esquema_path.exists():
+            raise FileNotFoundError(f"Esquema no encontrado: {esquema_path}")
+        
+        import json
+        with open(esquema_path, 'r', encoding='utf-8') as f:
+            esquema = json.load(f)
+        
+        print(f"   ✓ Esquema cargado: v{esquema['metadata']['version']}")
+        
+        # Leer datos Silver
+        import polars as pl
+        df_silver = pl.read_parquet(ruta_parquet_silver)
+        
+        print(f"   ✓ Silver cargado: {len(df_silver):,} registros")
+        
+        # Transformar a Gold
+        df_gold = seleccionar_y_convertir_columnas(df_silver, esquema)
+        
+        print(f"   ✓ Transformaciones aplicadas: {len(df_gold):,} registros")
+        
+        # Guardar Gold
+        carpeta_silver = ruta_parquet_silver.parent
+        rutas_gold = guardar_resultados(df_gold, carpeta_silver)
+        
+        print(f"   ✓ Gold guardado:")
+        print(f"     • Parquet: {rutas_gold['parquet'].name}")
+        print(f"     • Excel: {rutas_gold['excel'].name}")
+        
+        return {
+            'success': True,
+            'parquet': rutas_gold['parquet'],
+            'excel': rutas_gold['excel'],
+            'carpeta_actual': rutas_gold['carpeta_actual'],
+            'carpeta_historico': rutas_gold['carpeta_historico'],
+            'registros': len(df_gold),
+            'columnas': len(df_gold.columns)
+        }
+        
+    except Exception as e:
+        print(f"   ✗ Error: {e}")
+        raise

@@ -447,3 +447,93 @@ if __name__ == "__main__":
         import traceback
         traceback.print_exc()
         sys.exit(1)
+
+def procesar_sin_gui(ruta_archivo: Path, carpeta_salida: Path) -> dict:
+    """
+    Procesa licencias sin interfaz gráfica (modo headless)
+    Usado por el pipeline executor
+    
+    Args:
+        ruta_archivo: Path al archivo CONTROL_DE_LICENCIAS.xlsx
+        carpeta_salida: Path a la carpeta /silver/ donde guardar el parquet
+        
+    Returns:
+        dict con resultados del procesamiento
+    """
+    print(f"\n🔄 Procesando licencias (modo headless)...")
+    print(f"   Archivo: {ruta_archivo.name}")
+    print(f"   Salida: {carpeta_salida}")
+    
+    try:
+        # Cargar esquema
+        ruta_esquema = get_resource_path("esquemas/esquema_licencias.json")
+        esquema = cargar_esquema(ruta_esquema)
+        
+        # Procesar ambas hojas
+        df_con_goce = leer_hoja_excel(
+            ruta_archivo, 
+            "LICENCIA CON GOCE", 
+            "CON_GOCE",
+            esquema
+        )
+        
+        df_sin_goce = leer_hoja_excel(
+            ruta_archivo, 
+            "LICENCIA SIN GOCE", 
+            "SIN_GOCE",
+            esquema
+        )
+        
+        # Validar que al menos una hoja tenga datos
+        if df_con_goce is None and df_sin_goce is None:
+            raise ValueError("No se pudo procesar ninguna hoja válida")
+        
+        # Consolidar DataFrames
+        dfs_validos = [df for df in [df_con_goce, df_sin_goce] if df is not None]
+        df_consolidado = pl.concat(dfs_validos, how="diagonal")
+        
+        registros_con_goce = len(df_con_goce) if df_con_goce is not None else 0
+        registros_sin_goce = len(df_sin_goce) if df_sin_goce is not None else 0
+        
+        print(f"   ✓ Registros consolidados: {len(df_consolidado):,}")
+        
+        # Seleccionar solo columnas del esquema
+        columnas_esquema = [col["name"] for col in esquema["columns"]]
+        columnas_disponibles = [col for col in columnas_esquema if col in df_consolidado.columns]
+        df_consolidado = df_consolidado.select(columnas_disponibles)
+        
+        # Validar esquema
+        es_valido, errores = validar_esquema(df_consolidado, esquema)
+        
+        if not es_valido:
+            print("   ✗ Errores de validación:")
+            for error in errores:
+                print(f"     • {error}")
+            raise ValueError("Validación de esquema falló")
+        
+        # Guardar parquet
+        carpeta_salida.mkdir(parents=True, exist_ok=True)
+        ruta_parquet = carpeta_salida / "licencias_consolidadas.parquet"
+        
+        df_consolidado.write_parquet(ruta_parquet, compression="snappy")
+        
+        print(f"   ✓ Parquet guardado: {ruta_parquet.name}")
+        
+        # Guardar Excel para visualización
+        ruta_excel = carpeta_salida / "licencias_consolidadas.xlsx"
+        df_consolidado.write_excel(ruta_excel)
+        
+        print(f"   ✓ Excel guardado: {ruta_excel.name}")
+        
+        return {
+            'success': True,
+            'parquet': ruta_parquet,
+            'excel': ruta_excel,
+            'registros': len(df_consolidado),
+            'registros_con_goce': registros_con_goce,
+            'registros_sin_goce': registros_sin_goce
+        }
+        
+    except Exception as e:
+        print(f"   ✗ Error: {e}")
+        raise

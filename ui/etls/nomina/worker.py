@@ -1,13 +1,8 @@
 # ui/etls/nomina/worker.py
 """
-Worker para ETL de Nómina
-Ejecuta: Bronze → Silver → Gold
-
-ACTUALIZADO con:
-- Lazy loading de módulos
-- Timer de ejecución por fase
-- Manejo robusto de errores
-- Logs detallados de validaciones
+Worker para ETL de Nómina con Licencias
+Ejecuta pipeline completo: Bronze → Silver → Gold → Gold Enriquecido
+Llama a pipeline_nomina_executor.py para orquestar los 4 stages
 """
 from pathlib import Path
 from typing import Dict
@@ -19,36 +14,29 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from ui.workers.base_worker import BaseETLWorker
-from utils.lazy_loader import create_etl_loader
+from orquestadores.pipeline_nomina_executor import PipelineNominaExecutor
+from utils.paths import get_resource_path
 
 
 class NominaWorker(BaseETLWorker):
-    """Worker para procesamiento de nóminas con lazy loading"""
+    """Worker para procesamiento de nóminas con pipeline completo"""
     
     def __init__(self, archivos, output_dir):
         super().__init__(archivos, output_dir)
-        
-        # Configurar lazy loader para este ETL
-        self.loader = create_etl_loader('nomina', {
-            'step1': 'nomina.step1_consolidar_planillas',
-            'step2': 'nomina.step2_exportar'
-        })
+        self.pipeline_executor = None
         
         # Timers
         self.timers = {
-            'total': 0,
-            'step1': 0,
-            'step2': 0
+            'total': 0
         }
     
     def get_pipeline_name(self) -> str:
-        return "nomina"
+        return "nomina_pipeline"
     
     def execute_etl(self) -> Dict:
         """
-        Ejecuta el ETL completo de nómina:
-        Step 1: Consolidar planillas (Bronze → Silver)
-        Step 2: Exportar a Gold (Silver → Gold)
+        Ejecuta el pipeline completo de nómina con licencias
+        usando el executor basado en YAML
         
         Returns:
             dict con resultados del proceso
@@ -56,219 +44,87 @@ class NominaWorker(BaseETLWorker):
         tiempo_inicio_total = time.time()
         
         try:
-            resultado = {}
+            # Obtener ruta del YAML del pipeline
+            yaml_path = get_resource_path("orquestadores/pipeline_nomina_licencias.yaml")
             
-            # ============ STEP 1: Bronze → Silver ============
-            self.logger.info("="*70)
-            self.logger.info("STEP 1: CONSOLIDACIÓN (Bronze → Silver)")
-            self.logger.info("="*70)
-            
-            self.progress_updated.emit(5, "📥 Iniciando consolidación...")
-            
-            tiempo_inicio_step1 = time.time()
-            
-            try:
-                self.logger.info(f"Archivos a procesar: {len(self.archivos)}")
-                for idx, archivo in enumerate(self.archivos, 1):
-                    self.logger.info(f"  {idx}. {archivo.name}")
-                
-                self.progress_updated.emit(10, "📥 Cargando módulo de consolidación...")
-                
-                # LAZY LOADING: step1 se carga AQUÍ, no al inicio
-                consolidar_archivos = self.loader.step1.consolidar_archivos
-                guardar_resultados = self.loader.step1.guardar_resultados
-                
-                self.logger.info("✓ Módulo step1 cargado exitosamente")
-                self.progress_updated.emit(15, "🔄 Consolidando archivos...")
-                
-                # Ejecutar consolidación
-                df_consolidado = consolidar_archivos(self.archivos, self.output_dir)
-                
-                self.progress_updated.emit(40, "💾 Guardando resultados en Silver...")
-                
-                # Guardar resultados
-                ruta_parquet, ruta_excel = guardar_resultados(df_consolidado, self.output_dir)
-                
-                # Calcular tiempo step1
-                self.timers['step1'] = time.time() - tiempo_inicio_step1
-                
-                resultado['step1'] = {
-                    'dataframe': df_consolidado,
-                    'parquet': ruta_parquet,
-                    'excel': ruta_excel,
-                    'registros': len(df_consolidado),
-                    'columnas': len(df_consolidado.columns),
-                    'duracion': self.timers['step1']
-                }
-                
-                self.logger.info("-"*70)
-                self.logger.info(f"✓ Step 1 completado exitosamente")
-                self.logger.info(f"  • Registros: {len(df_consolidado):,}")
-                self.logger.info(f"  • Columnas: {len(df_consolidado.columns)}")
-                self.logger.info(f"  • Parquet: {ruta_parquet.name}")
-                self.logger.info(f"  • Excel: {ruta_excel.name}")
-                self.logger.info(f"  ⏱️  Duración: {self.logger.format_duration(self.timers['step1'])}")
-                self.logger.info("-"*70)
-                
-                self.progress_updated.emit(50, f"✓ Consolidadas {len(df_consolidado):,} filas")
-                
-            except ImportError as e:
-                self.logger.error(f"❌ No se pudo importar step1: {e}")
+            if not yaml_path.exists():
+                self.logger.error(f"❌ No se encontró el archivo YAML del pipeline: {yaml_path}")
                 return {
                     'success': False,
-                    'error': f'No se encontró nomina/step1_consolidar_planillas.py: {e}',
-                    'timers': self.timers
-                }
-            except Exception as e:
-                self.logger.error(f"❌ Error en Step 1: {e}")
-                import traceback
-                self.logger.error(traceback.format_exc())
-                return {
-                    'success': False,
-                    'error': f'Error en consolidación: {str(e)}',
+                    'error': f'Archivo pipeline YAML no encontrado: {yaml_path}',
                     'timers': self.timers
                 }
             
-            # ============ STEP 2: Silver → Gold ============
+            self.logger.info("=" * 70)
+            self.logger.info("PIPELINE NÓMINA + LICENCIAS")
+            self.logger.info("=" * 70)
+            self.logger.info(f"YAML: {yaml_path.name}")
+            self.logger.info(f"Archivos de planilla: {len(self.archivos)}")
+            self.logger.info(f"Directorio de trabajo: {self.output_dir}")
+            self.logger.info("=" * 70)
+            
+            # Crear executor del pipeline
+            self.pipeline_executor = PipelineNominaExecutor(
+                yaml_path=yaml_path,
+                archivos=self.archivos,
+                output_dir=self.output_dir
+            )
+            
+            # Conectar señales del executor con las del worker
+            self.pipeline_executor.log_message.connect(self._on_executor_log)
+            self.pipeline_executor.progress_update.connect(self._on_executor_progress)
+            self.pipeline_executor.stage_started.connect(self._on_stage_started)
+            self.pipeline_executor.stage_completed.connect(self._on_stage_completed)
+            
+            # Ejecutar pipeline
             self.logger.info("")
-            self.logger.info("="*70)
-            self.logger.info("STEP 2: TRANSFORMACIÓN (Silver → Gold)")
-            self.logger.info("="*70)
+            self.logger.info("🚀 Iniciando ejecución del pipeline...")
+            self.logger.info("")
             
-            self.progress_updated.emit(55, "🔍 Buscando esquema...")
+            resultado = self.pipeline_executor.execute()
             
-            tiempo_inicio_step2 = time.time()
-            
-            try:
-                # Buscar esquema usando get_resource_path (compatible con PyInstaller)
-                from utils.paths import get_resource_path
-                esquema_path = get_resource_path("esquemas/esquema_nominas.json")
-                
-                if not esquema_path.exists():
-                    self.logger.warning("⚠️  Esquema no encontrado, saltando Step 2")
-                    self.logger.warning(f"   Ruta esperada: {esquema_path}")
-                    self.progress_updated.emit(100, "✓ Consolidación completada (sin Gold)")
-                    resultado['step2'] = {'warning': 'Esquema no encontrado'}
-                else:
-                    self.logger.info(f"✓ Esquema encontrado: {esquema_path.name}")
-                    
-                    # Cargar esquema
-                    import json
-                    with open(esquema_path, 'r', encoding='utf-8') as f:
-                        esquema = json.load(f)
-                    
-                    self.logger.info(f"✓ Esquema cargado: v{esquema['metadata']['version']}")
-                    self.logger.info(f"  • Columnas esperadas: {len(esquema['schema'])}")
-                    
-                    self.progress_updated.emit(60, "📊 Cargando datos Silver...")
-                    
-                    # Leer datos silver
-                    import polars as pl
-                    df_silver = pl.read_parquet(ruta_parquet)
-                    
-                    self.logger.info(f"✓ Datos silver cargados: {len(df_silver):,} registros")
-                    
-                    self.progress_updated.emit(65, "⚙️  Cargando módulo de transformación...")
-                    
-                    # LAZY LOADING: step2 se carga AQUÍ
-                    seleccionar_y_convertir_columnas = self.loader.step2.seleccionar_y_convertir_columnas
-                    guardar_gold = self.loader.step2.guardar_resultados
-                    
-                    self.logger.info("✓ Módulo step2 cargado exitosamente")
-                    
-                    self.progress_updated.emit(70, "🔄 Aplicando transformaciones Gold...")
-                    
-                    # Transformar a gold (aplica transformaciones + NOMBRE_MES + validaciones)
-                    df_gold = seleccionar_y_convertir_columnas(df_silver, esquema)
-                    
-                    self.logger.info(f"✓ Transformaciones aplicadas")
-                    self.logger.info(f"  • Registros finales: {len(df_gold):,}")
-                    self.logger.info(f"  • Columnas finales: {len(df_gold.columns)}")
-                    
-                    self.progress_updated.emit(85, "💾 Guardando archivos Gold...")
-                    
-                    # Guardar gold (con versionamiento automático)
-                    carpeta_silver = ruta_parquet.parent
-                    rutas_gold = guardar_gold(df_gold, carpeta_silver)
-                    
-                    # Calcular tiempo step2
-                    self.timers['step2'] = time.time() - tiempo_inicio_step2
-                    
-                    resultado['step2'] = {
-                        'registros': len(df_gold),
-                        'columnas': len(df_gold.columns),
-                        'parquet': rutas_gold['parquet'],
-                        'excel': rutas_gold['excel'],
-                        'carpeta_actual': rutas_gold['carpeta_actual'],
-                        'carpeta_historico': rutas_gold['carpeta_historico'],
-                        'duracion': self.timers['step2']
-                    }
-                    
-                    self.logger.info("-"*70)
-                    self.logger.info(f"✓ Step 2 completado exitosamente")
-                    self.logger.info(f"  • Registros Gold: {len(df_gold):,}")
-                    self.logger.info(f"  • Columnas Gold: {len(df_gold.columns)}")
-                    self.logger.info(f"  • Parquet: {rutas_gold['parquet'].name}")
-                    self.logger.info(f"  • Excel: {rutas_gold['excel'].name}")
-                    self.logger.info(f"  ⏱️  Duración: {self.logger.format_duration(self.timers['step2'])}")
-                    self.logger.info("-"*70)
-                    
-                    self.progress_updated.emit(100, f"✓ Gold generado: {len(df_gold):,} registros")
-                
-            except ImportError as e:
-                self.logger.warning(f"⚠️  Step 2 no disponible: {e}")
-                self.progress_updated.emit(100, "✓ Consolidación completada (Step 2 no disponible)")
-                resultado['step2'] = {'warning': f'Step 2 no implementado: {e}'}
-            except Exception as e:
-                self.logger.error(f"❌ Error en Step 2: {e}")
-                import traceback
-                self.logger.error(traceback.format_exc())
-                resultado['step2'] = {'error': str(e)}
-                # No retornar error aquí, silver ya fue generado exitosamente
-            
-            # ============ RESULTADO FINAL ============
+            # Calcular tiempo total
             self.timers['total'] = time.time() - tiempo_inicio_total
-            
-            resultado['success'] = True
             resultado['timers'] = self.timers
             
-            # Log resumen final
-            self.logger.info("")
-            self.logger.info("="*70)
-            self.logger.info("RESUMEN FINAL")
-            self.logger.info("="*70)
-            
-            # Mensaje resumen
-            if 'step2' in resultado and 'registros' in resultado['step2']:
+            if resultado['success']:
+                # Log resumen final
+                self.logger.info("")
+                self.logger.info("=" * 70)
+                self.logger.info("RESUMEN FINAL")
+                self.logger.info("=" * 70)
+                
+                stages_completados = resultado.get('completed_stages', 0)
+                duracion = resultado.get('duracion_total', self.timers['total'])
+                
                 mensaje = (
-                    f"ETL completado exitosamente:\n"
-                    f"  • Silver: {resultado['step1']['registros']:,} registros, "
-                    f"{resultado['step1']['columnas']} columnas\n"
-                    f"  • Gold: {resultado['step2']['registros']:,} registros, "
-                    f"{resultado['step2']['columnas']} columnas\n"
-                    f"  ⏱️  Tiempo total: {self.logger.format_duration(self.timers['total'])}\n"
-                    f"    - Step 1 (Bronze→Silver): {self.logger.format_duration(self.timers['step1'])}\n"
-                    f"    - Step 2 (Silver→Gold): {self.logger.format_duration(self.timers['step2'])}"
+                    f"✓ Pipeline completado exitosamente\n"
+                    f"  • Stages ejecutados: {stages_completados}/4\n"
+                    f"  • Archivos procesados: {len(self.archivos)}\n"
+                    f"  ⏱️  Tiempo total: {self.logger.format_duration(duracion)}\n"
+                    f"\n📊 Outputs generados:\n"
+                    f"  • Silver: Planilla Metso Consolidado.parquet\n"
+                    f"  • Silver: licencias_consolidadas.parquet\n"
+                    f"  • Gold: Planilla_Metso_Consolidado.parquet\n"
+                    f"  • Gold: Planilla Metso BI_Gold_Con_Licencias.parquet\n"
+                    f"  • Gold: Planilla Metso BI_Gold_Con_Licencias.xlsx"
                 )
+                
+                resultado['mensaje'] = mensaje
+                self.logger.info(mensaje)
+                self.logger.info("=" * 70)
+                
+                self.progress_updated.emit(100, "✓ Pipeline completado")
             else:
-                mensaje = (
-                    f"Consolidación completada:\n"
-                    f"  • Silver: {resultado['step1']['registros']:,} registros\n"
-                    f"  ⏱️  Tiempo total: {self.logger.format_duration(self.timers['total'])}"
-                )
-            
-            resultado['mensaje'] = mensaje
-            self.logger.info(mensaje)
-            self.logger.info("="*70)
-            
-            # Verificar qué módulos fueron cargados
-            modulos_cargados = self.loader.get_loaded_modules()
-            self.logger.info(f"\n📦 Módulos cargados: {', '.join(modulos_cargados)}")
+                error_msg = resultado.get('error', 'Error desconocido')
+                self.logger.error(f"❌ Pipeline falló: {error_msg}")
+                
+                self.progress_updated.emit(0, f"❌ Error: {error_msg}")
             
             return resultado
             
         except Exception as e:
-            self.logger.error(f"❌ Error crítico en ETL: {str(e)}")
+            self.logger.error(f"❌ Error crítico en pipeline: {str(e)}")
             import traceback
             self.logger.error(traceback.format_exc())
             
@@ -279,3 +135,37 @@ class NominaWorker(BaseETLWorker):
                 'error': str(e),
                 'timers': self.timers
             }
+    
+    def _on_executor_log(self, nivel: str, mensaje: str):
+        """
+        Callback cuando el executor emite un log
+        Reenvía al logger del worker
+        """
+        log_method = getattr(self.logger, nivel.lower(), self.logger.info)
+        log_method(mensaje)
+    
+    def _on_executor_progress(self, porcentaje: int, mensaje: str):
+        """
+        Callback cuando el executor emite progreso
+        Reenvía como señal del worker
+        """
+        self.progress_updated.emit(porcentaje, mensaje)
+    
+    def _on_stage_started(self, stage_name: str, descripcion: str):
+        """
+        Callback cuando inicia un stage
+        """
+        self.logger.info("")
+        self.logger.info(f"🚀 Iniciando: {stage_name}")
+        if descripcion:
+            self.logger.info(f"   {descripcion}")
+    
+    def _on_stage_completed(self, stage_name: str, exito: bool, duracion: float):
+        """
+        Callback cuando termina un stage
+        """
+        if exito:
+            self.logger.info(f"✓ {stage_name} completado")
+            self.logger.info(f"  ⏱️  Duración: {self.logger.format_duration(duracion)}")
+        else:
+            self.logger.error(f"❌ {stage_name} falló")

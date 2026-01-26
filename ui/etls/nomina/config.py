@@ -1,6 +1,7 @@
 # ui/etls/nomina/config.py
 """
-Configuración del ETL de Nómina
+Configuración del ETL de Nómina con Licencias
+Pipeline completo: Nóminas + Licencias → Silver → Gold Enriquecido
 """
 from dataclasses import dataclass
 
@@ -21,7 +22,7 @@ CONFIG = ETLConfig(
     id="nomina",
     name="Nómina",
     icon="📊",
-    description="Consolidación de planillas Metso",
+    description="Pipeline completo: Nóminas + Licencias → Gold Enriquecido",
     enabled=True,
     order=1
 )

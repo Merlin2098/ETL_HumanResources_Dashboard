@@ -257,3 +257,104 @@ if __name__ == "__main__":
         import traceback
         traceback.print_exc()
         sys.exit(1)
+
+def procesar_sin_gui(ruta_nomina: Path, ruta_licencias: Path) -> dict:
+    """
+    Enriquece nómina Gold con licencias sin interfaz gráfica (modo headless)
+    Usado por el pipeline executor
+    
+    Args:
+        ruta_nomina: Path al parquet de nómina Gold
+        ruta_licencias: Path al parquet de licencias Silver
+        
+    Returns:
+        dict con resultados del procesamiento
+    """
+    print(f"\n🔄 Enriqueciendo nómina con licencias (modo headless)...")
+    print(f"   Nómina: {ruta_nomina.name}")
+    print(f"   Licencias: {ruta_licencias.name}")
+    
+    try:
+        # Cargar query SQL
+        ruta_query = get_resource_path("queries/query_licencias_agregadas.sql")
+        
+        if not ruta_query.exists():
+            raise FileNotFoundError(f"No se encontró query SQL: {ruta_query}")
+        
+        with open(ruta_query, 'r', encoding='utf-8') as f:
+            query_sql = f.read()
+        
+        # Cargar DataFrames
+        df_nomina = pl.read_parquet(ruta_nomina)
+        df_licencias = pl.read_parquet(ruta_licencias)
+        
+        registros_nomina = len(df_nomina)
+        registros_licencias = len(df_licencias)
+        
+        print(f"   ✓ Nómina cargada: {registros_nomina:,} registros")
+        print(f"   ✓ Licencias cargadas: {registros_licencias:,} registros")
+        
+        # Ejecutar query con DuckDB
+        con = duckdb.connect(':memory:')
+        
+        con.register('nomina', df_nomina.to_arrow())
+        con.register('licencias', df_licencias.to_arrow())
+        
+        resultado = con.execute(query_sql).fetch_arrow_table()
+        df_enriquecido = pl.from_arrow(resultado)
+        
+        con.close()
+        
+        # Estadísticas
+        registros_con_goce = df_enriquecido.filter(
+            pl.col("MOTIVO_CON_GOCE").is_not_null()
+        ).height
+        
+        registros_sin_goce = df_enriquecido.filter(
+            pl.col("MOTIVO_SIN_GOCE").is_not_null()
+        ).height
+        
+        print(f"   ✓ Enriquecimiento completado: {len(df_enriquecido):,} registros")
+        print(f"   ✓ Con licencias CON GOCE: {registros_con_goce:,}")
+        print(f"   ✓ Con licencias SIN GOCE: {registros_sin_goce:,}")
+        
+        # Guardar resultados
+        # Obtener carpeta base desde archivo de nómina
+        carpeta_actual = ruta_nomina.parent
+        carpeta_nomina = carpeta_actual.parent
+        carpeta_historico = carpeta_nomina / "historico"
+        
+        carpeta_historico.mkdir(parents=True, exist_ok=True)
+        
+        nombre_base = "Planilla Metso BI_Gold_Con_Licencias"
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        
+        # Archivo actual (sin timestamp)
+        ruta_parquet_actual = carpeta_actual / f"{nombre_base}.parquet"
+        df_enriquecido.write_parquet(ruta_parquet_actual, compression="snappy")
+        
+        # Archivo actual Excel
+        ruta_excel_actual = carpeta_actual / f"{nombre_base}.xlsx"
+        df_enriquecido.write_excel(ruta_excel_actual)
+        
+        # Archivo histórico
+        ruta_parquet_historico = carpeta_historico / f"{nombre_base}_{timestamp}.parquet"
+        df_enriquecido.write_parquet(ruta_parquet_historico, compression="snappy")
+        
+        print(f"   ✓ Parquet actual: {ruta_parquet_actual.name}")
+        print(f"   ✓ Excel: {ruta_excel_actual.name}")
+        print(f"   ✓ Histórico: {ruta_parquet_historico.name}")
+        
+        return {
+            'success': True,
+            'parquet_actual': ruta_parquet_actual,
+            'excel': ruta_excel_actual,
+            'parquet_historico': ruta_parquet_historico,
+            'registros': len(df_enriquecido),
+            'registros_con_goce': registros_con_goce,
+            'registros_sin_goce': registros_sin_goce
+        }
+        
+    except Exception as e:
+        print(f"   ✗ Error: {e}")
+        raise
