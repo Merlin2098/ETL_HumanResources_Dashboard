@@ -17,7 +17,7 @@ stages:
       # archivos y output_dir se pasan dinámicamente desde el executor
     outputs:
       - name: "parquet_nomina_silver"
-        path_template: "${output_dir}/silver/Planilla Metso Consolidado.parquet"
+        path_template: "${output_dir}/silver/Planilla_Metso_Consolidado_Silver.parquet"
         required: true
   
   - name: "Licencias Bronze → Silver"

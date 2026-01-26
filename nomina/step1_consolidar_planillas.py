@@ -3,7 +3,7 @@ Script de consolidación de reportes de planilla
 Consolida múltiples archivos Excel en un solo parquet/Excel en capa Silver
 
 REFACTORIZADO para compatibilidad con worker UI:
-- consolidar_archivos(): Acepta lista de archivos directamente
+- consolidar_archivos(): Acepta lista de archivos directamente y GUARDA resultados
 - guardar_resultados(): Guarda en carpeta silver
 - main(): Mantiene funcionalidad standalone con selección de carpeta
 """
@@ -13,6 +13,7 @@ import re
 from pathlib import Path
 from datetime import datetime
 import time
+import traceback
 
 
 def extraer_periodo(nombre_archivo):
@@ -123,6 +124,7 @@ def leer_archivo_planilla(archivo_path, periodo):
 def consolidar_archivos(archivos, carpeta_trabajo):
     """
     Consolida múltiples archivos de planilla en un solo DataFrame
+    y GUARDA los resultados en capa Silver
     
     Args:
         archivos: Lista de Path de archivos Excel O Path de carpeta (str/Path)
@@ -268,6 +270,30 @@ def consolidar_archivos(archivos, carpeta_trabajo):
     
     print(f"  ✓ Columnas MES y AÑO generadas exitosamente")
     
+    # ====================================================================
+    # GUARDAR RESULTADOS - CORRECCIÓN CRÍTICA
+    # ====================================================================
+    print(f"\n[3/3] Guardando resultados en capa Silver...")
+    
+    try:
+        # Llamar a la función guardar_resultados para generar Parquet y Excel
+        ruta_parquet, ruta_excel = guardar_resultados(df_consolidado, carpeta_trabajo)
+        
+        # Verificar que los archivos fueron creados
+        if not ruta_parquet.exists():
+            raise FileNotFoundError(f"No se pudo crear el archivo Parquet: {ruta_parquet}")
+        
+        if not ruta_excel.exists():
+            print(f"  ⚠️  Advertencia: No se pudo crear el archivo Excel: {ruta_excel}")
+        else:
+            print(f"  ✓ Excel generado: {ruta_excel.name}")
+            
+    except Exception as e:
+        print(f"  ✗ ERROR al guardar resultados: {e}")
+        print(f"  [DEBUG] Traceback:")
+        traceback.print_exc()
+        raise
+    
     return df_consolidado
 
 
@@ -288,27 +314,42 @@ def guardar_resultados(df, carpeta_trabajo):
     carpeta_silver.mkdir(exist_ok=True)
     
     # Nombres fijos sin timestamp
-    nombre_parquet = "Planilla Metso Consolidado.parquet"
-    nombre_excel = "Planilla Metso Consolidado.xlsx"
+    nombre_parquet = "Planilla_Metso_Consolidado_Silver.parquet"
+    nombre_excel = "Planilla_Metso_Consolidado_Silver.xlsx"
     
     # Rutas de salida
     ruta_parquet = carpeta_silver / nombre_parquet
     ruta_excel = carpeta_silver / nombre_excel
     
-    print(f"\n[3/3] Guardando resultados en capa Silver...")
     print(f"  📁 Carpeta: {carpeta_silver}")
     
-    # Guardar como Parquet
+    # Guardar como Parquet (CRÍTICO para el pipeline)
     print(f"  - Guardando parquet...", end='', flush=True)
-    df.write_parquet(ruta_parquet)
-    print(f" ✓")
-    print(f"    Ubicación: {ruta_parquet}")
+    try:
+        df.write_parquet(ruta_parquet)
+        size_mb = ruta_parquet.stat().st_size / (1024 * 1024) if ruta_parquet.exists() else 0
+        print(f" ✓ ({size_mb:.2f} MB)")
+    except Exception as e:
+        print(f" ✗ ERROR: {e}")
+        # Intentar con diferentes opciones de compresión
+        try:
+            print(f"  - Intentando con compresión diferente...")
+            df.write_parquet(ruta_parquet, compression='snappy')
+            size_mb = ruta_parquet.stat().st_size / (1024 * 1024)
+            print(f"  ✓ Parquet guardado con compresión snappy ({size_mb:.2f} MB)")
+        except Exception as e2:
+            print(f"  ✗ Error también con compresión: {e2}")
+            raise
     
-    # Guardar como Excel
+    # Guardar como Excel (opcional pero útil para visualización)
     print(f"  - Guardando Excel...", end='', flush=True)
-    df.write_excel(ruta_excel)
-    print(f" ✓")
-    print(f"    Ubicación: {ruta_excel}")
+    try:
+        df.write_excel(ruta_excel)
+        size_mb = ruta_excel.stat().st_size / (1024 * 1024) if ruta_excel.exists() else 0
+        print(f" ✓ ({size_mb:.2f} MB)")
+    except Exception as e:
+        print(f" ✗ ERROR (Excel): {e}")
+        # No lanzar excepción para Excel, el pipeline solo necesita Parquet
     
     return ruta_parquet, ruta_excel
 
@@ -378,8 +419,7 @@ def main():
     try:
         df_consolidado = consolidar_archivos(carpeta_path, carpeta_path)
         
-        # 4. Guardar resultados
-        ruta_parquet, ruta_excel = guardar_resultados(df_consolidado, carpeta_path)
+        # NOTA: consolidar_archivos() ya guarda los resultados, no es necesario llamar a guardar_resultados()
         
         # Calcular tiempo total
         tiempo_total = time.time() - tiempo_inicio
@@ -399,9 +439,23 @@ def main():
         periodos = df_consolidado['PERIODO'].unique().sort().to_list()
         print(f"  - Periodos: {', '.join(periodos)}")
         
+        # Verificar archivos generados
+        carpeta_silver = carpeta_path / "silver"
+        ruta_parquet = carpeta_silver / "Planilla Metso Consolidado.parquet"
+        ruta_excel = carpeta_silver / "Planilla Metso Consolidado.xlsx"
+        
         print(f"\n📁 Archivos generados en carpeta silver/:")
-        print(f"  - Parquet: {ruta_parquet.name}")
-        print(f"  - Excel: {ruta_excel.name}")
+        if ruta_parquet.exists():
+            size_mb = ruta_parquet.stat().st_size / (1024 * 1024)
+            print(f"  ✓ Parquet: {ruta_parquet.name} ({size_mb:.2f} MB)")
+        else:
+            print(f"  ✗ Parquet: NO GENERADO")
+            
+        if ruta_excel.exists():
+            size_mb = ruta_excel.stat().st_size / (1024 * 1024)
+            print(f"  ✓ Excel: {ruta_excel.name} ({size_mb:.2f} MB)")
+        else:
+            print(f"  ⚠️  Excel: NO GENERADO")
         
         print(f"\n⏱️  Tiempo de ejecución: {tiempo_total:.2f}s")
         

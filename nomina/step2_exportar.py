@@ -2,9 +2,7 @@
 Script de transformación Silver → Gold para reportes de planilla
 Implementa versionamiento con carpetas actual/ e historico/
 
-REFACTORIZADO para compatibilidad con worker UI:
-- seleccionar_y_convertir_columnas(): Aplica transformaciones gold
-- guardar_resultados(): Guarda en estructura gold/actual y gold/historico
+REFACTORIZADO para compatibilidad con worker UI y estructura simplificada
 """
 
 import polars as pl
@@ -12,6 +10,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 import shutil
+import traceback
 
 
 def aplicar_transformaciones_gold(df, schema):
@@ -259,8 +258,7 @@ def generar_excel_visualizacion(df, ruta_salida):
 def gestionar_versionamiento_gold(carpeta_base):
     """
     Gestiona la estructura de versionamiento para archivos gold
-    
-    Estructura:
+    ESTRUCTURA SIMPLIFICADA:
     gold/
     ├── actual/        <- Power BI apunta aquí
     └── historico/     <- Versiones anteriores
@@ -272,36 +270,37 @@ def gestionar_versionamiento_gold(carpeta_base):
         tuple: (carpeta_actual, carpeta_historico)
     """
     carpeta_gold = Path(carpeta_base) / "gold"
-    carpeta_actual = carpeta_gold / "actual"
-    carpeta_historico = carpeta_gold / "historico"
+    carpeta_actual = carpeta_gold / "actual"      # ← SIN subcarpeta "nomina"
+    carpeta_historico = carpeta_gold / "historico"  # ← SIN subcarpeta "nomina"
     
     # Crear estructura si no existe
     carpeta_actual.mkdir(parents=True, exist_ok=True)
     carpeta_historico.mkdir(parents=True, exist_ok=True)
     
-    # Archivos a verificar
-    nombre_parquet = "Planilla Metso BI_Gold.parquet"
-    nombre_excel = "Planilla Metso BI_Gold.xlsx"
+    # Archivos a verificar - NOMBRE QUE EL PIPELINE ESPERA
+    nombre_parquet = "Planilla_Metso_Consolidado.parquet"
+    nombre_excel = "Planilla_Metso_Consolidado.xlsx"
     
     archivo_actual_parquet = carpeta_actual / nombre_parquet
     archivo_actual_excel = carpeta_actual / nombre_excel
     
+    # Mover archivos existentes a histórico
     if archivo_actual_parquet.exists() or archivo_actual_excel.exists():
         print("\n📦 Archivando versión anterior...")
         
         # Generar timestamp para histórico
-        timestamp = datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         
         # Mover parquet a histórico
         if archivo_actual_parquet.exists():
-            nombre_historico_parquet = f"Planilla Metso BI_Gold_{timestamp}.parquet"
+            nombre_historico_parquet = f"Planilla_Metso_Consolidado_{timestamp}.parquet"
             destino_parquet = carpeta_historico / nombre_historico_parquet
             shutil.move(str(archivo_actual_parquet), str(destino_parquet))
             print(f"  ✓ Parquet anterior archivado: {nombre_historico_parquet}")
         
         # Mover excel a histórico
         if archivo_actual_excel.exists():
-            nombre_historico_excel = f"Planilla Metso BI_Gold_{timestamp}.xlsx"
+            nombre_historico_excel = f"Planilla_Metso_Consolidado_{timestamp}.xlsx"
             destino_excel = carpeta_historico / nombre_historico_excel
             shutil.move(str(archivo_actual_excel), str(destino_excel))
             print(f"  ✓ Excel anterior archivado: {nombre_historico_excel}")
@@ -350,7 +349,7 @@ def seleccionar_y_convertir_columnas(df_silver, esquema):
 def guardar_resultados(df_gold, carpeta_silver):
     """
     Función de compatibilidad para el worker UI
-    Guarda los archivos gold con versionamiento
+    Guarda los archivos gold con versionamiento SIMPLIFICADO
     
     Args:
         df_gold: DataFrame gold procesado
@@ -362,12 +361,12 @@ def guardar_resultados(df_gold, carpeta_silver):
     # Subir desde silver/ a carpeta base del proyecto
     carpeta_base = Path(carpeta_silver).parent
     
-    # Gestionar versionamiento
+    # Gestionar versionamiento con estructura simplificada
     carpeta_actual, carpeta_historico = gestionar_versionamiento_gold(carpeta_base)
     
-    # Rutas de salida (sin timestamp en actual/)
-    ruta_parquet_gold = carpeta_actual / "Planilla Metso BI_Gold.parquet"
-    ruta_excel_gold = carpeta_actual / "Planilla Metso BI_Gold.xlsx"
+    # Rutas de salida - NOMBRES QUE EL PIPELINE ESPERA
+    ruta_parquet_gold = carpeta_actual / "Planilla_Metso_Consolidado.parquet"
+    ruta_excel_gold = carpeta_actual / "Planilla_Metso_Consolidado.xlsx"
     
     # Guardar archivos
     print("\n💾 Guardando archivos en capa Gold...")
@@ -375,15 +374,23 @@ def guardar_resultados(df_gold, carpeta_silver):
     print("-" * 70)
     
     # Guardar parquet gold
-    df_gold.write_parquet(ruta_parquet_gold)
-    print(f"✓ Parquet gold: {ruta_parquet_gold.name}")
+    try:
+        df_gold.write_parquet(ruta_parquet_gold)
+        size_mb = ruta_parquet_gold.stat().st_size / (1024 * 1024) if ruta_parquet_gold.exists() else 0
+        print(f"✓ Parquet gold: {ruta_parquet_gold.name} ({size_mb:.2f} MB)")
+    except Exception as e:
+        print(f"✗ ERROR al guardar parquet: {e}")
+        traceback.print_exc()
+        raise
     
     # Generar Excel de visualización
     try:
         generar_excel_visualizacion(df_gold, ruta_excel_gold)
-        print(f"✓ Excel gold: {ruta_excel_gold.name}")
+        size_mb = ruta_excel_gold.stat().st_size / (1024 * 1024) if ruta_excel_gold.exists() else 0
+        print(f"✓ Excel gold: {ruta_excel_gold.name} ({size_mb:.2f} MB)")
     except Exception as e:
         print(f"⚠️  Error al generar Excel: {e}")
+        # No lanzar excepción, Excel es opcional
     
     print("-" * 70)
     
@@ -393,6 +400,74 @@ def guardar_resultados(df_gold, carpeta_silver):
         'carpeta_actual': carpeta_actual,
         'carpeta_historico': carpeta_historico
     }
+
+
+def exportar_a_gold(ruta_parquet_silver: Path, carpeta_trabajo: Path) -> dict:
+    """
+    Procesa Silver a Gold sin interfaz gráfica (modo headless)
+    Usado por el pipeline executor
+    Genera estructura SIMPLIFICADA: gold/actual/ y gold/historico/
+    
+    Args:
+        ruta_parquet_silver: Path al parquet Silver de nómina
+        carpeta_trabajo: Path a la carpeta de trabajo base
+        
+    Returns:
+        dict con resultados del procesamiento
+    """
+    print(f"\n🔄 Procesando Silver → Gold (modo headless)...")
+    print(f"   Silver: {ruta_parquet_silver.name}")
+    print(f"   Carpeta trabajo: {carpeta_trabajo}")
+    
+    try:
+        # 1. Cargar esquema
+        from utils.paths import get_resource_path
+        esquema_path = get_resource_path("esquemas/esquema_nominas.json")
+        
+        if not esquema_path.exists():
+            raise FileNotFoundError(f"Esquema no encontrado: {esquema_path}")
+        
+        import json
+        with open(esquema_path, 'r', encoding='utf-8') as f:
+            esquema = json.load(f)
+        
+        print(f"   ✓ Esquema cargado: v{esquema['metadata']['version']}")
+        
+        # 2. Leer datos Silver
+        import polars as pl
+        df_silver = pl.read_parquet(ruta_parquet_silver)
+        
+        print(f"   ✓ Silver cargado: {len(df_silver):,} registros")
+        
+        # 3. Transformar a Gold
+        df_gold = seleccionar_y_convertir_columnas(df_silver, esquema)
+        
+        print(f"   ✓ Transformaciones aplicadas: {len(df_gold):,} registros")
+        
+        # 4. Guardar Gold con estructura simplificada
+        carpeta_silver = ruta_parquet_silver.parent
+        rutas_gold = guardar_resultados(df_gold, carpeta_silver)
+        
+        print(f"   ✓ Gold guardado exitosamente")
+        print(f"     • Estructura: gold/")
+        print(f"       ├── actual/    (archivos actuales)")
+        print(f"       └── historico/ (versiones anteriores)")
+        
+        return {
+            'success': True,
+            'parquet': rutas_gold['parquet'],
+            'excel': rutas_gold['excel'],
+            'carpeta_actual': rutas_gold['carpeta_actual'],
+            'carpeta_historico': rutas_gold['carpeta_historico'],
+            'registros': len(df_gold),
+            'columnas': len(df_gold.columns)
+        }
+        
+    except Exception as e:
+        print(f"   ✗ Error: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
 
 
 # ============================================================================
@@ -531,11 +606,11 @@ def main():
     print(f"⏱️  Tiempo de ejecución: {duracion:.2f} segundos")
     print(f"📊 Registros procesados: {df_gold.shape[0]:,}")
     print(f"📋 Schema utilizado: {Path(ruta_schema).name}")
-    print(f"\n📁 Estructura de carpetas Gold:")
-    print(f"   {rutas['carpeta_actual'].parent}/")
+    print(f"\n📁 Estructura de carpetas Gold (SIMPLIFICADA):")
+    print(f"   gold/")
     print(f"   ├── actual/        (Power BI apunta aquí)")
-    print(f"   │   ├── Planilla Metso BI_Gold.parquet")
-    print(f"   │   └── Planilla Metso BI_Gold.xlsx")
+    print(f"   │   ├── Planilla_Metso_Consolidado.parquet")
+    print(f"   │   └── Planilla_Metso_Consolidado.xlsx")
     print(f"   └── historico/     (versiones anteriores)")
     
     # Contar archivos en histórico
@@ -543,79 +618,11 @@ def main():
     if archivos_historico:
         print(f"\n📦 Archivos en histórico: {len(archivos_historico)}")
     
-    print("\n💡 Los archivos en actual/ se sobreescriben en cada ejecución")
+    print("\n💡 Estructura simplificada - sin carpeta 'nomina' intermedia")
+    print("💡 Los archivos en actual/ se sobreescriben en cada ejecución")
     print("💡 Las versiones anteriores se guardan automáticamente en historico/")
     print("=" * 70)
 
 
 if __name__ == "__main__":
     main()
-    
-"""
-Función exportar_a_gold para nomina/step2_exportar.py
-
-AGREGAR ESTA FUNCIÓN AL FINAL DEL ARCHIVO
-"""
-
-def exportar_a_gold(ruta_parquet_silver: Path, carpeta_trabajo: Path) -> dict:
-    """
-    Procesa Silver a Gold sin interfaz gráfica (modo headless)
-    Usado por el pipeline executor
-    
-    Args:
-        ruta_parquet_silver: Path al parquet Silver de nómina
-        carpeta_trabajo: Path a la carpeta de trabajo base
-        
-    Returns:
-        dict con resultados del procesamiento
-    """
-    print(f"\n🔄 Procesando Silver → Gold (modo headless)...")
-    print(f"   Silver: {ruta_parquet_silver.name}")
-    print(f"   Carpeta trabajo: {carpeta_trabajo}")
-    
-    try:
-        # Cargar esquema
-        from utils.paths import get_resource_path
-        esquema_path = get_resource_path("esquemas/esquema_nominas.json")
-        
-        if not esquema_path.exists():
-            raise FileNotFoundError(f"Esquema no encontrado: {esquema_path}")
-        
-        import json
-        with open(esquema_path, 'r', encoding='utf-8') as f:
-            esquema = json.load(f)
-        
-        print(f"   ✓ Esquema cargado: v{esquema['metadata']['version']}")
-        
-        # Leer datos Silver
-        import polars as pl
-        df_silver = pl.read_parquet(ruta_parquet_silver)
-        
-        print(f"   ✓ Silver cargado: {len(df_silver):,} registros")
-        
-        # Transformar a Gold
-        df_gold = seleccionar_y_convertir_columnas(df_silver, esquema)
-        
-        print(f"   ✓ Transformaciones aplicadas: {len(df_gold):,} registros")
-        
-        # Guardar Gold
-        carpeta_silver = ruta_parquet_silver.parent
-        rutas_gold = guardar_resultados(df_gold, carpeta_silver)
-        
-        print(f"   ✓ Gold guardado:")
-        print(f"     • Parquet: {rutas_gold['parquet'].name}")
-        print(f"     • Excel: {rutas_gold['excel'].name}")
-        
-        return {
-            'success': True,
-            'parquet': rutas_gold['parquet'],
-            'excel': rutas_gold['excel'],
-            'carpeta_actual': rutas_gold['carpeta_actual'],
-            'carpeta_historico': rutas_gold['carpeta_historico'],
-            'registros': len(df_gold),
-            'columnas': len(df_gold.columns)
-        }
-        
-    except Exception as e:
-        print(f"   ✗ Error: {e}")
-        raise
