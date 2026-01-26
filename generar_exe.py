@@ -3,7 +3,7 @@ Script de Generación de Ejecutable Onedir
 Proyecto: Sistema ETL / Nóminas
 Genera un ejecutable Windows con carpeta distribuible que incluye esquemas y queries.
 
-Adaptado para estructura modular (BD, Nómina, PDT, Examen Retiro, Régimen Minero).
+Adaptado para estructura modular (BD, Nómina, PDT, Examen Retiro, Régimen Minero, Licencias, Orquestadores).
 """
 
 import os
@@ -61,6 +61,7 @@ def verificar_estructura():
     carpetas_requeridas = [
         "bd", "config", "esquemas", "examen_retiro", 
         "nomina", "nomina_regimen_minero", "pdt", 
+        "licencias", "orquestadores",  # ✅ NUEVAS
         "queries", "ui", "utils"
     ]
     
@@ -127,7 +128,7 @@ def construir_comando():
         
         # Procesamiento de Datos
         "pandas", "openpyxl", "json", "sqlite3", "decimal", "datetime",
-        "polars", "duckdb",
+        "polars", "duckdb", "yaml",  # ✅ YAML para orquestadores
         
         # ✅ UI ETLs (módulos principales)
         "ui.etls",
@@ -161,13 +162,22 @@ def construir_comando():
         "pdt", 
         "pdt.step1_consolidar_ingresos",
         "pdt.step2_exportar_ingresos",
-        "pdt.step3_exportar_practicantes",  # ← ÚNICO CAMBIO NECESARIO
+        "pdt.step3_exportar_practicantes",
         
         # Examen Retiro
         "examen_retiro", 
         "examen_retiro.step1_clean",
         "examen_retiro.step2_gold", 
         "examen_retiro.step3_join",
+        
+        # ✅ LICENCIAS (nuevo módulo)
+        "licencias",
+        "licencias.step1_consolidar_licencias",
+        "licencias.step2_enriquecer_nomina",
+        
+        # ✅ ORQUESTADORES (nuevo módulo)
+        "orquestadores",
+        "orquestadores.pipeline_nomina_executor",
         
         # Utils
         "utils", 
@@ -191,7 +201,7 @@ def construir_comando():
 
     # --- DATA FILES (RECURSOS) ---
     # Sintaxis: "origen;destino" (Windows usa ;)
-    print("📁 Configurando recursos estáticos...")
+    print("📦 Configurando recursos estáticos...")
     
     # 1. Config (Iconos, Temas, JSONs)
     config_path = base_dir / "config"
@@ -211,7 +221,13 @@ def construir_comando():
         comando += ["--add-data", f"{queries_path}{os.pathsep}queries"]
         print(f"   ✅ Agregando queries: {queries_path}")
 
-    # 4. ✅ CRÍTICO: Carpeta ui/etls completa (para auto-discovery)
+    # 4. ✅ Orquestadores (YAML files)
+    orquestadores_path = base_dir / "orquestadores"
+    if orquestadores_path.exists():
+        comando += ["--add-data", f"{orquestadores_path}{os.pathsep}orquestadores"]
+        print(f"   ✅ Agregando orquestadores: {orquestadores_path}")
+
+    # 5. ✅ CRÍTICO: Carpeta ui/etls completa (para auto-discovery)
     etls_path = base_dir / "ui" / "etls"
     if etls_path.exists():
         comando += ["--add-data", f"{etls_path}{os.pathsep}ui/etls"]
@@ -280,8 +296,9 @@ def generar_exe():
             print("2. La carpeta '_internal' contiene:")
             print("   • Esquemas JSON (validación de datos)")
             print("   • Queries SQL (transformaciones)")
+            print("   • Configuración YAML (pipelines)")
             print("   • Configuración y temas")
-            print("   • Módulos ETL")
+            print("   • Módulos ETL (BD, Nómina, PDT, Licencias, etc.)")
             print("\n3. Para probar, ejecuta directamente el .exe desde la carpeta")
             print("=" * 60)
         else:
