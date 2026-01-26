@@ -225,7 +225,7 @@ class PipelineNominaExecutor(QObject):
             }
         
         elif stage_index == 3:  # Stage 4: Enriquecimiento
-            ruta_nomina_gold = self.output_dir / "gold" / "nomina" / "actual" / "Planilla_Metso_Consolidado.parquet"
+            ruta_nomina_gold = self.output_dir / "gold" / "actual" / "Planilla_Metso_Consolidado.parquet"
             ruta_licencias_silver = self.output_dir / "silver" / "licencias_consolidadas.parquet"
             
             return {
