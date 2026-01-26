@@ -217,7 +217,7 @@ class PipelineNominaExecutor(QObject):
             }
         
         elif stage_index == 2:  # Stage 3: Nómina Silver → Gold
-            ruta_parquet_silver = self.output_dir / "silver" / "Planilla Metso Consolidado.parquet"
+            ruta_parquet_silver = self.output_dir / "silver" / "Planilla_Metso_Consolidado_Silver.parquet"
             
             return {
                 'ruta_parquet_silver': ruta_parquet_silver,

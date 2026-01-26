@@ -11,6 +11,8 @@ from pathlib import Path
 from datetime import datetime
 import shutil
 import traceback
+import os
+import time
 
 
 def aplicar_transformaciones_gold(df, schema):
@@ -415,9 +417,35 @@ def exportar_a_gold(ruta_parquet_silver: Path, carpeta_trabajo: Path) -> dict:
     Returns:
         dict con resultados del procesamiento
     """
+    
+        # ==================== DEBUG ====================
+    print(f"🔍 DEBUG - Iniciando exportar_a_gold()")
+    print(f"🔍 DEBUG - ruta_parquet_silver: {ruta_parquet_silver}")
+    print(f"🔍 DEBUG - carpeta_trabajo: {carpeta_trabajo}")
+    print(f"🔍 DEBUG - ¿Silver existe?: {os.path.exists(ruta_parquet_silver)}")
+    
+    if not os.path.exists(ruta_parquet_silver):
+        print(f"🔍 DEBUG - ❌ ARCHIVO NO ENCONTRADO")
+        # Listar archivos en la carpeta silver
+        silver_dir = os.path.dirname(ruta_parquet_silver)
+        print(f"🔍 DEBUG - Contenido de {silver_dir}:")
+        if os.path.exists(silver_dir):
+            for file in os.listdir(silver_dir):
+                print(f"  • {file}")
+        else:
+            print(f"  • Carpeta {silver_dir} no existe")
+    # ==================== FIN DEBUG ====================
+    
+    # Iniciar temporizador
+    tiempo_inicio = time.time()
+    
+    
+    
     print(f"\n🔄 Procesando Silver → Gold (modo headless)...")
     print(f"   Silver: {ruta_parquet_silver.name}")
     print(f"   Carpeta trabajo: {carpeta_trabajo}")
+    
+    
     
     try:
         # 1. Cargar esquema
