@@ -17,6 +17,7 @@ treemap.md
 diagnostico.py
 validar_esquema.py
 config/path_cache.json
+dependencies_report.md
 
 # __pycache__ y temporales de Python
 __pycache__/

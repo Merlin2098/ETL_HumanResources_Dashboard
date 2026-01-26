@@ -7,3 +7,10 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
+      
+      - id: update-dependencies
+        name: Actualizar análisis de dependencias
+        entry: .venv/Scripts/python.exe analyze_dependencies.py
+        language: system
+        pass_filenames: false
+        always_run: true
