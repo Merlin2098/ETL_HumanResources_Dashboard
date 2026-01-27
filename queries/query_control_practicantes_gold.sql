@@ -33,24 +33,24 @@ flags_evaluacion AS (
         CASE 
             WHEN CONDICION = 'PRACTICANTE PROFESIONAL' 
                 AND dias_servicio BETWEEN 335 AND 364 
-            THEN 1 
-            ELSE 0 
+            THEN 'SI' 
+            ELSE 'NO' 
         END AS por_cumplir_1,
         
         -- Flag 2: Ya cumplió 1 año (>= 365 días)
         CASE 
             WHEN CONDICION = 'PRACTICANTE PROFESIONAL' 
                 AND dias_servicio >= 365 
-            THEN 1 
-            ELSE 0 
+            THEN 'SI' 
+            ELSE 'NO' 
         END AS cumplio_1,
         
         -- Flag 3: Por cumplir 2 años (falta <= 3 meses, es decir entre 640-729 días / 21-24 meses)
         CASE 
             WHEN CONDICION = 'PRACTICANTE PROFESIONAL' 
                 AND dias_servicio BETWEEN 640 AND 729 
-            THEN 1 
-            ELSE 0 
+            THEN 'SI' 
+            ELSE 'NO' 
         END AS por_cumplir_2
         
     FROM calculo_tiempo
