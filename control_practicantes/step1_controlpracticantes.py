@@ -1,3 +1,22 @@
+"""
+Script: step1_controlpracticantes.py
+Descripción: Procesa archivo Excel LISTA_DE_CONTRATOS_Y_PRACTICANTES_-_CONTROL.xlsx
+             - Hoja: Practicantes
+             - Headers en fila 4 (índice 3)
+             - Headers combinados que necesitan limpieza
+             
+Arquitectura:
+- Entrada: Excel con información de practicantes (ubicación seleccionada por usuario)
+- Silver: Parquet limpio con columnas estandarizadas
+
+Salida: 
+    - /silver/control_practicantes_silver.parquet
+    - /silver/control_practicantes_silver.xlsx
+
+Autor: Richi via Claude
+Fecha: 27.01.2026
+"""
+
 import polars as pl
 import openpyxl
 from pathlib import Path
@@ -427,6 +446,70 @@ def main():
         import traceback
         traceback.print_exc()
         return
+
+
+def procesar_sin_gui(ruta_archivo: Path, carpeta_salida: Path) -> dict:
+    """
+    Procesa control de practicantes sin interfaz gráfica (modo headless)
+    Compatible con pipeline executor
+    
+    Args:
+        ruta_archivo: Path al archivo Excel de control
+        carpeta_salida: Path a carpeta /silver/ donde guardar los resultados
+        
+    Returns:
+        dict con resultados del procesamiento
+    """
+    print(f"\n🔄 Procesando control de practicantes (modo headless)...")
+    print(f"   Archivo: {ruta_archivo.name}")
+    print(f"   Salida: {carpeta_salida}")
+    
+    try:
+        # Cargar esquema
+        ruta_esquema = get_resource_path("esquemas/esquema_control_practicantes.json")
+        esquema = cargar_esquema(ruta_esquema)
+        print(f"   ✓ Esquema cargado: {ruta_esquema.name}")
+        
+        # Procesar hoja Practicantes
+        df = leer_hoja_practicantes(ruta_archivo, esquema)
+        
+        if df is None:
+            raise ValueError("No se pudo procesar la hoja 'Practicantes'")
+        
+        registros_procesados = len(df)
+        print(f"   ✓ Registros procesados: {registros_procesados:,}")
+        
+        # Validar esquema
+        es_valido, errores = validar_esquema(df, esquema)
+        
+        if not es_valido:
+            print("   ⚠️  Advertencias de validación:")
+            for error in errores:
+                print(f"     • {error}")
+        
+        # Crear carpeta de salida si no existe
+        carpeta_salida.mkdir(parents=True, exist_ok=True)
+        
+        # Guardar Parquet
+        ruta_parquet = carpeta_salida / "control_practicantes_silver.parquet"
+        df.write_parquet(ruta_parquet, compression="snappy")
+        print(f"   ✓ Parquet guardado: {ruta_parquet.name}")
+        
+        # Guardar Excel
+        ruta_excel = carpeta_salida / "control_practicantes_silver.xlsx"
+        df.write_excel(ruta_excel)
+        print(f"   ✓ Excel guardado: {ruta_excel.name}")
+        
+        return {
+            'success': True,
+            'parquet': ruta_parquet,
+            'excel': ruta_excel,
+            'registros': registros_procesados
+        }
+        
+    except Exception as e:
+        print(f"   ✗ Error: {e}")
+        raise
 
 
 if __name__ == "__main__":
