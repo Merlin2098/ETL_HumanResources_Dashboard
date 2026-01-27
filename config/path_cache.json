@@ -6,7 +6,8 @@
     "examen_retiro_bronze": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Analisis de nómina\\motivo_cese\\Programación de examen de Retiro3.xlsm",
     "examen_retiro_cc_actual": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Base de datos\\centros de costo\\CC_ACTUAL.parquet",
     "bd_bronze": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Base de datos\\Prueba\\BD. 06.01.2026..xlsm",
-    "examen_retiro_cc_old": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Base de datos\\centros de costo\\OLD\\CC_OLD.parquet"
+    "examen_retiro_cc_old": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Base de datos\\centros de costo\\OLD\\CC_OLD.parquet",
+    "control_practicantes_archivo": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Control_Practicantes\\LISTA DE CONTRATOS Y PRACTICANTES - CONTROL.xlsx"
   },
   "frequent_dirs": {
     "nomina_bronze_dir": [
@@ -28,11 +29,14 @@
     ],
     "bd_bronze": [
       "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Base de datos\\Prueba"
+    ],
+    "control_practicantes_archivo": [
+      "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Control_Practicantes"
     ]
   },
   "metadata": {
     "created": "2026-01-07T12:11:25.926351",
-    "last_updated": "2026-01-26T12:59:15.216473",
+    "last_updated": "2026-01-27T17:31:04.643190",
     "version": "1.0"
   }
 }
