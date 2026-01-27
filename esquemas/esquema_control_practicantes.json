@@ -1,0 +1,24 @@
+{
+  "required_columns": [
+    "N°",
+    "DNI",
+    "APELLIDOS Y NOMBRES",
+    "CONDICION",
+    "FECHA ING",
+    "SEDE",
+    "UNIVERSIDAD",
+    "JEFE INMEDIATO",
+    "GERENCIA"
+  ],
+  "column_types": {
+    "N°": "string",
+    "DNI": "string",
+    "APELLIDOS Y NOMBRES": "string",
+    "CONDICION": "string",
+    "FECHA ING": "date",
+    "SEDE": "string",
+    "UNIVERSIDAD": "string",
+    "JEFE INMEDIATO": "string",
+    "GERENCIA": "string"
+  }
+}
