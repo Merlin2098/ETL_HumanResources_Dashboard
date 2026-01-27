@@ -1,6 +1,7 @@
 # Entornos virtuales
 .venv/
 venv/
+.vscode/
 
 # Build y distribución
 build/
