@@ -1,22 +1,3 @@
-"""
-Script: step1_controlpracticantes.py
-Descripción: Procesa archivo Excel LISTA_DE_CONTRATOS_Y_PRACTICANTES_-_CONTROL.xlsx
-             - Hoja: Practicantes
-             - Headers en fila 4 (índice 3)
-             - Headers combinados que necesitan limpieza
-             
-Arquitectura:
-- Bronze: Excel con información de practicantes
-- Silver: Parquet limpio con columnas estandarizadas
-
-Salida: 
-    - /silver/control_practicantes_silver.parquet
-    - /silver/control_practicantes_silver.xlsx
-
-Autor: Richi via Claude
-Fecha: 27.01.2026
-"""
-
 import polars as pl
 import openpyxl
 from pathlib import Path
@@ -49,7 +30,7 @@ def seleccionar_archivo_excel() -> Path | None:
     root.attributes('-topmost', True)
     
     archivo = filedialog.askopenfilename(
-        title="Seleccionar archivo LISTA_DE_CONTRATOS_Y_PRACTICANTES_-_CONTROL.xlsx (Bronze)",
+        title="Seleccionar archivo LISTA_DE_CONTRATOS_Y_PRACTICANTES_-_CONTROL.xlsx",
         filetypes=[("Excel files", "*.xlsx *.xlsm *.xls"), ("All files", "*.*")]
     )
     
@@ -307,22 +288,20 @@ def convertir_fecha_excel(valor) -> str | None:
     return None
 
 
-def crear_estructura_carpetas(carpeta_trabajo: Path) -> tuple[Path, Path, Path]:
+def crear_estructura_carpetas(carpeta_trabajo: Path) -> tuple[Path, Path]:
     """
-    Crea la estructura de carpetas bronze/silver/gold si no existe.
+    Crea la estructura de carpetas silver/gold si no existe.
     
     Returns:
-        Tuple con (carpeta_bronze, carpeta_silver, carpeta_gold)
+        Tuple con (carpeta_silver, carpeta_gold)
     """
-    carpeta_bronze = carpeta_trabajo / "bronze"
     carpeta_silver = carpeta_trabajo / "silver"
     carpeta_gold = carpeta_trabajo / "gold"
     
-    carpeta_bronze.mkdir(exist_ok=True)
     carpeta_silver.mkdir(exist_ok=True)
     carpeta_gold.mkdir(exist_ok=True)
     
-    return carpeta_bronze, carpeta_silver, carpeta_gold
+    return carpeta_silver, carpeta_gold
 
 
 def exportar_silver(
@@ -360,7 +339,7 @@ def main():
     print("=" * 80)
     
     # 1. Seleccionar archivo
-    print("\n[PASO 1] Selecciona el archivo de control de practicantes (Bronze)...")
+    print("\n[PASO 1] Selecciona el archivo de control de practicantes...")
     archivo_bronze = seleccionar_archivo_excel()
     
     if not archivo_bronze:
@@ -379,8 +358,8 @@ def main():
     print("=" * 80)
     print(f"\n   Creando estructura de carpetas...")
     
-    carpeta_bronze, carpeta_silver, carpeta_gold = crear_estructura_carpetas(carpeta_trabajo)
-    print(f"   ✓ Carpetas creadas: bronze/ silver/ gold/")
+    carpeta_silver, carpeta_gold = crear_estructura_carpetas(carpeta_trabajo)
+    print(f"   ✓ Carpetas creadas: silver/ gold/")
     
     # 3. Cargar esquema
     print(f"\n[1/2] Cargando esquema de validación...")
