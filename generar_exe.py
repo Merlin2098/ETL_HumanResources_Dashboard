@@ -61,7 +61,7 @@ def verificar_estructura():
     carpetas_requeridas = [
         "bd", "config", "esquemas", "examen_retiro", 
         "nomina", "nomina_regimen_minero", "pdt", 
-        "licencias", "orquestadores",  # ✅ NUEVAS
+        "licencias", "control_practicantes", "orquestadores",  # ✅ NUEVAS
         "queries", "ui", "utils"
     ]
     
@@ -139,6 +139,9 @@ def construir_comando():
         "ui.etls.nomina_regimen_minero.widget", "ui.etls.nomina_regimen_minero.worker",
         "ui.etls.examen_retiro", "ui.etls.examen_retiro.config", 
         "ui.etls.examen_retiro.widget", "ui.etls.examen_retiro.worker",
+        # ✅ CONTROL PRACTICANTES (nuevo ETL)
+        "ui.etls.control_practicantes", "ui.etls.control_practicantes.config",
+        "ui.etls.control_practicantes.widget", "ui.etls.control_practicantes.worker",
         
         # ✅ CRÍTICO: TODOS los steps de cada ETL (imports dinámicos)
         # BD
@@ -170,14 +173,20 @@ def construir_comando():
         "examen_retiro.step2_gold", 
         "examen_retiro.step3_join",
         
-        # ✅ LICENCIAS (nuevo módulo)
+        # ✅ LICENCIAS (módulo)
         "licencias",
         "licencias.step1_consolidar_licencias",
         "licencias.step2_enriquecer_nomina",
         
-        # ✅ ORQUESTADORES (nuevo módulo)
+        # ✅ CONTROL PRACTICANTES (nuevo módulo)
+        "control_practicantes",
+        "control_practicantes.step1_controlpracticantes",
+        "control_practicantes.step2_controlpracticantes",
+        
+        # ✅ ORQUESTADORES (módulo)
         "orquestadores",
         "orquestadores.pipeline_nomina_executor",
+        "orquestadores.pipeline_control_practicantes_executor",
         
         # Utils
         "utils", 
