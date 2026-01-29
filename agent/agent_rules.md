@@ -15,8 +15,8 @@ Stability is preferred over creativity.
 The agent MUST build its understanding of the repository using the following documents
 as primary sources of truth:
 
-1. `treemap.md`
-2. `dependencies_report.md`
+1. `agent/treemap.md`
+2. `agent/dependencies_report.md`
 
 These documents define the **structural and dependency model** of the system.
 
@@ -29,8 +29,8 @@ The agent MUST NOT infer structure or dependencies that contradict these files.
 When reasoning about the system, the agent must follow this precedence order:
 
 1. `AGENT_RULES.md` (this document)
-2. `treemap.md`
-3. `dependencies_report.md`
+2. `agent/treemap.md`
+3. `agent/dependencies_report.md`
 4. Explicit user instructions
 5. Repository code and files
 
@@ -59,8 +59,8 @@ If a conflict exists, higher-priority sources always override lower ones.
 The agent MAY:
 
 - Read repository structure and files
-- Use `treemap.md` to understand logical ownership and boundaries
-- Use `dependencies_report.md` to identify downstream impact
+- Use `agent/treemap.md` to understand logical ownership and boundaries
+- Use `agent/dependencies_report.md` to identify downstream impact
 - Analyze code, schemas, queries, and configurations
 - Propose changes and explain their impact
 - Modify files ONLY when explicitly authorized
@@ -72,8 +72,8 @@ The agent MAY:
 
 The agent MUST NOT:
 
-- Contradict or bypass `treemap.md` structure
-- Break or ignore dependencies listed in `dependencies_report.md`
+- Contradict or bypass `agent/treemap.md` structure
+- Break or ignore dependencies listed in `agent/dependencies_report.md`
 - Rename or remove public interfaces
 - Change existing Parquet schemas
 - Modify column names or semantic definitions
@@ -92,7 +92,7 @@ The agent MUST request confirmation before:
 - Any schema change (even additive)
 - Creating new pipelines or workflows
 - Modifying files located in high-dependency areas
-  (as identified in `dependencies_report.md`)
+  (as identified in `agent/dependencies_report.md`)
 - Changing business logic used by BI or reporting layers
 - Writing or overwriting configuration files (YAML / JSON)
 
@@ -116,8 +116,8 @@ Violating invariants is considered a critical failure.
 
 Before proposing or applying any change, the agent MUST:
 
-- Locate the affected component in `treemap.md`
-- Identify all downstream dependencies in `dependencies_report.md`
+- Locate the affected component in `agent/treemap.md`
+- Identify all downstream dependencies in `agent/dependencies_report.md`
 - Treat components with multiple downstream consumers as **high-risk**
 
 If downstream impact cannot be clearly determined, the agent MUST stop.
@@ -128,8 +128,8 @@ If downstream impact cannot be clearly determined, the agent MUST stop.
 
 The agent SHOULD:
 
-- Explicitly reference `treemap.md` when explaining scope
-- Explicitly reference `dependencies_report.md` when explaining risk
+- Explicitly reference `agent/treemap.md` when explaining scope
+- Explicitly reference `agent/dependencies_report.md` when explaining risk
 - Explain risks before proposing changes
 - Prefer plans over immediate execution
 - Suggest safer alternatives when possible

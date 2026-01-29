@@ -3,14 +3,14 @@ repos:
     hooks:
       - id: update-treemap
         name: Actualizar estructura del proyecto
-        entry: .venv/Scripts/python.exe treemap.py
+        entry: .venv/Scripts/python.exe agent_tools/treemap.py
         language: system
         pass_filenames: false
         always_run: true
       
       - id: update-dependencies
         name: Actualizar análisis de dependencias
-        entry: .venv/Scripts/python.exe analyze_dependencies.py
+        entry: .venv/Scripts/python.exe agent_tools/analyze_dependencies.py
         language: system
         pass_filenames: false
         always_run: true

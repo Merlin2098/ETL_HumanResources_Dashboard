@@ -358,7 +358,7 @@ def generar_reporte_markdown(grafo, raiz_proyecto, archivo_salida="dependencies_
         return False
 
 def main():
-    raiz = Path(__file__).parent
+    raiz = Path(__file__).resolve().parent.parent
     
     print("Analizando estructura del proyecto...")
     
@@ -379,7 +379,9 @@ def main():
     print(f"Se analizaron {len(grafo)} módulos Python")
     
     # Generar reporte
-    archivo_salida = raiz / "dependencies_report.md"
+    agent_dir = raiz / "agent"
+    agent_dir.mkdir(exist_ok=True)
+    archivo_salida = agent_dir / "dependencies_report.md"
     exito = generar_reporte_markdown(grafo, raiz, str(archivo_salida))
     
     return 0 if exito else 1
