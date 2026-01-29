@@ -15,6 +15,7 @@ logs/
 # Archivos específicos
 ignorar/
 agent/treemap.md
+agent/dependencies_report.md
 diagnostico.py
 validar_esquema.py
 config/path_cache.json
