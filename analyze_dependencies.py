@@ -227,14 +227,14 @@ def generar_arbol_ascii(grafo, modulo, nivel=0, visitados=None, prefijo="", most
 
 def generar_reporte_markdown(grafo, raiz_proyecto, archivo_salida="dependencies_report.md"):
     """
-    Genera un reporte Markdown con el análisis de dependencias del proyecto.
-    Formato optimizado para ser usado como contexto por LLMs.
+    Generates a Markdown report with the project's dependency analysis.
+    Format optimized for use as context by LLMs.
     """
     contenido = []
-    contenido.append("# Análisis de Dependencias del Proyecto\n\n")
-    contenido.append("> **Propósito**: Este documento mapea las dependencias entre módulos Python, archivos de configuración y librerías externas del proyecto. Úsalo para entender la arquitectura y las relaciones entre componentes.\n\n")
+    contenido.append("# Project Dependency Analysis\n\n")
+    contenido.append("> **Purpose**: This document maps dependencies between Python modules, configuration files, and external libraries. Use it to understand the architecture and relationships between components.\n\n")
     
-    # Identificar módulos raíz (no son importados por nadie)
+    # Identify root modules (not imported by anyone)
     todos_modulos = set(grafo.keys())
     modulos_importados = set()
     
@@ -243,70 +243,57 @@ def generar_reporte_markdown(grafo, raiz_proyecto, archivo_salida="dependencies_
     
     modulos_raiz = sorted(todos_modulos - modulos_importados)
     
-    # Estadísticas generales
+    # General statistics
     total_archivos_config = set()
     total_libs_externas = set()
     for deps in grafo.values():
         total_archivos_config.update(deps['archivos_config'])
         total_libs_externas.update(deps['imports_externos'])
     
-    contenido.append("## Resumen Ejecutivo\n\n")
-    contenido.append(f"- **Total de módulos Python**: {len(grafo)}\n")
-    contenido.append(f"- **Entry points del proyecto**: {len(modulos_raiz)}\n")
-    contenido.append(f"- **Archivos de configuración**: {len(total_archivos_config)}\n")
-    contenido.append(f"- **Librerías externas únicas**: {len(total_libs_externas)}\n\n")
+    contenido.append("## Executive Summary\n\n")
+    contenido.append(f"- **Total Python modules**: {len(grafo)}\n")
+    contenido.append(f"- **Project entry points**: {len(modulos_raiz)}\n")
+    contenido.append(f"- **Configuration files**: {len(total_archivos_config)}\n")
+    contenido.append(f"- **Unique external libraries**: {len(total_libs_externas)}\n\n")
     contenido.append("---\n\n")
     
-    # Sección 0: Flujo de ejecución (solo entry points)
-    contenido.append("## 1. Entry Points (Puntos de Entrada)\n\n")
-    contenido.append("Estos módulos son los **scripts principales** que inician la ejecución del proyecto (no son importados por otros módulos):\n\n")
+    # Section 1: Entry Points details
+    contenido.append("## 1. Project Entry Points\n\n")
+    contenido.append("These modules are the **main scripts** that initiate execution (they are not imported by other modules):\n\n")
     
     for modulo in modulos_raiz:
         deps = grafo[modulo]
         contenido.append(f"### `{modulo}`\n\n")
         
-        # Resumen de dependencias
         n_locales = len(deps['imports_locales'])
         n_config = len(deps['archivos_config'])
         n_externos = len(deps['imports_externos'])
         
-        contenido.append(f"**Dependencias directas**: {n_locales + n_config + n_externos} ({n_locales} módulos, {n_config} configs, {n_externos} librerías)\n\n")
+        contenido.append(f"**Direct dependencies**: {n_locales + n_config + n_externos} ({n_locales} modules, {n_config} configs, {n_externos} libraries)\n\n")
         
-        # Listar dependencias inmediatas
         if deps['imports_locales']:
-            contenido.append(f"- **Módulos internos**: {', '.join([f'`{m}`' for m in deps['imports_locales']])}\n")
+            contenido.append(f"- **Internal modules**: {', '.join([f'`{m}`' for m in deps['imports_locales']])}\n")
         if deps['archivos_config']:
-            contenido.append(f"- **Archivos de config**: {', '.join([f'`{a}`' for a in deps['archivos_config']])}\n")
+            contenido.append(f"- **Config files**: {', '.join([f'`{a}`' for a in deps['archivos_config']])}\n")
         if deps['imports_externos']:
             libs_principales = deps['imports_externos'][:5]
             resto = len(deps['imports_externos']) - 5
             libs_str = ', '.join([f'`{lib}`' for lib in libs_principales])
             if resto > 0:
-                libs_str += f" (+{resto} más)"
-            contenido.append(f"- **Librerías externas**: {libs_str}\n")
+                libs_str += f" (+{resto} more)"
+            contenido.append(f"- **External libraries**: {libs_str}\n")
         
         contenido.append("\n")
     
     contenido.append("---\n\n")
     
-    # Sección 1: Módulos principales (reemplaza la anterior)
-    contenido.append("## 1. Módulos Principales (Entry Points)\n\n")
-    contenido.append("Estos son los módulos que no son importados por ningún otro módulo:\n\n")
-    
-    for modulo in modulos_raiz:
-        deps = grafo[modulo]
-        total_deps = len(deps['imports_locales']) + len(deps['archivos_config'])
-        contenido.append(f"- **{modulo}** → {total_deps} dependencias\n")
-    
-    contenido.append("\n---\n\n")
-    
-    # Sección 2: Árbol de dependencias
-    contenido.append("## 2. Mapa Completo de Dependencias\n\n")
-    contenido.append("Este árbol muestra **todas las dependencias recursivas** de cada entry point:\n\n")
-    contenido.append("**Leyenda**:\n")
-    contenido.append("- 📦 Módulo Python del proyecto\n")
-    contenido.append("- 📄 Archivo de configuración (JSON, YAML, SQL, CSV, etc.)\n")
-    contenido.append("- 🔗 Librería externa (instalada vía pip)\n\n")
+    # Section 2: Dependency Map
+    contenido.append("## 2. Full Dependency Map\n\n")
+    contenido.append("This tree shows **all recursive dependencies** for each entry point:\n\n")
+    contenido.append("**Legend**:\n")
+    contenido.append("- 📦 Project Python Module\n")
+    contenido.append("- 📄 Configuration File (JSON, YAML, SQL, etc.)\n")
+    contenido.append("- 🔗 External Library (installed via pip)\n\n")
     
     for modulo in modulos_raiz:
         contenido.append(f"### {modulo}\n\n")
@@ -319,15 +306,15 @@ def generar_reporte_markdown(grafo, raiz_proyecto, archivo_salida="dependencies_
     
     contenido.append("---\n\n")
     
-    # Sección 3: Resumen por módulo
-    contenido.append("## 3. Índice de Todos los Módulos\n\n")
-    contenido.append("Vista tabular de todos los módulos con sus dependencias:\n\n")
-    contenido.append("| Módulo | Tipo | Deps. Locales | Archivos Config | Libs Externas |\n")
+    # Section 3: Modules Index
+    contenido.append("## 3. All Modules Index\n\n")
+    contenido.append("Tabular view of all modules and their dependency counts:\n\n")
+    contenido.append("| Module | Type | Local Deps. | Config Files | External Libs |\n")
     contenido.append("|--------|------|---------------|-----------------|---------------|\n")
     
     for modulo in sorted(grafo.keys()):
         deps = grafo[modulo]
-        tipo = "Principal" if modulo in modulos_raiz else "Importado"
+        tipo = "Entry Point" if modulo in modulos_raiz else "Imported"
         
         n_locales = len(deps['imports_locales'])
         n_config = len(deps['archivos_config'])
@@ -337,41 +324,38 @@ def generar_reporte_markdown(grafo, raiz_proyecto, archivo_salida="dependencies_
     
     contenido.append("\n---\n\n")
     
-    # Sección 4: Archivos de configuración detectados
+    # Section 4: Configuration Files
     archivos_config_totales = set()
     for deps in grafo.values():
         archivos_config_totales.update(deps['archivos_config'])
     
     if archivos_config_totales:
-        contenido.append("## 4. Archivos de Configuración\n\n")
-        contenido.append("Archivos de datos/configuración detectados en el código y qué módulos los utilizan:\n\n")
+        contenido.append("## 4. Configuration Files\n\n")
+        contenido.append("Data/configuration files detected in code and modules using them:\n\n")
         
         for archivo in sorted(archivos_config_totales):
-            # Encontrar qué módulos lo usan
             modulos_que_usan = [mod for mod, deps in grafo.items() if archivo in deps['archivos_config']]
-            contenido.append(f"- **`{archivo}`** → Usado por: {', '.join([f'`{m}`' for m in modulos_que_usan])}\n")
+            contenido.append(f"- **`{archivo}`** → Used by: {', '.join([f'`{m}`' for m in modulos_que_usan])}\n")
         
         contenido.append("\n")
     
-    # Nota final
+    # Final notes
     contenido.append("---\n\n")
-    contenido.append("## Notas\n\n")
-    contenido.append("- Este archivo es **generado automáticamente** mediante pre-commit hook\n")
-    contenido.append("- Los imports se detectan mediante análisis estático (AST) del código Python\n")
-    contenido.append("- Los archivos de configuración se detectan mediante regex de patrones comunes (`open()`, `read_csv()`, etc.)\n")
-    contenido.append("- Las dependencias circulares pueden causar que algunos módulos no aparezcan en el árbol completo\n")
+    contenido.append("## Notes\n\n")
+    contenido.append("- This file is **automatically generated** via a pre-commit hook.\n")
+    contenido.append("- Imports are detected through static analysis (AST) of Python code.\n")
+    contenido.append("- Configuration files are detected via regex of common patterns (`open()`, `read_csv()`, etc.).\n")
+    contenido.append("- Circular dependencies might cause some modules to be missing from the full tree.\n")
     
-    # Guardar archivo
+    # Save file
     try:
         with open(archivo_salida, "w", encoding="utf-8") as f:
             f.writelines(contenido)
-        
-        print(f"Reporte generado: {archivo_salida}")
+        print(f"Report generated: {archivo_salida}")
         return True
     except Exception as e:
-        print(f"Error al generar reporte: {e}")
+        print(f"Error generating report: {e}")
         return False
-
 
 def main():
     raiz = Path(__file__).parent
