@@ -245,9 +245,28 @@ def leer_hoja_practicantes(
             except Exception as e:
                 print(f"   ⚠️  No se pudo convertir FECHA ING a Date: {e}")
         
-        # Asegurar que todas las columnas sean string excepto FECHA ING
+        # TRANSFORMACIÓN DE FECHAS: Convertir F. RENOVACION a formato AAAA-MM-DD
+        if "F. RENOVACION" in df.columns:
+            print(f"   → Convirtiendo F. RENOVACION a formato estándar...")
+            
+            df = df.with_columns([
+                pl.col("F. RENOVACION")
+                  .map_elements(lambda x: convertir_fecha_excel(x), return_dtype=pl.Utf8)
+                  .alias("F. RENOVACION")
+            ])
+            
+            # Convertir a tipo Date
+            try:
+                df = df.with_columns([
+                    pl.col("F. RENOVACION").str.to_date("%Y-%m-%d", strict=False)
+                ])
+                print(f"   ✓ F. RENOVACION convertida a formato Date")
+            except Exception as e:
+                print(f"   ⚠️  No se pudo convertir F. RENOVACION a Date: {e}")
+        
+        # Asegurar que todas las columnas sean string excepto FECHA ING y F. RENOVACION
         for col in df.columns:
-            if col != "FECHA ING" and df[col].dtype != pl.Utf8:
+            if col not in ["FECHA ING", "F. RENOVACION"] and df[col].dtype != pl.Utf8:
                 df = df.with_columns([
                     pl.col(col).cast(pl.Utf8, strict=False)
                 ])

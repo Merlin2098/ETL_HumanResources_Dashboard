@@ -102,15 +102,28 @@ def generar_gold_con_flags(ruta_silver: Path) -> pl.DataFrame:
     
     con.close()
     
+    # Estadísticas de Fecha_Renovacion
+    total_registros = len(df_gold)
+    con_fecha_renovacion = df_gold.filter(pl.col("Fecha_Renovacion").is_not_null()).height
+    sin_fecha_renovacion = df_gold.filter(pl.col("Fecha_Renovacion").is_null()).height
+    
     # Estadísticas de flags
     flags_stats = {
-        'por_cumplir_1': df_gold.filter(pl.col("por_cumplir_1") == 1).height,
-        'cumplio_1': df_gold.filter(pl.col("cumplio_1") == 1).height,
-        'por_cumplir_2': df_gold.filter(pl.col("por_cumplir_2") == 1).height
+        'por_cumplir_1': df_gold.filter(pl.col("por_cumplir_1") == "SI").height,
+        'cumplio_1': df_gold.filter(pl.col("cumplio_1") == "SI").height,
+        'por_cumplir_2': df_gold.filter(pl.col("por_cumplir_2") == "SI").height
     }
     
     print(f"   ✓ Capa Gold generada")
-    print(f"\n📊 Estadísticas de flags (PRACTICANTE PROFESIONAL):")
+    print(f"\n📊 Estadísticas de Fecha_Renovacion:")
+    print(f"   - Total registros: {total_registros:,}")
+    print(f"   - Con Fecha_Renovacion: {con_fecha_renovacion:,}")
+    print(f"   - Sin Fecha_Renovacion (NULL): {sin_fecha_renovacion:,}")
+    
+    if sin_fecha_renovacion > 0:
+        print(f"   ⚠️  Registros sin Fecha_Renovacion NO tienen tiempo de servicio ni flags calculados")
+    
+    print(f"\n📊 Estadísticas de flags (PRACTICANTE PROFESIONAL con Fecha_Renovacion):")
     print(f"   - Por cumplir 1 año (falta ≤ 1 mes): {flags_stats['por_cumplir_1']:,}")
     print(f"   - Ya cumplió 1 año: {flags_stats['cumplio_1']:,}")
     print(f"   - Por cumplir 2 años (falta ≤ 3 meses): {flags_stats['por_cumplir_2']:,}")
@@ -265,14 +278,24 @@ def procesar_sin_gui(ruta_silver: Path, carpeta_gold: Path) -> dict:
         
         con.close()
         
+        # Estadísticas de Fecha_Renovacion
+        total_registros = len(df_gold)
+        con_fecha_renovacion = df_gold.filter(pl.col("Fecha_Renovacion").is_not_null()).height
+        sin_fecha_renovacion = df_gold.filter(pl.col("Fecha_Renovacion").is_null()).height
+        
         # Estadísticas de flags
         flags_stats = {
-            'por_cumplir_1': df_gold.filter(pl.col("por_cumplir_1") == 1).height,
-            'cumplio_1': df_gold.filter(pl.col("cumplio_1") == 1).height,
-            'por_cumplir_2': df_gold.filter(pl.col("por_cumplir_2") == 1).height
+            'por_cumplir_1': df_gold.filter(pl.col("por_cumplir_1") == "SI").height,
+            'cumplio_1': df_gold.filter(pl.col("cumplio_1") == "SI").height,
+            'por_cumplir_2': df_gold.filter(pl.col("por_cumplir_2") == "SI").height
         }
         
         print(f"   ✓ Capa Gold generada: {len(df_gold):,} registros")
+        print(f"   📊 Fecha_Renovacion - Con fecha: {con_fecha_renovacion:,}, Sin fecha (NULL): {sin_fecha_renovacion:,}")
+        
+        if sin_fecha_renovacion > 0:
+            print(f"   ⚠️  {sin_fecha_renovacion:,} registros sin Fecha_Renovacion NO tienen tiempo de servicio ni flags")
+        
         print(f"   ✓ Flags - Por cumplir 1 año: {flags_stats['por_cumplir_1']:,}")
         print(f"   ✓ Flags - Cumplió 1 año: {flags_stats['cumplio_1']:,}")
         print(f"   ✓ Flags - Por cumplir 2 años: {flags_stats['por_cumplir_2']:,}")
