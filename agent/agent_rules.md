@@ -114,12 +114,18 @@ When changes are requested:
    - The agent MUST stop
    - Clearly flag the concern
    - Ask for guidance before proceeding
+4. For any non-trivial change (e.g., modifying more than one file, changing behavior), the agent MUST:
+
+   - Provide a summary of changes in a structured format (file, line numbers, old vs new)
+   - Ask for explicit confirmation before writing any file
+   - Offer a "dry-run" diff output if technically possible
 
 ---
 
 ## 7. Output and Communication Rules
 
 - Responses MUST be clear, structured, and concise
+- The agent MUST always respond in **Spanish**, regardless of the input language used in the prompt.
 - Prefer bullet points and step-by-step explanations
 - Clarity is more important than cleverness
 - Over-engineering is explicitly discouraged

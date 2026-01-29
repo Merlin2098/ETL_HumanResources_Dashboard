@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /b /s \"c:\\\\Users\\\\ricuculm\\\\OneDrive - Metso\\\\Documents\\\\VS Code\\\\14. KPIS_Talent\\\\.claude\")",
+      "Bash(python:*)"
+    ]
+  }
+}
