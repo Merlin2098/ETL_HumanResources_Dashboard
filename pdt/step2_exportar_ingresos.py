@@ -300,7 +300,14 @@ def main():
         # 6. Seleccionar columnas y convertir tipos
         df_gold = seleccionar_y_convertir_columnas(df_silver, esquema)
 
-        # 6.1 Agregar columna enriquecida NOMBRE_MES
+        # 6.1 Imputar SERVICIO y REGIMEN: null/vacío → "Personal_Interno"
+        df_gold = df_gold.with_columns([
+            pl.col("SERVICIO").fill_null("Personal_Interno").replace("", "Personal_Interno"),
+            pl.col("REGIMEN").fill_null("Personal_Interno").replace("", "Personal_Interno"),
+        ])
+        print(f"  ✓ Imputación aplicada: SERVICIO y REGIMEN (null/vacío → 'Personal_Interno')")
+
+        # 6.2 Agregar columna enriquecida NOMBRE_MES
         df_gold = df_gold.with_columns([
             pl.col("MES").map_elements(
                 lambda m: {
