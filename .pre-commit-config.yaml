@@ -1,16 +1,46 @@
 repos:
   - repo: local
     hooks:
+      # Existing hooks - context generation
       - id: update-treemap
-        name: Actualizar estructura del proyecto
+        name: Update project structure map
         entry: .venv/Scripts/python.exe agent_tools/treemap.py
         language: system
         pass_filenames: false
         always_run: true
-      
+
       - id: update-dependencies
-        name: Actualizar análisis de dependencias
+        name: Update dependency analysis
         entry: .venv/Scripts/python.exe agent_tools/analyze_dependencies.py
         language: system
         pass_filenames: false
         always_run: true
+
+      # New hooks - agent protocol validation
+      - id: validate-task-plans
+        name: Validate task plans
+        entry: .venv/Scripts/python.exe agent_tools/schema_validator.py --type task_plan
+        language: system
+        files: ^agent/agent_outputs/plans/.*task_plan\.json$
+        pass_filenames: true
+
+      - id: validate-system-configs
+        name: Validate system configs
+        entry: .venv/Scripts/python.exe agent_tools/schema_validator.py --type system_config
+        language: system
+        files: ^agent/agent_outputs/plans/.*system_config\.yaml$
+        pass_filenames: true
+
+      - id: validate-execution-reports
+        name: Validate execution reports
+        entry: .venv/Scripts/python.exe agent_tools/schema_validator.py --type report
+        language: system
+        files: ^agent/agent_outputs/reports/.*execution_report\.json$
+        pass_filenames: true
+
+      - id: validate-protocol-schemas
+        name: Validate protocol schemas
+        entry: .venv/Scripts/python.exe agent_tools/validate_message.py
+        language: system
+        files: ^agent/agent_protocol/message_queue/.*\.json$
+        pass_filenames: true

@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "task_envelope.schema.json",
+  "title": "Task Envelope",
+  "description": "Inter-agent communication message format for the multi-agent protocol",
+  "type": "object",
+  "required": ["envelope", "metadata", "payload"],
+  "additionalProperties": false,
+  "properties": {
+    "envelope": {
+      "type": "object",
+      "description": "Message envelope containing routing and control information",
+      "required": ["envelope_id", "version", "created_at", "source_agent", "target_agent", "message_type"],
+      "additionalProperties": false,
+      "properties": {
+        "envelope_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for this envelope (UUID v4)"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Protocol version (semantic versioning)"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO-8601 timestamp of envelope creation"
+        },
+        "source_agent": {
+          "type": "string",
+          "enum": ["agent_inspector", "agent_executor", "agent_protocol", "user"],
+          "description": "Agent that created this envelope"
+        },
+        "target_agent": {
+          "type": "string",
+          "enum": ["agent_inspector", "agent_executor", "agent_protocol", "user"],
+          "description": "Agent that should receive this envelope"
+        },
+        "message_type": {
+          "type": "string",
+          "enum": ["TASK_REQUEST", "TASK_RESPONSE", "STATUS_UPDATE", "ERROR", "ACK", "ROLLBACK_REQUEST", "CANCEL"],
+          "description": "Type of message contained in the envelope"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["LOW", "NORMAL", "HIGH", "CRITICAL"],
+          "default": "NORMAL",
+          "description": "Message priority for queue ordering"
+        },
+        "requires_ack": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether an acknowledgment is required"
+        },
+        "ttl_seconds": {
+          "type": "integer",
+          "minimum": 60,
+          "maximum": 86400,
+          "default": 3600,
+          "description": "Time-to-live in seconds before message expires"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Traceability and correlation metadata",
+      "required": ["correlation_id", "sequence_number"],
+      "additionalProperties": false,
+      "properties": {
+        "correlation_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "ID linking related messages in a conversation"
+        },
+        "parent_envelope_id": {
+          "type": ["string", "null"],
+          "format": "uuid",
+          "description": "ID of the parent envelope if this is a response"
+        },
+        "sequence_number": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Sequence number within the correlation group"
+        },
+        "retry_count": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0,
+          "description": "Number of retry attempts for this message"
+        },
+        "max_retries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 3,
+          "description": "Maximum number of retry attempts allowed"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9_-]+$"
+          },
+          "description": "Tags for categorization and filtering"
+        },
+        "trace_id": {
+          "type": "string",
+          "description": "Distributed tracing ID for observability"
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "description": "Message-specific content",
+      "required": ["task_id", "task_type", "content"],
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for the task"
+        },
+        "task_type": {
+          "type": "string",
+          "enum": [
+            "FILE_CREATE",
+            "FILE_MODIFY",
+            "FILE_DELETE",
+            "FILE_RENAME",
+            "SCHEMA_UPDATE",
+            "SQL_EXECUTE",
+            "PIPELINE_RUN",
+            "ROLLBACK",
+            "STATUS_QUERY",
+            "MULTI_ACTION"
+          ],
+          "description": "Type of task to be performed"
+        },
+        "content": {
+          "type": "object",
+          "description": "Task-specific content (structure depends on task_type)",
+          "additionalProperties": true
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "description": "Validation and integrity information",
+      "additionalProperties": false,
+      "properties": {
+        "checksum": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "SHA-256 hash of the payload object"
+        },
+        "signature": {
+          "type": ["string", "null"],
+          "description": "Optional digital signature for authentication"
+        },
+        "validated_at": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "Timestamp when validation was performed"
+        },
+        "validated_by": {
+          "type": ["string", "null"],
+          "enum": ["agent_protocol", "manual", null],
+          "description": "Entity that performed validation"
+        }
+      }
+    }
+  }
+}

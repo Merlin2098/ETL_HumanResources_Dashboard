@@ -1,9 +1,9 @@
-# Entornos virtuales
+# Virtual environments
 .venv/
 venv/
 .vscode/
 
-# Build y distribución
+# Build and distribution
 build/
 dist/
 spec/
@@ -12,32 +12,48 @@ spec/
 logs/
 *.log
 
-# Archivos específicos
+# Specific files
 ignorar/
-agent/treemap.md
-agent/dependencies_report.md
 diagnostico.py
 validar_esquema.py
 config/path_cache.json
-agent/dependencies_report.md
 .claude/
 
-# __pycache__ y temporales de Python
+# Agent system - auto-generated files
+agent/treemap.md
+agent/dependencies_report.md
+
+# Agent outputs - dynamic content
+agent/agent_outputs/plans/
+agent/agent_outputs/reports/
+agent/agent_outputs/archive/
+agent/agent_logs/
+
+# Agent protocol - message queue (runtime)
+agent/agent_protocol/message_queue/pending/*
+agent/agent_protocol/message_queue/in_progress/*
+agent/agent_protocol/message_queue/completed/*
+# Keep the queue directories
+!agent/agent_protocol/message_queue/pending/.gitkeep
+!agent/agent_protocol/message_queue/in_progress/.gitkeep
+!agent/agent_protocol/message_queue/completed/.gitkeep
+
+# __pycache__ and Python temp files
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Cache de herramientas
+# Tool cache
 *.egg-info/
 .eggs/
 .cache/
 .mypy_cache/
 .pytest_cache/
 
-# Configuración de PyInstaller
+# PyInstaller configuration
 *.spec
 
-# Sistemas operativos
+# Operating systems
 .DS_Store
 Thumbs.db

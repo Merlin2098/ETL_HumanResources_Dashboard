@@ -1,0 +1,277 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "execution_report.schema.json",
+  "title": "Execution Report",
+  "description": "Schema for executor-generated execution reports",
+  "type": "object",
+  "required": ["report_id", "plan_id", "status", "started_at", "actions_summary"],
+  "additionalProperties": false,
+  "properties": {
+    "report_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for this report"
+    },
+    "plan_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Reference to the executed plan"
+    },
+    "executor_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Version of the executor that ran this task"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["SUCCESS", "PARTIAL", "FAILED", "ROLLED_BACK", "CANCELLED", "TIMEOUT"],
+      "description": "Overall execution status"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When execution started"
+    },
+    "completed_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "When execution completed (null if still running)"
+    },
+    "duration_ms": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Total execution duration in milliseconds"
+    },
+    "actions_summary": {
+      "type": "object",
+      "required": ["total", "completed", "failed", "skipped"],
+      "additionalProperties": false,
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of actions in the plan"
+        },
+        "completed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of successfully completed actions"
+        },
+        "failed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of failed actions"
+        },
+        "skipped": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of skipped actions"
+        }
+      }
+    },
+    "actions_completed": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/completedAction"
+      },
+      "description": "Details of completed actions"
+    },
+    "actions_failed": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/failedAction"
+      },
+      "description": "Details of failed actions"
+    },
+    "actions_skipped": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/skippedAction"
+      },
+      "description": "Details of skipped actions"
+    },
+    "rollback_performed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether rollback was performed"
+    },
+    "rollback_manifest_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Reference to rollback manifest if available"
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/error"
+      },
+      "description": "List of errors encountered"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of warnings generated"
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Execution metrics and statistics"
+    }
+  },
+  "$defs": {
+    "completedAction": {
+      "type": "object",
+      "required": ["action_id", "status", "started_at", "completed_at"],
+      "additionalProperties": false,
+      "properties": {
+        "action_id": {
+          "type": "string",
+          "pattern": "^a[0-9]{3}$",
+          "description": "Reference to action in plan"
+        },
+        "status": {
+          "type": "string",
+          "const": "SUCCESS",
+          "description": "Action status"
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When action started"
+        },
+        "completed_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When action completed"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Action duration in milliseconds"
+        },
+        "output": {
+          "type": ["string", "object"],
+          "description": "Operation-specific output"
+        },
+        "files_modified": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of files modified by this action"
+        }
+      }
+    },
+    "failedAction": {
+      "type": "object",
+      "required": ["action_id", "status", "error_code", "error_message"],
+      "additionalProperties": false,
+      "properties": {
+        "action_id": {
+          "type": "string",
+          "pattern": "^a[0-9]{3}$",
+          "description": "Reference to action in plan"
+        },
+        "status": {
+          "type": "string",
+          "const": "FAILED",
+          "description": "Action status"
+        },
+        "error_code": {
+          "type": "integer",
+          "description": "Error code"
+        },
+        "error_message": {
+          "type": "string",
+          "description": "Human-readable error message"
+        },
+        "stack_trace": {
+          "type": ["string", "null"],
+          "description": "Stack trace if available"
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When action started"
+        },
+        "failed_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When action failed"
+        },
+        "recovery_attempted": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether recovery was attempted"
+        }
+      }
+    },
+    "skippedAction": {
+      "type": "object",
+      "required": ["action_id", "reason"],
+      "additionalProperties": false,
+      "properties": {
+        "action_id": {
+          "type": "string",
+          "pattern": "^a[0-9]{3}$",
+          "description": "Reference to action in plan"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Reason for skipping"
+        },
+        "dependency_failed": {
+          "type": ["string", "null"],
+          "pattern": "^a[0-9]{3}$",
+          "description": "ID of failed dependency if applicable"
+        }
+      }
+    },
+    "error": {
+      "type": "object",
+      "required": ["error_id", "error_code", "message", "timestamp"],
+      "additionalProperties": false,
+      "properties": {
+        "error_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique error identifier"
+        },
+        "error_code": {
+          "type": "integer",
+          "description": "Numeric error code"
+        },
+        "error_category": {
+          "type": "string",
+          "enum": ["VALIDATION", "FILE_SYSTEM", "PERMISSION", "DEPENDENCY", "INTERNAL", "TIMEOUT"],
+          "description": "Error category"
+        },
+        "message": {
+          "type": "string",
+          "description": "Error message"
+        },
+        "details": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Additional error details"
+        },
+        "action_id": {
+          "type": ["string", "null"],
+          "pattern": "^a[0-9]{3}$",
+          "description": "Associated action ID if applicable"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When error occurred"
+        },
+        "recoverable": {
+          "type": "boolean",
+          "description": "Whether error is recoverable"
+        }
+      }
+    }
+  }
+}
