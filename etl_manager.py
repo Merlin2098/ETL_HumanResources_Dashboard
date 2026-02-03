@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# etl_manager.py
 """
 ETL Manager - Tawa Consulting
 Entry point principal de la aplicación
@@ -16,7 +14,6 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QIcon
 from ui.main_app import ETLManagerWindow  # ✅ Import absoluto correcto
 from utils.paths import get_resource_path  # ✅ Para rutas en producción
-
 
 def main():
     """Función principal"""
@@ -45,7 +42,6 @@ def main():
     print("\n✅ Aplicación iniciada correctamente\n")
     
     sys.exit(app.exec())
-
 
 if __name__ == '__main__':
     try:
