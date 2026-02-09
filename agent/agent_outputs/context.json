@@ -1,0 +1,3479 @@
+{
+  "skills_registry": {
+    "metadata": {
+      "version": "1.0.0",
+      "total_skills": 98,
+      "total_categories": 18,
+      "last_updated": "2026-02-08",
+      "framework": "Agent-Based Systems"
+    },
+    "skills": [
+      {
+        "name": "type_master",
+        "category": "Python",
+        "purpose": "Enforces comprehensive type hints using typing module, Mypy/Pyright static checking, and Pydantic runtime validation",
+        "triggers": [
+          "add type hints",
+          "type annotations",
+          "typing",
+          "mypy",
+          "pyright",
+          "pydantic validation",
+          "type safety"
+        ],
+        "files_required": [
+          "*.py"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT",
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "async_concurrency_expert",
+        "category": "Python",
+        "purpose": "Implements async/await patterns, manages event loops, and handles concurrent tasks preventing deadlocks and race conditions",
+        "triggers": [
+          "async",
+          "await",
+          "asyncio",
+          "concurrency",
+          "event loop",
+          "parallel tasks",
+          "race condition",
+          "deadlock"
+        ],
+        "files_required": [
+          "*.py"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT",
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "microservices_api_architect",
+        "category": "Python",
+        "purpose": "Designs FastAPI/Flask APIs with DDD folder structure, dependency injection, middleware, and OpenAPI documentation",
+        "triggers": [
+          "api design",
+          "fastapi",
+          "flask",
+          "rest api",
+          "endpoint",
+          "microservice",
+          "openapi",
+          "swagger"
+        ],
+        "files_required": [
+          "*.py",
+          "*.yaml",
+          "*.json"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "testing_qa_mentor",
+        "category": "Python",
+        "purpose": "Generates comprehensive unit and integration tests using pytest, fixtures, parametrization, Hypothesis, and mocking",
+        "triggers": [
+          "write tests",
+          "unit test",
+          "integration test",
+          "pytest",
+          "coverage",
+          "test case",
+          "fixture",
+          "mock",
+          "hypothesis"
+        ],
+        "files_required": [
+          "*.py",
+          "test_*.py",
+          "*_test.py"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT",
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "code_structuring_pythonic",
+        "category": "Python",
+        "purpose": "Ensures idiomatic Python patterns, PEP 8 compliance, clean architecture, and separation of concerns",
+        "triggers": [
+          "pythonic",
+          "pep 8",
+          "code structure",
+          "clean code",
+          "code smell",
+          "anti-pattern",
+          "idiomatic python"
+        ],
+        "files_required": [
+          "*.py"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "naming_control_flow",
+        "category": "Python",
+        "purpose": "Establishes clear naming conventions reflecting intent and explicit, readable control flow patterns",
+        "triggers": [
+          "naming convention",
+          "variable names",
+          "control flow",
+          "readability",
+          "magic values",
+          "code clarity"
+        ],
+        "files_required": [
+          "*.py"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "performance_profiler",
+        "category": "Python",
+        "purpose": "Profiles and optimizes Python code using cProfile, line_profiler, and memory_profiler to identify bottlenecks",
+        "triggers": [
+          "performance",
+          "profile",
+          "bottleneck",
+          "optimize",
+          "slow code",
+          "memory usage",
+          "benchmark",
+          "cProfile"
+        ],
+        "files_required": [
+          "*.py"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "data_integrity_guardian",
+        "category": "Python",
+        "purpose": "Ensures data consistency through input validation, constraints, transactions, and corruption prevention",
+        "triggers": [
+          "data integrity",
+          "data validation",
+          "constraint",
+          "transaction",
+          "data corruption",
+          "consistency check"
+        ],
+        "files_required": [
+          "*.py"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT",
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "secure_python_practices",
+        "category": "Python",
+        "purpose": "Implements security best practices including input validation, injection prevention, and secrets management",
+        "triggers": [
+          "security",
+          "sql injection",
+          "xss prevention",
+          "input sanitization",
+          "secrets management",
+          "vulnerability",
+          "secure code"
+        ],
+        "files_required": [
+          "*.py",
+          ".env"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "dependency_audit",
+        "category": "Python",
+        "purpose": "Audits Python dependencies for security vulnerabilities, compatibility, licensing, and version conflicts",
+        "triggers": [
+          "audit dependencies",
+          "vulnerability scan",
+          "outdated packages",
+          "dependency conflict",
+          "license check",
+          "pip audit"
+        ],
+        "files_required": [
+          "requirements.txt",
+          "pyproject.toml",
+          "setup.py",
+          "Pipfile"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "linter_formatter_guru",
+        "category": "Python",
+        "purpose": "Configures linting (Pylint, Flake8) and formatting (Black, Autopep8) with pre-commit hooks",
+        "triggers": [
+          "lint",
+          "format code",
+          "black",
+          "flake8",
+          "pylint",
+          "pre-commit",
+          "code style",
+          "autopep8"
+        ],
+        "files_required": [
+          "*.py",
+          ".flake8",
+          "pyproject.toml",
+          ".pre-commit-config.yaml"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT",
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "refactoring_assistant",
+        "category": "Python",
+        "purpose": "Performs systematic code refactoring to improve readability, reduce duplication, and simplify logic",
+        "triggers": [
+          "refactor",
+          "duplication",
+          "extract function",
+          "simplify logic",
+          "code cleanup",
+          "technical debt",
+          "dead code"
+        ],
+        "files_required": [
+          "*.py"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "api_client_generator",
+        "category": "Python",
+        "purpose": "Generates type-safe Python API clients for REST/GraphQL services with authentication and pagination",
+        "triggers": [
+          "api client",
+          "http client",
+          "rest client",
+          "graphql client",
+          "sdk generation",
+          "api wrapper"
+        ],
+        "files_required": [
+          "*.py",
+          "*.json",
+          "*.yaml"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "config_env_manager",
+        "category": "Python",
+        "purpose": "Manages configuration and environment variables with dotenv, validation, and multi-environment support",
+        "triggers": [
+          "config management",
+          "environment variable",
+          "dotenv",
+          ".env file",
+          "settings",
+          "multi-environment"
+        ],
+        "files_required": [
+          "*.py",
+          ".env",
+          "*.yaml",
+          "*.json"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT",
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "externalized_logic_handler",
+        "category": "Python",
+        "purpose": "Externalizes business logic into configurable rules, DSLs, or config-driven templates",
+        "triggers": [
+          "business rules",
+          "externalize logic",
+          "rule engine",
+          "dsl",
+          "config-driven",
+          "dynamic logic"
+        ],
+        "files_required": [
+          "*.py",
+          "*.yaml",
+          "*.json"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "serialization_persistence",
+        "category": "Python",
+        "purpose": "Handles data serialization (pickle/JSON/YAML), file I/O, caching strategies, and data versioning",
+        "triggers": [
+          "serialize",
+          "deserialize",
+          "pickle",
+          "persistence",
+          "cache strategy",
+          "save data",
+          "load data"
+        ],
+        "files_required": [
+          "*.py",
+          "*.json",
+          "*.yaml",
+          "*.pkl"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "devops_packaging",
+        "category": "Python",
+        "purpose": "Handles Python packaging, versioning, and distribution via setup.py/pyproject.toml and PyPI publishing",
+        "triggers": [
+          "package python",
+          "pypi",
+          "setup.py",
+          "pyproject.toml",
+          "distribution",
+          "versioning",
+          "wheel",
+          "sdist"
+        ],
+        "files_required": [
+          "setup.py",
+          "pyproject.toml",
+          "setup.cfg",
+          "MANIFEST.in"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT",
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "file_explorer",
+        "category": "File Exploration",
+        "purpose": "Unified facade that detects file type, validates format, and delegates to the appropriate format-specific explorer",
+        "triggers": [
+          "explore file",
+          "inspect file",
+          "file info",
+          "file metadata",
+          "analyze file",
+          "what is this file"
+        ],
+        "files_required": [
+          "*"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "csv_explorer",
+        "category": "File Exploration",
+        "purpose": "Reads and analyzes CSV files with encoding detection, delimiter inference, and schema inspection",
+        "triggers": [
+          "csv",
+          "comma separated",
+          "explore csv",
+          "csv schema",
+          "csv columns",
+          "delimiter"
+        ],
+        "files_required": [
+          "*.csv",
+          "*.tsv"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "excel_explorer",
+        "category": "File Exploration",
+        "purpose": "Explores Excel workbooks detecting sheets, reading cell data, and extracting workbook metadata",
+        "triggers": [
+          "explore excel",
+          "xlsx info",
+          "excel sheets",
+          "workbook structure",
+          "spreadsheet analysis"
+        ],
+        "files_required": [
+          "*.xlsx",
+          "*.xls",
+          "*.xlsm"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "json_explorer",
+        "category": "File Exploration",
+        "purpose": "Parses and explores JSON files validating structure, extracting values, and navigating nested objects",
+        "triggers": [
+          "explore json",
+          "json structure",
+          "json keys",
+          "json schema",
+          "json inspect"
+        ],
+        "files_required": [
+          "*.json"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "yaml_explorer",
+        "category": "File Exploration",
+        "purpose": "Reads YAML configuration files, validates syntax, and extracts structured data hierarchies",
+        "triggers": [
+          "explore yaml",
+          "yaml structure",
+          "yaml config",
+          "yml inspect"
+        ],
+        "files_required": [
+          "*.yaml",
+          "*.yml"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "xml_explorer",
+        "category": "File Exploration",
+        "purpose": "Parses XML documents navigating element hierarchy, extracting attributes, and reading text content",
+        "triggers": [
+          "xml",
+          "explore xml",
+          "xml structure",
+          "xml attributes",
+          "xml namespace"
+        ],
+        "files_required": [
+          "*.xml"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "html_explorer",
+        "category": "File Exploration",
+        "purpose": "Parses HTML documents extracting text, tables, links, and page metadata",
+        "triggers": [
+          "html",
+          "explore html",
+          "html tables",
+          "web page parse",
+          "scrape html"
+        ],
+        "files_required": [
+          "*.html",
+          "*.htm"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "pdf_explorer",
+        "category": "File Exploration",
+        "purpose": "Extracts text and metadata from PDF files handling multi-page documents and preserving layout",
+        "triggers": [
+          "pdf",
+          "explore pdf",
+          "pdf text",
+          "pdf metadata",
+          "read pdf"
+        ],
+        "files_required": [
+          "*.pdf"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "docx_explorer",
+        "category": "File Exploration",
+        "purpose": "Reads Word documents extracting text, tables, images, and formatting metadata",
+        "triggers": [
+          "docx",
+          "word document",
+          "explore docx",
+          "word file",
+          "doc content"
+        ],
+        "files_required": [
+          "*.docx"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "pptx_explorer",
+        "category": "File Exploration",
+        "purpose": "Explores PowerPoint presentations extracting slides, text content, and speaker notes",
+        "triggers": [
+          "pptx",
+          "powerpoint",
+          "presentation",
+          "slides",
+          "explore pptx",
+          "speaker notes"
+        ],
+        "files_required": [
+          "*.pptx"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "parquet_explorer",
+        "category": "File Exploration",
+        "purpose": "Explores Parquet columnar data files inspecting schema, column statistics, and data previews",
+        "triggers": [
+          "explore parquet",
+          "parquet schema",
+          "parquet metadata",
+          "parquet preview",
+          "parquet columns"
+        ],
+        "files_required": [
+          "*.parquet"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "db_explorer",
+        "category": "File Exploration",
+        "purpose": "Explores database connections listing tables, inspecting schemas, and previewing row data",
+        "triggers": [
+          "explore database",
+          "db schema",
+          "list tables",
+          "database structure",
+          "db inspect"
+        ],
+        "files_required": [
+          "*.db",
+          "*.sqlite",
+          "*.duckdb"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "powerbi_explorer",
+        "category": "File Exploration",
+        "purpose": "Explores Power BI files extracting data models, DAX measures, and table relationships",
+        "triggers": [
+          "power bi",
+          "pbix",
+          "explore power bi",
+          "dax measures",
+          "power bi model"
+        ],
+        "files_required": [
+          "*.pbix",
+          "*.pbit"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "markdown_explorer",
+        "category": "File Exploration",
+        "purpose": "Parses Markdown files extracting headings, links, code blocks, and document structure",
+        "triggers": [
+          "markdown",
+          "explore markdown",
+          "md structure",
+          "markdown headings",
+          "read markdown"
+        ],
+        "files_required": [
+          "*.md"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "skill_authority_first",
+        "category": "Governance",
+        "purpose": "Enforces that skills are authoritative units invoked BEFORE any agent action, with priority ordering and anti-rationalization safeguards",
+        "triggers": [
+          "skill invocation",
+          "skill priority",
+          "invoke skill",
+          "skill authority",
+          "before action"
+        ],
+        "files_required": [
+          "*.md"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "workspace_model_awareness",
+        "category": "Governance",
+        "purpose": "Ensures agents understand and respect the workspace model treating agent/ as writable and source code as protected",
+        "triggers": [
+          "workspace model",
+          "workspace boundaries",
+          "agent workspace",
+          "writable directory",
+          "protected code"
+        ],
+        "files_required": [
+          "*"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "scope_control_discipline",
+        "category": "Governance",
+        "purpose": "Enforces strict scope boundaries preventing scope creep and limiting modifications to authorized areas",
+        "triggers": [
+          "scope control",
+          "scope creep",
+          "out of scope",
+          "boundary enforcement",
+          "authorized changes"
+        ],
+        "files_required": [
+          "*"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "immutable_resource_respect",
+        "category": "Governance",
+        "purpose": "Prevents modification of immutable resources, external dependencies, and protected system infrastructure",
+        "triggers": [
+          "immutable resource",
+          "read only",
+          "do not modify",
+          "protected resource",
+          "external dependency"
+        ],
+        "files_required": [
+          "*"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "artifact_persistence_discipline",
+        "category": "Governance",
+        "purpose": "Enforces that agent-generated plans, reports, and outputs are persisted to disk and never deleted",
+        "triggers": [
+          "persist artifact",
+          "save output",
+          "artifact history",
+          "do not delete",
+          "audit trail"
+        ],
+        "files_required": [
+          "*.md",
+          "*.json",
+          "*.yaml"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "minimal_documentation_policy",
+        "category": "Governance",
+        "purpose": "Restricts documentation generation to only explicitly requested or strictly required cases, preventing duplication",
+        "triggers": [
+          "documentation policy",
+          "no unnecessary docs",
+          "minimal docs",
+          "avoid duplication"
+        ],
+        "files_required": [
+          "*.md"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "ambiguity_escalation",
+        "category": "Governance",
+        "purpose": "Escalates unclear requirements instead of guessing, preventing incorrect assumptions and unauthorized actions",
+        "triggers": [
+          "unclear requirement",
+          "ambiguous request",
+          "escalate",
+          "need clarification",
+          "uncertain scope"
+        ],
+        "files_required": [
+          "*"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "protected_file_validation",
+        "category": "Governance",
+        "purpose": "Validates that protected files on the immutability blacklist are not modified by any agent action",
+        "triggers": [
+          "protected file",
+          "immutability blacklist",
+          "file protection",
+          "cannot modify",
+          "blacklisted file"
+        ],
+        "files_required": [
+          "rules/agent_rules.md",
+          "agent_inspector.md",
+          "agent_executor.md",
+          "README.md",
+          ".env"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "path_traversal_prevention",
+        "category": "Governance",
+        "purpose": "Prevents path traversal attacks by validating file paths, preventing directory escape, and enforcing sandbox boundaries",
+        "triggers": [
+          "path traversal",
+          "directory escape",
+          "sandbox boundary",
+          "path validation",
+          "security path"
+        ],
+        "files_required": [
+          "*"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "verification_before_completion",
+        "category": "Governance",
+        "purpose": "Requires fresh verification evidence before any completion claims using a 5-step gate protocol (Identify, Run, Read, Verify, Claim)",
+        "triggers": [
+          "verify completion",
+          "prove it works",
+          "evidence required",
+          "completion claim",
+          "verify fix",
+          "run tests before done"
+        ],
+        "files_required": [
+          "*"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "ui_framework_selection",
+        "category": "UI",
+        "purpose": "Selects appropriate UI framework \u2014 Tkinter for MVP prototypes, PySide6 for production builds",
+        "triggers": [
+          "ui framework",
+          "tkinter vs pyside",
+          "gui framework",
+          "desktop app",
+          "which ui library"
+        ],
+        "files_required": [
+          "*.py"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "ui_widget_modularity",
+        "category": "UI",
+        "purpose": "Creates self-contained, reusable widgets decoupled from global layout enabling component composition",
+        "triggers": [
+          "widget",
+          "reusable component",
+          "ui module",
+          "widget decoupling",
+          "component composition"
+        ],
+        "files_required": [
+          "*.py"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT",
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "ui_theme_binding",
+        "category": "UI",
+        "purpose": "Implements reactive theme systems with automatic widget updates supporting light/dark mode switching",
+        "triggers": [
+          "theme",
+          "dark mode",
+          "light mode",
+          "theme binding",
+          "color scheme",
+          "ui theme"
+        ],
+        "files_required": [
+          "*.py",
+          "*.json",
+          "*.yaml"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT",
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "ui_layout_proportionality",
+        "category": "UI",
+        "purpose": "Builds adaptive, proportional layouts that scale correctly across multiple screen resolutions",
+        "triggers": [
+          "responsive layout",
+          "proportional ui",
+          "screen resolution",
+          "adaptive layout",
+          "layout scaling"
+        ],
+        "files_required": [
+          "*.py"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT",
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "ui_identity_policy",
+        "category": "UI",
+        "purpose": "Displays application identity (name, version) without redundancy, maintaining a clean professional appearance",
+        "triggers": [
+          "app identity",
+          "app title",
+          "version display",
+          "window title",
+          "branding"
+        ],
+        "files_required": [
+          "*.py"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "ui_splash_and_lazy_loading",
+        "category": "UI",
+        "purpose": "Shows splash screens during lazy resource loading to prevent frozen UI and improve perceived responsiveness",
+        "triggers": [
+          "splash screen",
+          "lazy loading",
+          "loading screen",
+          "startup performance",
+          "progress indicator"
+        ],
+        "files_required": [
+          "*.py"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "ui_application_assets",
+        "category": "UI",
+        "purpose": "Manages centralized, cross-platform application assets (icons, images, themes) in a single location",
+        "triggers": [
+          "app assets",
+          "icons",
+          "images",
+          "asset management",
+          "resource directory"
+        ],
+        "files_required": [
+          "*.py",
+          "*.png",
+          "*.ico",
+          "*.svg"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT",
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "context_loading_protocol",
+        "category": "Planning",
+        "purpose": "Loads context files in structured order \u2014 treemap.md first, then dependencies_report.md, then task-specific files",
+        "triggers": [
+          "load context",
+          "context loading",
+          "treemap",
+          "dependencies report",
+          "project context",
+          "initialize context"
+        ],
+        "files_required": [
+          "treemap.md",
+          "dependencies_report.md",
+          "*.md"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "decision_process_flow",
+        "category": "Planning",
+        "purpose": "Structures decision-making from request validation through context loading, impact analysis, option scoring, plan generation, and output persistence",
+        "triggers": [
+          "decision process",
+          "make decision",
+          "evaluate options",
+          "plan generation",
+          "impact analysis",
+          "score options"
+        ],
+        "files_required": [
+          "*.md",
+          "*.yaml",
+          "*.json"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "risk_scoring_matrix",
+        "category": "Planning",
+        "purpose": "Standardizes risk assessment using a 3x4 probability/impact matrix producing Trivial through Critical categories with approval thresholds",
+        "triggers": [
+          "risk assessment",
+          "risk score",
+          "risk matrix",
+          "probability impact",
+          "risk level",
+          "approval threshold"
+        ],
+        "files_required": [
+          "*.md",
+          "*.yaml"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "output_validation_checklist",
+        "category": "Planning",
+        "purpose": "Validates outputs before emission checking plan IDs (UUID v4), version matching, ISO-8601 timestamps, DAG dependencies, and persistence",
+        "triggers": [
+          "validate output",
+          "output checklist",
+          "plan validation",
+          "schema check",
+          "pre-emission check"
+        ],
+        "files_required": [
+          "*.md",
+          "*.json",
+          "*.yaml"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "brainstorming_design_explorer",
+        "category": "Planning",
+        "purpose": "Collaborative pre-planning design exploration asking one question at a time, proposing 2-3 approaches with trade-offs, and enforcing YAGNI",
+        "triggers": [
+          "brainstorm",
+          "design exploration",
+          "explore approaches",
+          "what to build",
+          "ideation",
+          "trade-off analysis",
+          "design options"
+        ],
+        "files_required": [
+          "*.md"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "llm_inference_optimization",
+        "category": "Planning",
+        "purpose": "Meta-layer governing how skills are invoked \u2014 manages token budget (4 chars/token), context pruning at 60%, temperature selection, and reasoning patterns",
+        "triggers": [
+          "token budget",
+          "context optimization",
+          "inference quality",
+          "temperature selection",
+          "context pruning",
+          "reasoning pattern",
+          "token estimation"
+        ],
+        "files_required": [
+          "*.md",
+          "*.yaml"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "execution_flow_orchestration",
+        "category": "Execution",
+        "purpose": "Orchestrates structured execution workflows coordinating atomic actions, monitoring progress, and handling failures gracefully",
+        "triggers": [
+          "execute plan",
+          "orchestrate",
+          "workflow execution",
+          "run pipeline",
+          "coordinate tasks",
+          "atomic action"
+        ],
+        "files_required": [
+          "*.py",
+          "*.md",
+          "*.yaml"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT",
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "git_rollback_strategy",
+        "category": "Execution",
+        "purpose": "Uses git revert for rollback operations maintaining commit history and allowing targeted change reversal",
+        "triggers": [
+          "rollback",
+          "git revert",
+          "undo commit",
+          "revert changes",
+          "restore previous"
+        ],
+        "files_required": [
+          ".git/*",
+          "*.py"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "plan_archive_protocol",
+        "category": "Execution",
+        "purpose": "Archives active plans before new execution ensuring historical plans and reports are preserved for auditability",
+        "triggers": [
+          "archive plan",
+          "plan history",
+          "preserve plan",
+          "plan lifecycle",
+          "plan versioning"
+        ],
+        "files_required": [
+          "*.md",
+          "*.json",
+          "*.yaml"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "read_excel_pandas",
+        "category": "IO",
+        "purpose": "Loads Excel files using pandas for exploratory analysis, best for files under 50MB and interactive data exploration",
+        "triggers": [
+          "read excel",
+          "pandas excel",
+          "exploratory analysis",
+          "small excel",
+          "quick excel read"
+        ],
+        "files_required": [
+          "*.xlsx",
+          "*.xls"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "read_excel_polars_openpyxl",
+        "category": "IO",
+        "purpose": "High-performance Excel reading using Polars+Openpyxl, 2-5x faster than pandas with 70% less memory for production ETL",
+        "triggers": [
+          "large excel",
+          "polars excel",
+          "performance excel",
+          "production excel read",
+          "big file excel"
+        ],
+        "files_required": [
+          "*.xlsx",
+          "*.xls"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "excel_to_parquet",
+        "category": "IO",
+        "purpose": "Converts Excel files to Parquet format achieving 60-80% compression, optimized for data lake bronze layer ingestion",
+        "triggers": [
+          "excel to parquet",
+          "convert excel",
+          "parquet conversion",
+          "data lake ingestion",
+          "compress excel"
+        ],
+        "files_required": [
+          "*.xlsx",
+          "*.xls",
+          "*.parquet"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "parquet_to_excel_polars_xlsxwriter",
+        "category": "IO",
+        "purpose": "Exports Parquet data to Excel for business users using Polars+XlsxWriter exclusively (pandas is forbidden)",
+        "triggers": [
+          "parquet to excel",
+          "export to excel",
+          "business report",
+          "excel export",
+          "gold layer export"
+        ],
+        "files_required": [
+          "*.parquet",
+          "*.xlsx"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "load_json_files",
+        "category": "Formats",
+        "purpose": "Loads configuration and data from JSON files with validation, schema enforcement, and clear error messages",
+        "triggers": [
+          "load json",
+          "json config",
+          "parse json",
+          "json file",
+          "read json config"
+        ],
+        "files_required": [
+          "*.json"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "load_yaml_files",
+        "category": "Formats",
+        "purpose": "Loads human-readable YAML configurations supporting multi-environment setups and complex nested structures",
+        "triggers": [
+          "load yaml",
+          "yaml config",
+          "parse yaml",
+          "yaml file",
+          "pipeline config"
+        ],
+        "files_required": [
+          "*.yaml",
+          "*.yml"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "load_sql_queries",
+        "category": "Formats",
+        "purpose": "Loads SQL queries from a dedicated directory enabling version-controlled, reusable query templates",
+        "triggers": [
+          "load sql",
+          "sql file",
+          "query template",
+          "sql loader",
+          "reusable query"
+        ],
+        "files_required": [
+          "*.sql"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "connect_duckdb",
+        "category": "Database",
+        "purpose": "Establishes and configures DuckDB connections optimized for OLAP workloads and embedded analytical databases",
+        "triggers": [
+          "duckdb",
+          "connect database",
+          "olap",
+          "analytical database",
+          "duckdb connection"
+        ],
+        "files_required": [
+          "*.py",
+          "*.duckdb"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "query_parquet_duckdb",
+        "category": "Database",
+        "purpose": "Executes SQL queries on Parquet files via DuckDB with zero-copy reads, 5-10x faster than pandas for large datasets",
+        "triggers": [
+          "query parquet",
+          "sql on parquet",
+          "duckdb query",
+          "analytical query",
+          "parquet sql"
+        ],
+        "files_required": [
+          "*.parquet",
+          "*.sql",
+          "*.py"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "systematic_debugging",
+        "category": "Debugging",
+        "purpose": "4-phase structured debugging: Root Cause Investigation, Pattern Analysis, Hypothesis Testing, Implementation \u2014 no fixes without root cause",
+        "triggers": [
+          "debug",
+          "bug",
+          "investigate error",
+          "root cause",
+          "fix issue",
+          "troubleshoot",
+          "error investigation"
+        ],
+        "files_required": [
+          "*.py",
+          "*.log",
+          "*"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "root_cause_tracing",
+        "category": "Debugging",
+        "purpose": "Traces bugs backward through the call stack using 5-step methodology to find the original trigger and apply defense-in-depth",
+        "triggers": [
+          "trace root cause",
+          "call stack",
+          "data flow trace",
+          "backward trace",
+          "where does this come from",
+          "polluter bisection"
+        ],
+        "files_required": [
+          "*.py",
+          "*.log",
+          "*"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "setup_medallion_structure",
+        "category": "Architecture",
+        "purpose": "Creates Bronze/Silver/Gold data lake directory structure enforcing progressive data quality layers",
+        "triggers": [
+          "medallion architecture",
+          "data lake",
+          "bronze silver gold",
+          "data lake setup",
+          "lake structure"
+        ],
+        "files_required": [
+          "*"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "library_manager",
+        "category": "DevOps",
+        "purpose": "Manages Python package dependencies, versioning, environment configuration, and dependency resolution",
+        "triggers": [
+          "manage dependencies",
+          "install package",
+          "pip install",
+          "dependency resolution",
+          "package version",
+          "requirements"
+        ],
+        "files_required": [
+          "requirements.txt",
+          "pyproject.toml",
+          "setup.py",
+          "Pipfile"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT",
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "generate_exe_pyinstaller_onedir",
+        "category": "DevOps",
+        "purpose": "Generates standalone Windows executables from Python scripts using PyInstaller with venv, --onedir, and --windowed flags",
+        "triggers": [
+          "pyinstaller",
+          "generate exe",
+          "build executable",
+          "standalone app",
+          "distribute application",
+          "windows executable"
+        ],
+        "files_required": [
+          "*.py",
+          "*.spec"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "input_file_handler",
+        "category": "File Handling",
+        "purpose": "Handles file input operations including validation, reading, encoding detection, and error handling",
+        "triggers": [
+          "file input",
+          "open file",
+          "file validation",
+          "encoding detection",
+          "read file",
+          "file dialog"
+        ],
+        "files_required": [
+          "*"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "input_validation_sanitizer",
+        "category": "File Handling",
+        "purpose": "Validates and sanitizes incoming file data ensuring correct types, ranges, and formats before processing",
+        "triggers": [
+          "validate input",
+          "sanitize data",
+          "input check",
+          "data cleaning",
+          "format validation",
+          "type checking input"
+        ],
+        "files_required": [
+          "*"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT",
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "execution_timer",
+        "category": "Observability",
+        "purpose": "Measures execution time with appropriate precision \u2014 hh:mm:ss for general tasks, milliseconds for SQL queries",
+        "triggers": [
+          "execution time",
+          "timer",
+          "measure performance",
+          "benchmark",
+          "profiling",
+          "how long"
+        ],
+        "files_required": [
+          "*.py"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "log_overwrite_policy",
+        "category": "Observability",
+        "purpose": "Overwrites logs on each execution to prevent accumulation, ensuring fresh logs per run and preventing storage bloat",
+        "triggers": [
+          "log policy",
+          "overwrite logs",
+          "fresh logs",
+          "log management",
+          "log cleanup"
+        ],
+        "files_required": [
+          "*.log",
+          "*.py"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "log_bundle_folder_management",
+        "category": "Observability",
+        "purpose": "Creates log folders outside PyInstaller bundles ensuring bundled applications can write logs to user-accessible locations",
+        "triggers": [
+          "log folder",
+          "bundle logs",
+          "pyinstaller logs",
+          "log directory",
+          "log path setup"
+        ],
+        "files_required": [
+          "*.py",
+          "*.log"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "python_venv_executor",
+        "category": "Runtime",
+        "purpose": "Executes Python scripts exclusively via virtual environment \u2014 global Python is never used, enforcing complete isolation",
+        "triggers": [
+          "venv",
+          "virtual environment",
+          "run script",
+          "execute python",
+          "isolated execution",
+          "python environment"
+        ],
+        "files_required": [
+          "*.py",
+          "requirements.txt"
+        ],
+        "modes": [
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "streamlit_lifecycle_state",
+        "category": "Streamlit",
+        "purpose": "Manages st.session_state lifecycle, complex callbacks, and event-driven logic to prevent synchronization errors and unnecessary reruns",
+        "triggers": [
+          "session_state",
+          "callbacks",
+          "st.session_state",
+          "on_change",
+          "on_click",
+          "rerun control",
+          "state management",
+          "component lifecycle"
+        ],
+        "files_required": [
+          "*.py"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT",
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "streamlit_performance_caching",
+        "category": "Streamlit",
+        "purpose": "Optimizes application performance using st.cache_data for computation/data and st.cache_resource for global connections/state",
+        "triggers": [
+          "st.cache_data",
+          "st.cache_resource",
+          "caching",
+          "performance optimization",
+          "singleton",
+          "data persistence",
+          "lazy loading"
+        ],
+        "files_required": [
+          "*.py"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT",
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "streamlit_layout_expert",
+        "category": "Streamlit",
+        "purpose": "Designs advanced user interfaces using st.columns, st.tabs, st.container, st.expander, and st.sidebar for professional organization",
+        "triggers": [
+          "st.columns",
+          "st.tabs",
+          "st.container",
+          "st.sidebar",
+          "st.expander",
+          "ui layout",
+          "dashboard design",
+          "nested layout"
+        ],
+        "files_required": [
+          "*.py"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ]
+      },
+      {
+        "name": "streamlit_data_viz",
+        "category": "Streamlit",
+        "purpose": "Integrates interactive visualizations with Plotly and Altair, and implements real-time data editing using st.data_editor",
+        "triggers": [
+          "plotly",
+          "altair",
+          "st.data_editor",
+          "data visualization",
+          "charts",
+          "interactive plots",
+          "data editing",
+          "dataframe display"
+        ],
+        "files_required": [
+          "*.py"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT",
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "streamlit_secrets_manager",
+        "category": "Streamlit",
+        "purpose": "Implements secure configuration management via .streamlit/secrets.toml and st.secrets for credentials and API keys",
+        "triggers": [
+          "st.secrets",
+          "secrets.toml",
+          "secure config",
+          "api keys",
+          "database credentials",
+          "config security",
+          ".streamlit/secrets"
+        ],
+        "files_required": [
+          ".streamlit/secrets.toml",
+          "secrets.toml",
+          "*.py"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT",
+          "IMPLEMENT_ONLY"
+        ]
+      },
+      {
+        "name": "notion_curator_project_assessor",
+        "category": "Notion Curator",
+        "purpose": "Classifies projects by role (core/experimental/learning/archived), estimates multi-dimensional impact (professional, technical, strategic), and evaluates effort-to-return ratio through guided conversation",
+        "triggers": [
+          "classify project",
+          "project role",
+          "impact estimation",
+          "effort return",
+          "project assessment",
+          "evaluar proyecto",
+          "clasificar proyecto"
+        ],
+        "files_required": [
+          "*.md",
+          "*.yaml"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ],
+        "interaction_mode": "interactive",
+        "language": "es",
+        "input_description": "Project name, repository or folder reference, and any existing documentation or notes about the project",
+        "output_description": "Structured assessment in Spanish including role classification, impact scores across three dimensions, effort-vs-return verdict, and flagged areas requiring user confirmation",
+        "constraints": [
+          "Do NOT auto-assign impact levels \u2014 ask the user to confirm or adjust",
+          "If effort-vs-return is ambiguous, state it explicitly and request clarification",
+          "Flag any claim that appears inflated or unsupported",
+          "Do NOT generate filler content to make the assessment look more complete"
+        ]
+      },
+      {
+        "name": "notion_curator_keep_archive_advisor",
+        "category": "Notion Curator",
+        "purpose": "Advises whether a project should be kept active, archived, or transformed based on current relevance, and curates output to prevent cognitive overload in Notion workspace",
+        "triggers": [
+          "keep or archive",
+          "archive project",
+          "transform project",
+          "notion cleanup",
+          "project relevance",
+          "archivar proyecto",
+          "curar notion"
+        ],
+        "files_required": [
+          "*.md",
+          "*.yaml"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ],
+        "interaction_mode": "interactive",
+        "language": "es",
+        "input_description": "Project name, last modification date, current usage status, and any subjective notes from the user about perceived value",
+        "output_description": "Clear keep/archive/transform recommendation in Spanish with rationale, suggested actions, and explicit question to the user before finalizing",
+        "constraints": [
+          "Never auto-archive without user confirmation",
+          "If a project has low impact, state it clearly \u2014 do not soften the message",
+          "Recommend extracting reusable components before archiving",
+          "Limit Notion output to prevent page sprawl \u2014 fewer sections, higher signal"
+        ]
+      },
+      {
+        "name": "notion_curator_reflection_prompter",
+        "category": "Notion Curator",
+        "purpose": "Guides structured reflection through targeted questions, mirrors implicit signals back to the user, and flags inflated claims or low-impact justifications",
+        "triggers": [
+          "reflect on project",
+          "project reflection",
+          "what did I learn",
+          "truth mirror",
+          "honest assessment",
+          "reflexion proyecto",
+          "reflexionar"
+        ],
+        "files_required": [
+          "*.md"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ],
+        "interaction_mode": "interactive",
+        "language": "es",
+        "input_description": "Project context, user statements about the project, and any previous assessments or narratives",
+        "output_description": "Sequence of focused reflection questions in Spanish, with truth-mirroring observations that surface implicit signals from user behavior or statements",
+        "constraints": [
+          "Ask ONE question at a time \u2014 do not overwhelm with multiple prompts",
+          "Mirror implicit signals without judgment (e.g., 'you mentioned X but have not touched it in months')",
+          "Do NOT answer your own questions or assume the user's intent",
+          "If the user's response feels performative, gently probe deeper"
+        ]
+      },
+      {
+        "name": "notion_curator_narrative_builder",
+        "category": "Notion Curator",
+        "purpose": "Constructs first-person, technically honest project narratives for Notion pages, extracting concrete learnings from design decisions and implementation trade-offs",
+        "triggers": [
+          "notion readme",
+          "project narrative",
+          "write project page",
+          "notion page",
+          "narrativa proyecto",
+          "design decisions",
+          "escribir narrativa"
+        ],
+        "files_required": [
+          "*.md"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ],
+        "interaction_mode": "hybrid",
+        "language": "es",
+        "input_description": "Reflection outputs from notion_curator_reflection_prompter, project assessment from notion_curator_project_assessor, and any raw notes or code context",
+        "output_description": "First-person Notion-style project page in Spanish with sections for context, key decisions, learnings, and current status \u2014 concise, technically honest, no filler",
+        "constraints": [
+          "Write in first person \u2014 this is the user's voice, not a report",
+          "Each design decision must link to a concrete learning",
+          "Do NOT add sections just to fill space \u2014 omit empty categories",
+          "This is NOT a GitHub README \u2014 no installation instructions, no badges, no API docs",
+          "Maximum 5 sections per narrative to prevent Notion overload"
+        ]
+      },
+      {
+        "name": "notion_curator_skill_evolution_tracker",
+        "category": "Notion Curator",
+        "purpose": "Tracks how technical skills and evaluation criteria evolve across projects, identifying growth patterns, consolidated competencies, and emerging areas",
+        "triggers": [
+          "skill growth",
+          "track skills",
+          "criteria evolution",
+          "skill progression",
+          "evolucion habilidades",
+          "seguimiento competencias"
+        ],
+        "files_required": [
+          "*.md",
+          "*.yaml"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ],
+        "interaction_mode": "hybrid",
+        "language": "es",
+        "input_description": "Previous project assessments, narrative history, and user-reported skill changes or new tools adopted",
+        "output_description": "Periodic skill evolution summary in Spanish documenting consolidated skills, emerging skills, stalled areas, and shifted evaluation criteria",
+        "constraints": [
+          "Distinguish between 'used once' and 'consolidated' \u2014 frequency matters",
+          "Ask the user about skills that appear stalled or abandoned",
+          "Track criteria changes explicitly (e.g., 'before: speed. now: maintainability')",
+          "Do NOT inflate skill levels \u2014 if usage is limited, say so"
+        ]
+      },
+      {
+        "name": "github_readme_intent_detector",
+        "category": "GitHub README",
+        "purpose": "Analyzes repository contents to determine what the project actually is, what problem it addresses, and its primary technical domain",
+        "triggers": [
+          "repo intent",
+          "what is this repo",
+          "project purpose",
+          "repository analysis",
+          "detect intent"
+        ],
+        "files_required": [
+          "*"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ],
+        "interaction_mode": "autonomous",
+        "language": "en",
+        "input_description": "Repository root path or context.json containing treemap, dependencies, and file structure",
+        "output_description": "Structured intent summary including primary purpose, technical domain, target audience, and confidence level",
+        "constraints": [
+          "Derive intent exclusively from code, configs, and existing docs \u2014 never invent purposes",
+          "If intent is ambiguous, state multiple hypotheses with confidence levels",
+          "Do NOT assume the project is production-ready unless evidence supports it",
+          "Do NOT use marketing language or superlatives"
+        ]
+      },
+      {
+        "name": "github_readme_maturity_classifier",
+        "category": "GitHub README",
+        "purpose": "Classifies repository maturity level (prototype, internal-tool, production, archived) based on objective signals like tests, CI, docs, versioning, and commit activity",
+        "triggers": [
+          "repo maturity",
+          "project stage",
+          "is this production ready",
+          "maturity classification",
+          "project lifecycle stage"
+        ],
+        "files_required": [
+          "*"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ],
+        "interaction_mode": "autonomous",
+        "language": "en",
+        "input_description": "Repository root path or context.json with treemap, dependencies report, and commit metadata",
+        "output_description": "Maturity classification (prototype | internal-tool | production | archived) with supporting evidence and signal breakdown",
+        "constraints": [
+          "Base classification on objective signals only \u2014 presence of tests, CI config, version tags, LICENSE, changelog",
+          "If signals conflict (e.g., production docs but no tests), report the conflict explicitly",
+          "Do NOT upgrade maturity based on README claims alone",
+          "A repo with no tests and no CI is not production-grade regardless of what docs say"
+        ]
+      },
+      {
+        "name": "github_readme_value_extractor",
+        "category": "GitHub README",
+        "purpose": "Identifies what is non-generic in the repository \u2014 the unique technical contributions, patterns, or approaches that distinguish it from standard implementations",
+        "triggers": [
+          "core value",
+          "what makes this unique",
+          "differentiator",
+          "non-generic value",
+          "unique contribution"
+        ],
+        "files_required": [
+          "*.py",
+          "*.md",
+          "*.yaml",
+          "*.json"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ],
+        "interaction_mode": "autonomous",
+        "language": "en",
+        "input_description": "Repository root path or context.json with skills registry, treemap, and dependency information",
+        "output_description": "List of non-generic elements with evidence, plus explicit statement of which parts are standard/boilerplate",
+        "constraints": [
+          "If the entire repo is a standard implementation with no unique contribution, state that clearly",
+          "Do NOT fabricate uniqueness \u2014 generic CRUD apps are generic CRUD apps",
+          "Distinguish between 'genuinely novel' and 'well-executed but standard'",
+          "Every claimed value must reference specific code, config, or architectural evidence"
+        ]
+      },
+      {
+        "name": "github_readme_section_planner",
+        "category": "GitHub README",
+        "purpose": "Determines which README sections are warranted based on repository content, maturity, and scope \u2014 producing structure before content to prevent bloat",
+        "triggers": [
+          "readme structure",
+          "readme sections",
+          "plan readme",
+          "readme outline",
+          "documentation structure"
+        ],
+        "files_required": [
+          "*.md",
+          "*.py",
+          "*.yaml"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ],
+        "interaction_mode": "autonomous",
+        "language": "en",
+        "input_description": "Outputs from intent_detector, maturity_classifier, and value_extractor",
+        "output_description": "Ordered list of warranted README sections with justification for inclusion and explicit list of sections deliberately omitted",
+        "constraints": [
+          "Only include sections supported by actual repository content",
+          "A prototype does NOT need Contributing, Changelog, or API Reference sections",
+          "Omit sections rather than fill them with placeholder text",
+          "Justify every included section \u2014 no section exists by default"
+        ]
+      },
+      {
+        "name": "github_readme_problem_statement_generator",
+        "category": "GitHub README",
+        "purpose": "Generates a concise, external-facing problem statement that explains what technical problem the repository addresses and for whom",
+        "triggers": [
+          "problem statement",
+          "what problem does this solve",
+          "project description",
+          "readme introduction",
+          "external description"
+        ],
+        "files_required": [
+          "*.md",
+          "*.py",
+          "*.yaml"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ],
+        "interaction_mode": "autonomous",
+        "language": "en",
+        "input_description": "Output from intent_detector and value_extractor, plus repository context",
+        "output_description": "2-4 sentence problem statement in third person, technically precise, free of jargon inflation",
+        "constraints": [
+          "Write in third person \u2014 no 'we', 'our', or 'I'",
+          "State the problem before the solution",
+          "Do NOT claim the project 'solves' a problem unless evidence supports functional completeness",
+          "Use 'addresses', 'provides', or 'implements' over 'revolutionizes', 'powerful', or 'cutting-edge'"
+        ]
+      },
+      {
+        "name": "github_readme_architecture_annotator",
+        "category": "GitHub README",
+        "purpose": "Documents observable architecture and design decisions from code structure, dependency choices, and configuration patterns \u2014 never speculates beyond what is present",
+        "triggers": [
+          "architecture docs",
+          "design decisions",
+          "technical architecture",
+          "repo architecture",
+          "system design"
+        ],
+        "files_required": [
+          "*.py",
+          "*.yaml",
+          "*.json",
+          "*.toml"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ],
+        "interaction_mode": "autonomous",
+        "language": "en",
+        "input_description": "Repository treemap, dependency report, and file structure from context.json",
+        "output_description": "Architecture summary listing observable patterns, dependency rationale (where inferrable), and directory structure semantics",
+        "constraints": [
+          "Only document architecture that is observable from code and config \u2014 do NOT infer unstated patterns",
+          "If a design decision is unclear, note it as 'not documented' rather than guessing the rationale",
+          "Do NOT produce architecture diagrams based on speculation",
+          "List dependencies as facts, not as endorsements"
+        ]
+      },
+      {
+        "name": "github_readme_scope_definer",
+        "category": "GitHub README",
+        "purpose": "Defines what the repository explicitly supports and what falls outside its scope, preventing users from forming incorrect expectations",
+        "triggers": [
+          "usage scope",
+          "what is supported",
+          "scope definition",
+          "supported features",
+          "intended usage"
+        ],
+        "files_required": [
+          "*.md",
+          "*.py",
+          "*.yaml"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ],
+        "interaction_mode": "autonomous",
+        "language": "en",
+        "input_description": "Outputs from intent_detector, maturity_classifier, and repository context",
+        "output_description": "Two lists \u2014 'Supported' and 'Not Supported / Out of Scope' \u2014 derived from actual repository capabilities",
+        "constraints": [
+          "Only list features as 'supported' if there is code implementing them",
+          "If tests exist for a feature, note it; if not, flag the gap",
+          "Do NOT list aspirational features as supported",
+          "Err on the side of under-claiming rather than over-claiming"
+        ]
+      },
+      {
+        "name": "github_readme_nongoals_extractor",
+        "category": "GitHub README",
+        "purpose": "Extracts explicit non-goals and limitations from repository evidence \u2014 what the project intentionally does not do and where it falls short",
+        "triggers": [
+          "non-goals",
+          "limitations",
+          "what this is not",
+          "known limitations",
+          "out of scope"
+        ],
+        "files_required": [
+          "*.md",
+          "*.py",
+          "*.yaml"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ],
+        "interaction_mode": "autonomous",
+        "language": "en",
+        "input_description": "Repository context, dependency report, and maturity classification",
+        "output_description": "Structured list of non-goals (intentional exclusions) and limitations (known shortcomings) with evidence",
+        "constraints": [
+          "Distinguish between 'intentional non-goal' and 'limitation/gap'",
+          "If the repo lacks error handling, say so \u2014 do not frame it as 'minimal by design' without evidence",
+          "Missing tests are a limitation, not a feature",
+          "Do NOT soften limitations to protect project perception"
+        ]
+      },
+      {
+        "name": "github_readme_inconsistency_detector",
+        "category": "GitHub README",
+        "purpose": "Detects mismatches between existing README claims and actual repository contents \u2014 identifies stale docs, missing features, and overclaims",
+        "triggers": [
+          "readme drift",
+          "docs vs code",
+          "inconsistency check",
+          "stale documentation",
+          "readme accuracy"
+        ],
+        "files_required": [
+          "README.md",
+          "*.py",
+          "*.yaml",
+          "*.json"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ],
+        "interaction_mode": "autonomous",
+        "language": "en",
+        "input_description": "Existing README content and repository context from context.json (treemap, dependencies, skills registry)",
+        "output_description": "List of detected inconsistencies categorized as stale, overclaimed, underdocumented, or structurally misleading, with specific evidence",
+        "constraints": [
+          "Every inconsistency must cite the specific README claim AND the contradicting repository evidence",
+          "Do NOT flag stylistic preferences as inconsistencies \u2014 focus on factual mismatches",
+          "If README mentions features not present in code, flag as overclaim",
+          "If code has capabilities not mentioned in README, flag as underdocumented"
+        ]
+      },
+      {
+        "name": "github_readme_claim_validator",
+        "category": "GitHub README",
+        "purpose": "Validates claims in README drafts against repository evidence \u2014 enforces anti-hype by flagging unsupported superlatives, unverifiable benchmarks, and inflated descriptions",
+        "triggers": [
+          "validate claims",
+          "anti-hype check",
+          "claim verification",
+          "readme review",
+          "fact check readme"
+        ],
+        "files_required": [
+          "*.md",
+          "*.py",
+          "*.yaml"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ],
+        "interaction_mode": "autonomous",
+        "language": "en",
+        "input_description": "README draft text and repository context from context.json",
+        "output_description": "Annotated claim review with verdicts (supported, unsupported, unverifiable, inflated) and suggested rewording for flagged claims",
+        "constraints": [
+          "Flag any superlative ('best', 'fastest', 'most powerful') as requiring evidence",
+          "Performance claims without benchmarks in the repo are 'unverifiable'",
+          "Feature claims without corresponding code are 'unsupported'",
+          "Suggest neutral, defensible alternatives for every flagged claim"
+        ]
+      },
+      {
+        "name": "github_readme_cross_repo_positioner",
+        "category": "GitHub README",
+        "purpose": "Positions the repository relative to other projects in the same organization or domain \u2014 clarifying overlaps, dependencies, and complementary roles",
+        "triggers": [
+          "cross-repo position",
+          "how does this fit",
+          "repo relationship",
+          "project portfolio",
+          "repo comparison"
+        ],
+        "files_required": [
+          "*.md",
+          "*.yaml",
+          "*.json"
+        ],
+        "modes": [
+          "ANALYZE_AND_IMPLEMENT"
+        ],
+        "interaction_mode": "autonomous",
+        "language": "en",
+        "input_description": "Current repository context plus list of related repositories or organization-level metadata",
+        "output_description": "Positioning statement clarifying this repo's role relative to siblings, noting dependencies, overlaps, and complementary functions",
+        "constraints": [
+          "Only state relationships that are evidenced by imports, configs, or explicit references",
+          "Do NOT assume organizational intent \u2014 only report observable connections",
+          "If no cross-repo relationship is detectable, state that explicitly",
+          "Do NOT fabricate ecosystem narratives from isolated repositories"
+        ]
+      }
+    ]
+  },
+  "agent_rules": "# Agent Governance Rules\n\n## Version\n\n3.1.0\n\n## Scope\n\nGLOBAL GOVERNANCE DOCUMENT\n\nThis document defines the **global governance, security model, and workspace policies**\nfor all AI agents operating in this repository.\n\nIt is a **human-authoritative reference**, not an execution prompt.\n\n---\n\n## 1. Purpose\n\nThe purpose of this document is to:\n\n- Establish a shared mental model of the repository\n- Define immutable security and workspace boundaries\n- Declare non-negotiable governance policies\n- Delegate operational enforcement to skills\n- Serve as a reference for designing agent-specific contracts\n\nAgent-specific behavior MUST be defined in:\n\n- `agent/agent_inspector/agent_inspector.md`\n- `agent/agent_executor/agent_executor.md`\n- Other `agent_<name>.md` contracts\n\n---\n\n## 2. Governance Model\n\n### 2.1 Authority Layers\n\n| Layer               | Description                        | Mutability |\n| ------------------- | ---------------------------------- | ---------- |\n| Governance          | Repository-wide rules and policies | Rare       |\n| Agent Contract      | Role-specific operational rules    | Versioned  |\n| Runtime Constraints | Per-execution limitations          | Ephemeral  |\n\nNo agent may operate under more than **one active contract** at runtime.\n\nGovernance rules are **policy declarations**, not execution logic.\n\n---\n\n## 3. Repository Mental Model\n\n### 3.1 `agent/` Directory\n\nPurpose:\n\n- Agent memory\n- Agent outputs\n- Agent logs\n- Agent-readable documentation\n- Skill definitions\n\nCharacteristics:\n\n- Autonomous workspace\n- Writable by agents (within constraints)\n- NOT part of application runtime\n\nKey subdirectories:\n\n- `agent/agent_outputs/` \u2014 plans, reports, artifacts\n- `agent/agent_logs/` \u2014 execution logs\n- `agent/temp/` \u2014 temporary agent files\n- `agent/skills/` \u2014 authoritative skill definitions\n\n---\n\n### 3.2 Application Source Code\n\nDirectories such as:\n\n- `src/`\n- `ui/`\n- `tests/`\n\nAre considered **PROTECTED APPLICATION CODE**.\n\nRules:\n\n- Agents MUST NOT modify source code directly\n- Source code changes require:\n  - A validated plan\n  - Explicit authorization\n  - Human approval (unless otherwise stated)\n\n---\n\n## 4. Security and Protection Policy\n\n### 4.1 Protected Files (GLOBAL BLACKLIST)\n\nThe following files and paths are IMMUTABLE by default:\n\n```yaml\nprotected_files:\n  documentation:\n    - agent/agent_rules.md\n    - agent/architecture_proposal.md\n    - agent/agent_inspector/agent_inspector.md\n    - agent/agent_executor/agent_executor.md\n    - agent/agent_protocol/README.md\n    - README.md\n\n  configuration:\n    - .git/**\n    - .env\n    - .env.*\n    - credentials.json\n    - secrets.*\n    - requirements.txt\n    - pyproject.toml\n    - setup.py\n    - .pre-commit-config.yaml\n```\n\nAny attempt to modify protected files MUST be rejected.\n\n### 4.2 Execution Environment Policies\n#### 4.2.1 Python Execution Isolation Policy\n\nPython execution is subject to a mandatory isolation policy.\n\n**Policy declaration:**\n\n- Execution of Python via a global interpreter is **STRICTLY PROHIBITED**\n- All Python execution MUST occur through an approved virtual environment\n- This policy is non-negotiable and applies to all agents and execution contexts\n\n**Enforcement model:**\n\n- This policy is enforced exclusively through a governance-approved runtime skill\n- Agents MUST NOT implement, reproduce, or reason about enforcement logic\n- Any Python execution not performed via the approved skill constitutes a governance violation\n\nThe authoritative implementation of this policy resides under: `agent/skills/runtime/`\n\n#### 4.2.2 Skill-Oriented Execution Model\n\nThis repository follows a skill-oriented execution model.\n\n**Policy declaration:**\n\n- Skills represent reusable, deterministic, authoritative procedures\n- Skills are the single source of truth for operational behavior\n- When a task matches the responsibility of an existing skill, agents MUST invoke the skill\n\n**Restrictions:**\n\n- Agents MUST NOT reimplement logic covered by a skill\n- Agents MUST NOT partially reproduce skill behavior\n- Agents MUST NOT reason through steps already encapsulated by a skill\n\n**Governance principle:**\n\nIf a capability exists as a skill, the skill is authoritative. Reasoning is subordinate to invocation.\n\n## 5. Workspace Persistence Policy\n\n- Agent-generated plans MUST be persisted to disk\n- Historical plans and reports MUST NOT be deleted\n- Temporary files MAY be cleaned up by the agent\n- Outputs MUST be stored under `agent/agent_outputs/`\n\n**Persistence guarantees:**\n\n- Auditability\n- Traceability\n- Reproducibility\n\n## 6. Documentation Governance\n\nDocumentation generation is restricted by default.\n\n**Rules:**\n\nAgents MUST NOT generate new documentation unless:\n\n- Explicitly requested, OR\n- Strictly required to complete a task\n\nWhen authorized:\n\n- Documentation must be minimal\n- Documentation must be purpose-driven\n- Duplication is forbidden\n\n## 7. Change Authority\n\n| Change Type         | Authority           |\n| ------------------- | ------------------- |\n| Governance rules    | Human-only          |\n| Agent contracts     | Human-reviewed      |\n| Runtime constraints | User / Orchestrator |\n| Execution plans     | Agent Inspector     |\n| Execution           | Agent Executor      |\n\nAgents MUST escalate ambiguity instead of guessing intent.\n\n## 8. Conflict Resolution\n\nIf a conflict arises between:\n\n- Governance rules\n- Agent contracts\n- Runtime constraints\n\nResolution order is:\n\n1. Governance rules\n2. Agent contract\n3. Runtime constraints\n\n## 9. Design Principle\n\n- **Governance** defines what is never allowed\n- **Contracts** define what an agent may do\n- **Skills** define how it is done\n- **Constraints** define what is allowed right now\n\n## 10. Status\n\nThis document is:\n\n- Informational for agents\n- Authoritative for humans\n- NOT intended to be injected into runtime prompts\n\n---\n\n**Version:** 3.1.0\n**Last Updated:** 2026-02-07\n**Classification:** GOVERNANCE-ONLY",
+  "dependencies_report": "# Project Dependency Analysis\n\n> **Purpose**: This document maps dependencies between Python modules, configuration files, and external libraries. Use it to understand the architecture and relationships between components.\n\n## Executive Summary\n\n- **Total Python modules**: 10\n- **Project entry points**: 10\n- **Configuration files**: 9\n- **Unique external libraries**: 20\n\n---\n\n## 1. Project Entry Points\n\nThese modules are the **main scripts** that initiate execution (they are not imported by other modules):\n\n### `__init__`\n\n**Direct dependencies**: 0 (0 modules, 0 configs, 0 libraries)\n\n\n### `agent_tools.__init__`\n\n**Direct dependencies**: 0 (0 modules, 0 configs, 0 libraries)\n\n\n### `agent_tools.analyze_dependencies`\n\n**Direct dependencies**: 7 (0 modules, 0 configs, 7 libraries)\n\n- **External libraries**: `re`, `collections`, `pathspec`, `ast`, `os` (+2 more)\n\n### `agent_tools.audit_logger`\n\n**Direct dependencies**: 12 (0 modules, 0 configs, 12 libraries)\n\n- **External libraries**: `typing`, `dataclasses`, `uuid`, `datetime`, `argparse` (+7 more)\n\n### `agent_tools.load_full_context`\n\n**Direct dependencies**: 10 (1 modules, 4 configs, 5 libraries)\n\n- **Internal modules**: `load_static_context`\n- **Config files**: `task_plan.json`, `context.json`, `system_config.yaml`, `summary.yaml`\n- **External libraries**: `typing`, `json`, `load_static_context`, `yaml`, `os`\n\n### `agent_tools.load_static_context`\n\n**Direct dependencies**: 6 (0 modules, 2 configs, 4 libraries)\n\n- **Config files**: `context.json`, `skills_registry.yaml`\n- **External libraries**: `typing`, `yaml`, `json`, `os`\n\n### `agent_tools.schema_validator`\n\n**Direct dependencies**: 13 (0 modules, 4 configs, 9 libraries)\n\n- **Config files**: `task_envelope.schema.json`, `execution_report.schema.json`, `task_plan.schema.json`, `system_config.schema.yaml`\n- **External libraries**: `typing`, `jsonschema`, `datetime`, `argparse`, `json` (+4 more)\n\n### `agent_tools.simulate_execution`\n\n**Direct dependencies**: 8 (0 modules, 0 configs, 8 libraries)\n\n- **External libraries**: `typing`, `dataclasses`, `datetime`, `argparse`, `json` (+3 more)\n\n### `agent_tools.treemap`\n\n**Direct dependencies**: 3 (0 modules, 0 configs, 3 libraries)\n\n- **External libraries**: `sys`, `pathspec`, `os`\n\n### `agent_tools.validate_message`\n\n**Direct dependencies**: 14 (0 modules, 4 configs, 10 libraries)\n\n- **Config files**: `task_envelope.schema.json`, `execution_report.schema.json`, `task_plan.schema.json`, `system_config.schema.yaml`\n- **External libraries**: `typing`, `jsonschema`, `datetime`, `argparse`, `json` (+5 more)\n\n---\n\n## 2. Full Dependency Map\n\nThis tree shows **all recursive dependencies** for each entry point:\n\n**Legend**:\n- \ud83d\udce6 Project Python Module\n- \ud83d\udcc4 Configuration File (JSON, YAML, SQL, etc.)\n- \ud83d\udd17 External Library (installed via pip)\n\n### __init__\n\n```\n__init__\n\n```\n\n### agent_tools.__init__\n\n```\nagent_tools.__init__\n\n```\n\n### agent_tools.analyze_dependencies\n\n```\nagent_tools.analyze_dependencies\n\u251c\u2500\u2500 \ud83d\udd17 re\n\u251c\u2500\u2500 \ud83d\udd17 collections\n\u251c\u2500\u2500 \ud83d\udd17 pathspec\n\u251c\u2500\u2500 \ud83d\udd17 ast\n\u251c\u2500\u2500 \ud83d\udd17 os\n\u251c\u2500\u2500 \ud83d\udd17 sys\n\u2514\u2500\u2500 \ud83d\udd17 pathlib\n```\n\n### agent_tools.audit_logger\n\n```\nagent_tools.audit_logger\n\u251c\u2500\u2500 \ud83d\udd17 typing\n\u251c\u2500\u2500 \ud83d\udd17 dataclasses\n\u251c\u2500\u2500 \ud83d\udd17 uuid\n\u251c\u2500\u2500 \ud83d\udd17 datetime\n\u251c\u2500\u2500 \ud83d\udd17 argparse\n\u251c\u2500\u2500 \ud83d\udd17 json\n\u251c\u2500\u2500 \ud83d\udd17 io\n\u251c\u2500\u2500 \ud83d\udd17 csv\n\u251c\u2500\u2500 \ud83d\udd17 sys\n\u251c\u2500\u2500 \ud83d\udd17 hashlib\n\u251c\u2500\u2500 \ud83d\udd17 __future__\n\u2514\u2500\u2500 \ud83d\udd17 pathlib\n```\n\n### agent_tools.load_full_context\n\n```\nagent_tools.load_full_context\n\u251c\u2500\u2500 \ud83d\udce6 load_static_context\n\u251c\u2500\u2500 \ud83d\udcc4 task_plan.json\n\u251c\u2500\u2500 \ud83d\udcc4 context.json\n\u251c\u2500\u2500 \ud83d\udcc4 system_config.yaml\n\u251c\u2500\u2500 \ud83d\udcc4 summary.yaml\n\u251c\u2500\u2500 \ud83d\udd17 typing\n\u251c\u2500\u2500 \ud83d\udd17 json\n\u251c\u2500\u2500 \ud83d\udd17 load_static_context\n\u251c\u2500\u2500 \ud83d\udd17 yaml\n\u2514\u2500\u2500 \ud83d\udd17 os\n```\n\n### agent_tools.load_static_context\n\n```\nagent_tools.load_static_context\n\u251c\u2500\u2500 \ud83d\udcc4 context.json\n\u251c\u2500\u2500 \ud83d\udcc4 skills_registry.yaml\n\u251c\u2500\u2500 \ud83d\udd17 typing\n\u251c\u2500\u2500 \ud83d\udd17 yaml\n\u251c\u2500\u2500 \ud83d\udd17 json\n\u2514\u2500\u2500 \ud83d\udd17 os\n```\n\n### agent_tools.schema_validator\n\n```\nagent_tools.schema_validator\n\u251c\u2500\u2500 \ud83d\udcc4 task_envelope.schema.json\n\u251c\u2500\u2500 \ud83d\udcc4 execution_report.schema.json\n\u251c\u2500\u2500 \ud83d\udcc4 task_plan.schema.json\n\u251c\u2500\u2500 \ud83d\udcc4 system_config.schema.yaml\n\u251c\u2500\u2500 \ud83d\udd17 typing\n\u251c\u2500\u2500 \ud83d\udd17 jsonschema\n\u251c\u2500\u2500 \ud83d\udd17 datetime\n\u251c\u2500\u2500 \ud83d\udd17 argparse\n\u251c\u2500\u2500 \ud83d\udd17 json\n\u251c\u2500\u2500 \ud83d\udd17 yaml\n\u251c\u2500\u2500 \ud83d\udd17 sys\n\u251c\u2500\u2500 \ud83d\udd17 __future__\n\u2514\u2500\u2500 \ud83d\udd17 pathlib\n```\n\n### agent_tools.simulate_execution\n\n```\nagent_tools.simulate_execution\n\u251c\u2500\u2500 \ud83d\udd17 typing\n\u251c\u2500\u2500 \ud83d\udd17 dataclasses\n\u251c\u2500\u2500 \ud83d\udd17 datetime\n\u251c\u2500\u2500 \ud83d\udd17 argparse\n\u251c\u2500\u2500 \ud83d\udd17 json\n\u251c\u2500\u2500 \ud83d\udd17 sys\n\u251c\u2500\u2500 \ud83d\udd17 __future__\n\u2514\u2500\u2500 \ud83d\udd17 pathlib\n```\n\n### agent_tools.treemap\n\n```\nagent_tools.treemap\n\u251c\u2500\u2500 \ud83d\udd17 sys\n\u251c\u2500\u2500 \ud83d\udd17 pathspec\n\u2514\u2500\u2500 \ud83d\udd17 os\n```\n\n### agent_tools.validate_message\n\n```\nagent_tools.validate_message\n\u251c\u2500\u2500 \ud83d\udcc4 task_envelope.schema.json\n\u251c\u2500\u2500 \ud83d\udcc4 execution_report.schema.json\n\u251c\u2500\u2500 \ud83d\udcc4 task_plan.schema.json\n\u251c\u2500\u2500 \ud83d\udcc4 system_config.schema.yaml\n\u251c\u2500\u2500 \ud83d\udd17 typing\n\u251c\u2500\u2500 \ud83d\udd17 jsonschema\n\u251c\u2500\u2500 \ud83d\udd17 datetime\n\u251c\u2500\u2500 \ud83d\udd17 argparse\n\u251c\u2500\u2500 \ud83d\udd17 json\n\u251c\u2500\u2500 \ud83d\udd17 yaml\n\u251c\u2500\u2500 \ud83d\udd17 sys\n\u251c\u2500\u2500 \ud83d\udd17 hashlib\n\u251c\u2500\u2500 \ud83d\udd17 __future__\n\u2514\u2500\u2500 \ud83d\udd17 pathlib\n```\n\n---\n\n## 3. All Modules Index\n\nTabular view of all modules and their dependency counts:\n\n| Module | Type | Local Deps. | Config Files | External Libs |\n|--------|------|---------------|-----------------|---------------|\n| __init__ | Entry Point | 0 | 0 | 0 |\n| agent_tools.__init__ | Entry Point | 0 | 0 | 0 |\n| agent_tools.analyze_dependencies | Entry Point | 0 | 0 | 7 |\n| agent_tools.audit_logger | Entry Point | 0 | 0 | 12 |\n| agent_tools.load_full_context | Entry Point | 1 | 4 | 5 |\n| agent_tools.load_static_context | Entry Point | 0 | 2 | 4 |\n| agent_tools.schema_validator | Entry Point | 0 | 4 | 9 |\n| agent_tools.simulate_execution | Entry Point | 0 | 0 | 8 |\n| agent_tools.treemap | Entry Point | 0 | 0 | 3 |\n| agent_tools.validate_message | Entry Point | 0 | 4 | 10 |\n\n---\n\n## 4. Configuration Files\n\nData/configuration files detected in code and modules using them:\n\n- **`context.json`** \u2192 Used by: `agent_tools.load_full_context`, `agent_tools.load_static_context`\n- **`execution_report.schema.json`** \u2192 Used by: `agent_tools.schema_validator`, `agent_tools.validate_message`\n- **`skills_registry.yaml`** \u2192 Used by: `agent_tools.load_static_context`\n- **`summary.yaml`** \u2192 Used by: `agent_tools.load_full_context`\n- **`system_config.schema.yaml`** \u2192 Used by: `agent_tools.schema_validator`, `agent_tools.validate_message`\n- **`system_config.yaml`** \u2192 Used by: `agent_tools.load_full_context`\n- **`task_envelope.schema.json`** \u2192 Used by: `agent_tools.schema_validator`, `agent_tools.validate_message`\n- **`task_plan.json`** \u2192 Used by: `agent_tools.load_full_context`\n- **`task_plan.schema.json`** \u2192 Used by: `agent_tools.schema_validator`, `agent_tools.validate_message`\n\n---\n\n## Notes\n\n- This file is **automatically generated** via a pre-commit hook.\n- Imports are detected through static analysis (AST) of Python code.\n- Configuration files are detected via regex of common patterns (`open()`, `read_csv()`, etc.).\n- Circular dependencies might cause some modules to be missing from the full tree.\n",
+  "treemap": "## Project Structure\n\n```\n\u251c\u2500\u2500 .gitignore\n\u251c\u2500\u2500 .pre-commit-config.yaml\n\u251c\u2500\u2500 README.md\n\u251c\u2500\u2500 __init__.py\n\u251c\u2500\u2500 agent/\n\u2502   \u251c\u2500\u2500 agent_executor/\n\u2502   \u2502   \u251c\u2500\u2500 agent_executor.md\n\u2502   \u2502   \u251c\u2500\u2500 context/\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 context.md\n\u2502   \u2502   \u251c\u2500\u2500 prompt/\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 simplified_prompt.md\n\u2502   \u2502   \u2514\u2500\u2500 workflow/\n\u2502   \u2502       \u2514\u2500\u2500 workflow.md\n\u2502   \u251c\u2500\u2500 agent_inspector/\n\u2502   \u2502   \u251c\u2500\u2500 agent_inspector.md\n\u2502   \u2502   \u251c\u2500\u2500 context/\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 context.md\n\u2502   \u2502   \u251c\u2500\u2500 prompt/\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 simplified_prompt.md\n\u2502   \u2502   \u2514\u2500\u2500 workflow/\n\u2502   \u2502       \u2514\u2500\u2500 workflow.md\n\u2502   \u251c\u2500\u2500 agent_outputs/\n\u2502   \u2502   \u251c\u2500\u2500 context.json\n\u2502   \u2502   \u251c\u2500\u2500 prompts/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 claude/\n\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 agent_executor_prompt.txt\n\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 agent_inspector_prompt.txt\n\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 agent_senior_prompt.txt\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 gemini/\n\u2502   \u2502   \u2502       \u251c\u2500\u2500 agent_executor_prompt.txt\n\u2502   \u2502   \u2502       \u251c\u2500\u2500 agent_inspector.txt\n\u2502   \u2502   \u2502       \u2514\u2500\u2500 agent_senior.txt\n\u2502   \u2502   \u2514\u2500\u2500 scripts/\n\u2502   \u251c\u2500\u2500 agent_protocol/\n\u2502   \u2502   \u251c\u2500\u2500 README.md\n\u2502   \u2502   \u251c\u2500\u2500 message_queue/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 completed/\n\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 .gitkeep\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 in_progress/\n\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 .gitkeep\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 pending/\n\u2502   \u2502   \u2502       \u2514\u2500\u2500 .gitkeep\n\u2502   \u2502   \u2514\u2500\u2500 schemas/\n\u2502   \u2502       \u251c\u2500\u2500 execution_report.schema.json\n\u2502   \u2502       \u251c\u2500\u2500 system_config.schema.yaml\n\u2502   \u2502       \u251c\u2500\u2500 task_envelope.schema.json\n\u2502   \u2502       \u2514\u2500\u2500 task_plan.schema.json\n\u2502   \u251c\u2500\u2500 agent_senior/\n\u2502   \u2502   \u251c\u2500\u2500 agent_senior.md\n\u2502   \u2502   \u251c\u2500\u2500 context/\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 context.md\n\u2502   \u2502   \u251c\u2500\u2500 prompt/\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 simplified_prompt.md\n\u2502   \u2502   \u2514\u2500\u2500 workflow/\n\u2502   \u2502       \u2514\u2500\u2500 workflow.md\n\u2502   \u251c\u2500\u2500 analysis/\n\u2502   \u251c\u2500\u2500 modular_flow_instructions.md\n\u2502   \u251c\u2500\u2500 rules/\n\u2502   \u2502   \u2514\u2500\u2500 agent_rules.md\n\u2502   \u251c\u2500\u2500 skills/\n\u2502   \u2502   \u251c\u2500\u2500 README.md\n\u2502   \u2502   \u251c\u2500\u2500 architecture/\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 setup_medallion_structure.md\n\u2502   \u2502   \u251c\u2500\u2500 database/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 README.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 connect_duckdb.md\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 query_parquet_duckdb.md\n\u2502   \u2502   \u251c\u2500\u2500 debugging/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 README.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 root_cause_tracing.md\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 systematic_debugging.md\n\u2502   \u2502   \u251c\u2500\u2500 devops/\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 library_manager.md\n\u2502   \u2502   \u251c\u2500\u2500 execution/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 README.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 execution_flow_orchestration.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 git_rollback_strategy.md\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 plan_archive_protocol.md\n\u2502   \u2502   \u251c\u2500\u2500 file_exploration/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 csv_explorer.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 db_explorer.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 docx_explorer.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 excel_explorer.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 file_explorer.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 html_explorer.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 json_explorer.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 parquet_explorer.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 pdf_explorer.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 powerbi_explorer.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 pptx_explorer.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 xml_explorer.md\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 yaml_explorer.md\n\u2502   \u2502   \u251c\u2500\u2500 file_handling/\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 input_file_handler.md\n\u2502   \u2502   \u251c\u2500\u2500 formats/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 README.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 load_json_files.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 load_sql_queries.md\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 load_yaml_files.md\n\u2502   \u2502   \u251c\u2500\u2500 governance/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 README.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 ambiguity_escalation.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 artifact_persistence_discipline.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 immutable_resource_respect.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 minimal_documentation_policy.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 path_traversal_prevention.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 protected_file_validation.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 scope_control_discipline.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 skill_authority_first.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 verification_before_completion.md\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 workspace_model_awareness.md\n\u2502   \u2502   \u251c\u2500\u2500 io/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 README.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 excel_to_parquet.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 parquet_to_excel_polars_xlsxwriter.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 read_excel_pandas.md\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 read_excel_polars_openpyxl.md\n\u2502   \u2502   \u251c\u2500\u2500 observability/\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 execution_timer.md\n\u2502   \u2502   \u251c\u2500\u2500 planning/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 README.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 brainstorming_design_explorer.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 context_loading_protocol.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 decision_process_flow.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 llm_inference_optimization.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 output_validation_checklist.md\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 risk_scoring_matrix.md\n\u2502   \u2502   \u251c\u2500\u2500 python/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 api_client_generator.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 async_concurrency_expert.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 code_structuring_pythonic.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 config_env_manager.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 data_integrity_guardian.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 dependency_audit.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 devops_packaging.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 externalized_logic_handler.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 linter_formatter_guru.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 microservices_api_architect.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 naming_control_flow.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 performance_profiler.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 refactoring_assistant.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 secure_python_practices.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 serialization_persistence.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 testing_qa_mentor.md\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 type_master.md\n\u2502   \u2502   \u251c\u2500\u2500 runtime/\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 python_venv_executor.md\n\u2502   \u2502   \u251c\u2500\u2500 skills_registry.yaml\n\u2502   \u2502   \u251c\u2500\u2500 streamlit/\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 streamlit_data_viz.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 streamlit_layout_expert.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 streamlit_lifecycle_state.md\n\u2502   \u2502   \u2502   \u251c\u2500\u2500 streamlit_performance_caching.md\n\u2502   \u2502   \u2502   \u2514\u2500\u2500 streamlit_secrets_manager.md\n\u2502   \u2502   \u2514\u2500\u2500 ui/\n\u2502   \u2502       \u251c\u2500\u2500 README.md\n\u2502   \u2502       \u251c\u2500\u2500 ui_application_assets.md\n\u2502   \u2502       \u251c\u2500\u2500 ui_framework_selection.md\n\u2502   \u2502       \u251c\u2500\u2500 ui_identity_policy.md\n\u2502   \u2502       \u251c\u2500\u2500 ui_layout_proportionality.md\n\u2502   \u2502       \u251c\u2500\u2500 ui_splash_and_lazy_loading.md\n\u2502   \u2502       \u251c\u2500\u2500 ui_theme_binding.md\n\u2502   \u2502       \u2514\u2500\u2500 ui_widget_modularity.md\n\u2502   \u2514\u2500\u2500 user_task.yaml\n\u251c\u2500\u2500 agent_tools/\n\u2502   \u251c\u2500\u2500 __init__.py\n\u2502   \u251c\u2500\u2500 analyze_dependencies.py\n\u2502   \u251c\u2500\u2500 audit_logger.py\n\u2502   \u251c\u2500\u2500 load_full_context.py\n\u2502   \u251c\u2500\u2500 load_static_context.py\n\u2502   \u251c\u2500\u2500 schema_validator.py\n\u2502   \u251c\u2500\u2500 simulate_execution.py\n\u2502   \u2514\u2500\u2500 validate_message.py\n\u2514\u2500\u2500 requirements.txt\n```\n\n## Cache Artifacts\n\n- path_cache.json: single runtime cache file\n- Host-specific or suffixed cache files are not supported\n- Any additional cache files should be considered accidental artifacts\n",
+  "schemas": {
+    "execution_report.schema.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "execution_report.schema.json",
+      "title": "Execution Report",
+      "description": "Schema for executor-generated execution reports",
+      "type": "object",
+      "required": [
+        "report_id",
+        "plan_id",
+        "status",
+        "started_at",
+        "actions_summary"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "report_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for this report"
+        },
+        "plan_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Reference to the executed plan"
+        },
+        "executor_version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Version of the executor that ran this task"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "SUCCESS",
+            "PARTIAL",
+            "FAILED",
+            "ROLLED_BACK",
+            "CANCELLED",
+            "TIMEOUT"
+          ],
+          "description": "Overall execution status"
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When execution started"
+        },
+        "completed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "description": "When execution completed (null if still running)"
+        },
+        "duration_ms": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "Total execution duration in milliseconds"
+        },
+        "actions_summary": {
+          "type": "object",
+          "required": [
+            "total",
+            "completed",
+            "failed",
+            "skipped"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "total": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Total number of actions in the plan"
+            },
+            "completed": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of successfully completed actions"
+            },
+            "failed": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of failed actions"
+            },
+            "skipped": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of skipped actions"
+            }
+          }
+        },
+        "actions_completed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/completedAction"
+          },
+          "description": "Details of completed actions"
+        },
+        "actions_failed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/failedAction"
+          },
+          "description": "Details of failed actions"
+        },
+        "actions_skipped": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/skippedAction"
+          },
+          "description": "Details of skipped actions"
+        },
+        "rollback_performed": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether rollback was performed"
+        },
+        "rollback_manifest_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid",
+          "description": "Reference to rollback manifest if available"
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/error"
+          },
+          "description": "List of errors encountered"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of warnings generated"
+        },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Execution metrics and statistics"
+        }
+      },
+      "$defs": {
+        "completedAction": {
+          "type": "object",
+          "required": [
+            "action_id",
+            "status",
+            "started_at",
+            "completed_at"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "action_id": {
+              "type": "string",
+              "pattern": "^a[0-9]{3}$",
+              "description": "Reference to action in plan"
+            },
+            "status": {
+              "type": "string",
+              "const": "SUCCESS",
+              "description": "Action status"
+            },
+            "started_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When action started"
+            },
+            "completed_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When action completed"
+            },
+            "duration_ms": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Action duration in milliseconds"
+            },
+            "output": {
+              "type": [
+                "string",
+                "object"
+              ],
+              "description": "Operation-specific output"
+            },
+            "files_modified": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "List of files modified by this action"
+            }
+          }
+        },
+        "failedAction": {
+          "type": "object",
+          "required": [
+            "action_id",
+            "status",
+            "error_code",
+            "error_message"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "action_id": {
+              "type": "string",
+              "pattern": "^a[0-9]{3}$",
+              "description": "Reference to action in plan"
+            },
+            "status": {
+              "type": "string",
+              "const": "FAILED",
+              "description": "Action status"
+            },
+            "error_code": {
+              "type": "integer",
+              "description": "Error code"
+            },
+            "error_message": {
+              "type": "string",
+              "description": "Human-readable error message"
+            },
+            "stack_trace": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Stack trace if available"
+            },
+            "started_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When action started"
+            },
+            "failed_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When action failed"
+            },
+            "recovery_attempted": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether recovery was attempted"
+            }
+          }
+        },
+        "skippedAction": {
+          "type": "object",
+          "required": [
+            "action_id",
+            "reason"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "action_id": {
+              "type": "string",
+              "pattern": "^a[0-9]{3}$",
+              "description": "Reference to action in plan"
+            },
+            "reason": {
+              "type": "string",
+              "description": "Reason for skipping"
+            },
+            "dependency_failed": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^a[0-9]{3}$",
+              "description": "ID of failed dependency if applicable"
+            }
+          }
+        },
+        "error": {
+          "type": "object",
+          "required": [
+            "error_id",
+            "error_code",
+            "message",
+            "timestamp"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "error_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Unique error identifier"
+            },
+            "error_code": {
+              "type": "integer",
+              "description": "Numeric error code"
+            },
+            "error_category": {
+              "type": "string",
+              "enum": [
+                "VALIDATION",
+                "FILE_SYSTEM",
+                "PERMISSION",
+                "DEPENDENCY",
+                "INTERNAL",
+                "TIMEOUT"
+              ],
+              "description": "Error category"
+            },
+            "message": {
+              "type": "string",
+              "description": "Error message"
+            },
+            "details": {
+              "type": "object",
+              "additionalProperties": true,
+              "description": "Additional error details"
+            },
+            "action_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^a[0-9]{3}$",
+              "description": "Associated action ID if applicable"
+            },
+            "timestamp": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When error occurred"
+            },
+            "recoverable": {
+              "type": "boolean",
+              "description": "Whether error is recoverable"
+            }
+          }
+        }
+      }
+    },
+    "system_config.schema.yaml": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "system_config.schema.yaml",
+      "title": "System Configuration",
+      "description": "Schema for inspector-generated system configuration files",
+      "type": "object",
+      "required": [
+        "config_id",
+        "version",
+        "created_at",
+        "system_definitions",
+        "workflow_configuration"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "config_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for this configuration"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Configuration schema version"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO-8601 timestamp of creation"
+        },
+        "plan_reference": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Reference to associated task plan"
+        },
+        "system_definitions": {
+          "type": "object",
+          "description": "System component definitions",
+          "required": [
+            "target_components"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "target_components": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": [
+                  "component_id",
+                  "component_type",
+                  "file_paths"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "component_id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]*$",
+                    "description": "Unique component identifier"
+                  },
+                  "component_type": {
+                    "type": "string",
+                    "enum": [
+                      "etl_module",
+                      "ui_component",
+                      "utility",
+                      "schema",
+                      "query",
+                      "pipeline",
+                      "configuration"
+                    ],
+                    "description": "Type of component"
+                  },
+                  "file_paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Files belonging to this component"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Component description"
+                  }
+                }
+              }
+            },
+            "affected_modules": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Modules affected by the task"
+            },
+            "dependencies": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "from",
+                  "to",
+                  "type"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "from": {
+                    "type": "string",
+                    "description": "Source component"
+                  },
+                  "to": {
+                    "type": "string",
+                    "description": "Target component"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "imports",
+                      "uses",
+                      "configures",
+                      "extends"
+                    ],
+                    "description": "Dependency type"
+                  }
+                }
+              },
+              "description": "Component dependency relationships"
+            }
+          }
+        },
+        "workflow_configuration": {
+          "type": "object",
+          "description": "Workflow execution settings",
+          "additionalProperties": false,
+          "properties": {
+            "execution_mode": {
+              "type": "string",
+              "enum": [
+                "sequential",
+                "parallel",
+                "mixed"
+              ],
+              "default": "sequential",
+              "description": "How actions should be executed"
+            },
+            "requires_approval": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether human approval is required"
+            },
+            "approval_threshold": {
+              "type": "string",
+              "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH",
+                "CRITICAL"
+              ],
+              "default": "HIGH",
+              "description": "Risk level that triggers approval requirement"
+            },
+            "timeout_seconds": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 3600,
+              "default": 300,
+              "description": "Maximum execution time"
+            },
+            "notification_on_completion": {
+              "type": "boolean",
+              "default": true,
+              "description": "Send notification when task completes"
+            },
+            "retry_policy": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "max_retries": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 5,
+                  "default": 3
+                },
+                "backoff_multiplier": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 5,
+                  "default": 2
+                },
+                "initial_delay_ms": {
+                  "type": "integer",
+                  "minimum": 100,
+                  "maximum": 10000,
+                  "default": 1000
+                }
+              }
+            }
+          }
+        },
+        "execution_constraints": {
+          "type": "object",
+          "description": "Constraints on execution",
+          "additionalProperties": false,
+          "properties": {
+            "max_files_modified": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10,
+              "description": "Maximum files that can be modified"
+            },
+            "allowed_operations": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "CREATE",
+                  "MODIFY",
+                  "DELETE",
+                  "RENAME"
+                ]
+              },
+              "default": [
+                "MODIFY"
+              ],
+              "description": "Allowed file operations"
+            },
+            "forbidden_patterns": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [
+                "**/.git/**",
+                "**/node_modules/**",
+                "**/__pycache__/**",
+                "**/.venv/**",
+                "**/dist/**",
+                "**/build/**"
+              ],
+              "description": "Glob patterns for forbidden paths"
+            },
+            "protected_files": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [
+                "agent/rules/agent_rules.md",
+                ".pre-commit-config.yaml",
+                "requirements.txt",
+                ".gitignore"
+              ],
+              "description": "Files requiring elevated approval"
+            },
+            "max_file_size_bytes": {
+              "type": "integer",
+              "minimum": 1024,
+              "maximum": 52428800,
+              "default": 10485760,
+              "description": "Maximum file size in bytes (default 10MB)"
+            }
+          }
+        },
+        "tool_selection_policies": {
+          "type": "object",
+          "description": "Policies for tool selection",
+          "additionalProperties": false,
+          "properties": {
+            "preferred_tools": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "operation",
+                  "tool"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "description": "Operation type"
+                  },
+                  "tool": {
+                    "type": "string",
+                    "description": "Preferred tool name"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "description": "Reason for preference"
+                  }
+                }
+              },
+              "description": "Preferred tools for operations"
+            },
+            "fallback_tools": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "primary",
+                  "fallback"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "primary": {
+                    "type": "string",
+                    "description": "Primary tool"
+                  },
+                  "fallback": {
+                    "type": "string",
+                    "description": "Fallback tool"
+                  },
+                  "condition": {
+                    "type": "string",
+                    "description": "When to use fallback"
+                  }
+                }
+              },
+              "description": "Fallback tool configurations"
+            }
+          }
+        },
+        "validation_rules": {
+          "type": "object",
+          "description": "Post-execution validation rules",
+          "additionalProperties": false,
+          "properties": {
+            "verify_file_hashes": {
+              "type": "boolean",
+              "default": true,
+              "description": "Verify file hashes after modification"
+            },
+            "run_syntax_check": {
+              "type": "boolean",
+              "default": true,
+              "description": "Run syntax validation on modified files"
+            },
+            "run_schema_validation": {
+              "type": "boolean",
+              "default": true,
+              "description": "Validate JSON/YAML against schemas"
+            },
+            "custom_validators": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "command"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Validator name"
+                  },
+                  "command": {
+                    "type": "string",
+                    "description": "Command to run"
+                  },
+                  "on_failure": {
+                    "type": "string",
+                    "enum": [
+                      "warn",
+                      "error",
+                      "rollback"
+                    ],
+                    "default": "warn",
+                    "description": "Action on failure"
+                  }
+                }
+              },
+              "description": "Custom validation commands"
+            }
+          }
+        }
+      }
+    },
+    "task_envelope.schema.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "task_envelope.schema.json",
+      "title": "Task Envelope",
+      "description": "Inter-agent communication message format for the multi-agent protocol",
+      "type": "object",
+      "required": [
+        "envelope",
+        "metadata",
+        "payload"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "envelope": {
+          "type": "object",
+          "description": "Message envelope containing routing and control information",
+          "required": [
+            "envelope_id",
+            "version",
+            "created_at",
+            "source_agent",
+            "target_agent",
+            "message_type"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "envelope_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Unique identifier for this envelope (UUID v4)"
+            },
+            "version": {
+              "type": "string",
+              "pattern": "^\\d+\\.\\d+\\.\\d+$",
+              "description": "Protocol version (semantic versioning)"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "ISO-8601 timestamp of envelope creation"
+            },
+            "source_agent": {
+              "type": "string",
+              "enum": [
+                "agent_inspector",
+                "agent_executor",
+                "agent_protocol",
+                "user"
+              ],
+              "description": "Agent that created this envelope"
+            },
+            "target_agent": {
+              "type": "string",
+              "enum": [
+                "agent_inspector",
+                "agent_executor",
+                "agent_protocol",
+                "user"
+              ],
+              "description": "Agent that should receive this envelope"
+            },
+            "message_type": {
+              "type": "string",
+              "enum": [
+                "TASK_REQUEST",
+                "TASK_RESPONSE",
+                "STATUS_UPDATE",
+                "ERROR",
+                "ACK",
+                "ROLLBACK_REQUEST",
+                "CANCEL"
+              ],
+              "description": "Type of message contained in the envelope"
+            },
+            "priority": {
+              "type": "string",
+              "enum": [
+                "LOW",
+                "NORMAL",
+                "HIGH",
+                "CRITICAL"
+              ],
+              "default": "NORMAL",
+              "description": "Message priority for queue ordering"
+            },
+            "requires_ack": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether an acknowledgment is required"
+            },
+            "ttl_seconds": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 86400,
+              "default": 3600,
+              "description": "Time-to-live in seconds before message expires"
+            }
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Traceability and correlation metadata",
+          "required": [
+            "correlation_id",
+            "sequence_number"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "correlation_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "ID linking related messages in a conversation"
+            },
+            "parent_envelope_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "uuid",
+              "description": "ID of the parent envelope if this is a response"
+            },
+            "sequence_number": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Sequence number within the correlation group"
+            },
+            "retry_count": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "description": "Number of retry attempts for this message"
+            },
+            "max_retries": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 3,
+              "description": "Maximum number of retry attempts allowed"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z0-9_-]+$"
+              },
+              "description": "Tags for categorization and filtering"
+            },
+            "trace_id": {
+              "type": "string",
+              "description": "Distributed tracing ID for observability"
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "description": "Message-specific content",
+          "required": [
+            "task_id",
+            "task_type",
+            "content"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "task_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Unique identifier for the task"
+            },
+            "task_type": {
+              "type": "string",
+              "enum": [
+                "FILE_CREATE",
+                "FILE_MODIFY",
+                "FILE_DELETE",
+                "FILE_RENAME",
+                "SCHEMA_UPDATE",
+                "SQL_EXECUTE",
+                "PIPELINE_RUN",
+                "ROLLBACK",
+                "STATUS_QUERY",
+                "MULTI_ACTION"
+              ],
+              "description": "Type of task to be performed"
+            },
+            "content": {
+              "type": "object",
+              "description": "Task-specific content (structure depends on task_type)",
+              "additionalProperties": true
+            }
+          }
+        },
+        "validation": {
+          "type": "object",
+          "description": "Validation and integrity information",
+          "additionalProperties": false,
+          "properties": {
+            "checksum": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "description": "SHA-256 hash of the payload object"
+            },
+            "signature": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Optional digital signature for authentication"
+            },
+            "validated_at": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date-time",
+              "description": "Timestamp when validation was performed"
+            },
+            "validated_by": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "agent_protocol",
+                "manual",
+                null
+              ],
+              "description": "Entity that performed validation"
+            }
+          }
+        }
+      }
+    },
+    "task_plan.schema.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "task_plan.schema.json",
+      "title": "Task Plan",
+      "description": "Schema for inspector-generated task plans",
+      "type": "object",
+      "required": [
+        "plan_id",
+        "version",
+        "created_at",
+        "task_summary",
+        "action_plan",
+        "execution_instructions",
+        "risk_assessment"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "plan_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for this plan"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Semantic version of the plan format"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO-8601 timestamp of plan creation"
+        },
+        "inspector_version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Version of the inspector that created this plan"
+        },
+        "task_summary": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 500,
+          "description": "Human-readable summary of the task"
+        },
+        "context_files_used": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of files analyzed during planning"
+        },
+        "decisions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision"
+          },
+          "description": "Decisions made during planning"
+        },
+        "action_plan": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/action"
+          },
+          "description": "Ordered list of actions to execute"
+        },
+        "task_decomposition": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/subtask"
+          },
+          "description": "Logical grouping of actions into subtasks"
+        },
+        "execution_instructions": {
+          "$ref": "#/$defs/executionInstructions"
+        },
+        "risk_assessment": {
+          "$ref": "#/$defs/riskAssessment"
+        }
+      },
+      "$defs": {
+        "decision": {
+          "type": "object",
+          "required": [
+            "decision_id",
+            "description",
+            "rationale"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "decision_id": {
+              "type": "string",
+              "pattern": "^d[0-9]{3}$",
+              "description": "Unique decision identifier (format: d001, d002, etc.)"
+            },
+            "description": {
+              "type": "string",
+              "minLength": 10,
+              "description": "What was decided"
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 10,
+              "description": "Why this decision was made"
+            },
+            "alternatives_considered": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Other options that were evaluated"
+            },
+            "risk_level": {
+              "type": "string",
+              "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH",
+                "CRITICAL"
+              ],
+              "description": "Risk level associated with this decision"
+            }
+          }
+        },
+        "action": {
+          "type": "object",
+          "required": [
+            "action_id",
+            "action_type",
+            "target",
+            "operation"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "action_id": {
+              "type": "string",
+              "pattern": "^a[0-9]{3}$",
+              "description": "Unique action identifier (format: a001, a002, etc.)"
+            },
+            "action_type": {
+              "type": "string",
+              "enum": [
+                "FILE_CREATE",
+                "FILE_MODIFY",
+                "FILE_DELETE",
+                "FILE_RENAME",
+                "SCHEMA_UPDATE",
+                "SQL_EXECUTE",
+                "PIPELINE_RUN"
+              ],
+              "description": "Type of action to perform"
+            },
+            "target": {
+              "type": "string",
+              "description": "File path or resource identifier"
+            },
+            "operation": {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "additionalProperties": true,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "Operation-specific type"
+                }
+              },
+              "description": "Operation details"
+            },
+            "depends_on": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^a[0-9]{3}$"
+              },
+              "description": "Action IDs this action depends on"
+            },
+            "reversible": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether this action can be rolled back"
+            },
+            "risk_level": {
+              "type": "string",
+              "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH",
+                "CRITICAL"
+              ],
+              "default": "LOW",
+              "description": "Risk level of this action"
+            },
+            "validation_rules": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Post-execution validation rules"
+            },
+            "estimated_duration_ms": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Estimated execution time in milliseconds"
+            }
+          }
+        },
+        "subtask": {
+          "type": "object",
+          "required": [
+            "subtask_id",
+            "description",
+            "actions"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "subtask_id": {
+              "type": "string",
+              "pattern": "^st[0-9]{3}$",
+              "description": "Unique subtask identifier"
+            },
+            "description": {
+              "type": "string",
+              "description": "Subtask description"
+            },
+            "actions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^a[0-9]{3}$"
+              },
+              "description": "Action IDs belonging to this subtask"
+            },
+            "order": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Execution order among subtasks"
+            }
+          }
+        },
+        "executionInstructions": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "execution_order": {
+              "type": "string",
+              "enum": [
+                "sequential",
+                "parallel",
+                "dependency_based"
+              ],
+              "default": "sequential",
+              "description": "How actions should be executed"
+            },
+            "stop_on_error": {
+              "type": "boolean",
+              "default": true,
+              "description": "Stop execution on first error"
+            },
+            "rollback_on_failure": {
+              "type": "boolean",
+              "default": true,
+              "description": "Automatically rollback on failure"
+            },
+            "human_approval_required": {
+              "type": "boolean",
+              "default": false,
+              "description": "Require human approval before execution"
+            },
+            "estimated_files_affected": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Estimated number of files to be modified"
+            },
+            "timeout_seconds": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 3600,
+              "default": 300,
+              "description": "Maximum execution time in seconds"
+            }
+          }
+        },
+        "riskAssessment": {
+          "type": "object",
+          "required": [
+            "overall_risk"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "overall_risk": {
+              "type": "string",
+              "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH",
+                "CRITICAL"
+              ],
+              "description": "Overall risk level of the task"
+            },
+            "risks_identified": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/risk"
+              },
+              "description": "List of identified risks"
+            },
+            "behavioral_invariants": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "System behaviors that must be preserved"
+            },
+            "mitigation_summary": {
+              "type": "string",
+              "description": "Summary of mitigation strategies"
+            }
+          }
+        },
+        "risk": {
+          "type": "object",
+          "required": [
+            "risk_id",
+            "description",
+            "probability",
+            "impact"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "risk_id": {
+              "type": "string",
+              "pattern": "^r[0-9]{3}$",
+              "description": "Unique risk identifier"
+            },
+            "description": {
+              "type": "string",
+              "description": "Risk description"
+            },
+            "probability": {
+              "type": "string",
+              "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH"
+              ],
+              "description": "Probability of risk occurrence"
+            },
+            "impact": {
+              "type": "string",
+              "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH",
+                "CRITICAL"
+              ],
+              "description": "Impact if risk materializes"
+            },
+            "mitigation": {
+              "type": "string",
+              "description": "How to mitigate this risk"
+            },
+            "contingency": {
+              "type": "string",
+              "description": "What to do if risk materializes"
+            }
+          }
+        }
+      }
+    }
+  },
+  "agent_definitions": {
+    "senior": {
+      "context": "# Context - Senior Agent\n\n## 1. Identity & Role\n**Role:** Hybrid Senior Agent (Analysis + Execution)\n**Trust Level:** ELEVATED_BUT_SCOPE_BOUND\n**Language:** English (all outputs must be in English)\n**Design Philosophy:** Move fast without breaking the system. Balance senior judgment with explicit control and governance compliance.\n\n## 2. Core Mission\nYou are designed for targeted, well-scoped tasks where the full Inspector -> Executor pipeline is unnecessary. \n\n**You MUST:**\n- Respect governance and protected file rules.\n- Stay within the explicitly provided scope.\n- Perform analysis proportional to task complexity.\n- Implement only what is justified by analysis or instruction.\n- Prefer minimal, reversible changes.\n- Preserve existing behavior unless instructed otherwise.\n\n**You MUST NOT:**\n- Expand scope beyond instructions.\n- Perform architectural redesigns.\n- Modify protected files.\n- Act on ambiguous objectives without clarification.\n- Introduce \"nice to have\" improvements.\n\n## 3. Governance Rules\n\n### Protected Files Blacklist (NEVER modify)\n- `.git/**`, `.env`, `.env.*`, `credentials.json`, `secrets.*`\n- `requirements.txt`, `pyproject.toml`, `setup.py`, `.pre-commit-config.yaml`\n- `agent/agent_rules.md`, `agent/architecture_proposal.md`\n- `agent/agent_inspector/agent_inspector.md`\n- `agent/agent_executor/agent_executor.md`\n- `agent/agent_protocol/README.md`, `README.md`\n\n### Ambiguity Protocol\nIf requirements are unclear or conflicting:\n1. Do NOT guess or infer intent.\n2. State what is unclear.\n3. Ask for clarification.\n4. Wait for response before proceeding.\n\n### Scope Control\nScope is defined by:\n- The human prompt (Objective).\n- The explicitly referenced files.\n\nIf the task cannot be completed within scope, STOP and explain why.\n\n## 4. Execution Guidelines\n- **Manifest Loading:** If the user triggers with a command like \"Run task\" or refers to `agent/user_task.yaml`, you MUST read that file first. Its contents (objective, files, constraints) take precedence over the chat message.\n- **Modifications:** Modify ONLY explicitly mentioned files or clearly implied adjacent files.\n- **Approach:** One change at a time, verify each before proceeding.\n- **Skills:** Check for applicable skills first (see Skills Registry).\n\n## 5. Output Requirements\nAfter completion, you MUST provide:\n1. **Analysis Summary** (if performed): Brief description, key findings, approach.\n2. **Implementation Summary**: Files modified, created, or deleted.\n3. **Governance Compliance Confirmation**: Confirm no protected files modified, scope respected, changes reversible.\n4. **Verification Evidence**: Commands run, output results, and status.\n\n## 6. When to Use\n- Task is well-scoped and clearly defined.\n- Involves 1-3 files maximum.\n- Does not require formal risk assessment documentation or audit trail.\n- Quick turnaround is prioritized.\n",
+      "workflow": "# Workflow - Senior Agent\n\n## Step 1: Context Loading\n**Role:** agent_senior\n**Description:** \n1. Run `python agent_tools/load_static_context.py` to generate `agent/agent_outputs/context.json`.\n2. (Optional) Run `python agent_tools/load_full_context.py` if dynamic files exist.\n3. Validate that `context.json` exists and contains: `skills_registry`, `agent_rules`, `dependencies_report`, `treemap`, `schemas`.\n4. Adopt `context.json` as the **single authoritative source** for project context.\n\n## Step 2: Skill Authority Check\n**Role:** agent_senior\n**Description:** \nBefore responding to ANY request:\n1. Check available skills in the registry.\n2. Ask: \"Does a skill apply to this task?\" (even if only partially).\n3. **If YES:** Invoke the skill and follow its process.\n4. **If NO:** Proceed to Step 3.\n\n## Step 3: Operating Mode Selection & Execution\n**Role:** agent_senior\n**Description:** Determine the mode from inputs ({MODE}) and execute accordingly.\n\n**Case A: ANALYZE_AND_IMPLEMENT (Default)**\n1. **Analysis:** Perform lightweight, task-focused analysis. Identify risks.\n2. **Planning:** Decide on approach. Ensure no system-wide refactoring is proposed.\n3. **Implementation:** specific code changes justified by analysis.\n\n**Case B: IMPLEMENT_ONLY**\n1. **Execution:** Skip analysis. Implement directly from provided instructions.\n2. **Constraint:** Apply changes precisely as described. Report blockers immediately.\n\n## Step 4: Verification Loop\n**Role:** agent_senior\n**Description:** \nBefore claiming ANY work is done:\n1. **Identify:** Determine the command that proves the claim.\n2. **Run:** Execute the verification command.\n3. **Read:** Analyze full output and exit code.\n4. **Verify:** Confirm output aligns with expectations.\n5. **Iterate:** If verification fails, revert or fix (staying within scope) and repeat.\n\n## Step 5: Governance & Final Reporting\n**Role:** agent_senior\n**Description:** \n1. Review all changes against the **Protected Files Blacklist**.\n2. Verify strict adherence to **Scope**.\n3. Compile the Final Output based on **Output Requirements** (Analysis Summary, Implementation Summary, Compliance Confirmation, Verification Evidence).\n"
+    },
+    "executor": {
+      "context": "# Context - Agent Executor\n\n## 1. Identity & Role\n**Role:** Safe Action Implementer\n**Trust Level:** WRITE_CONTROLLED\n**Language:** English\n**Mission:** Safely implement changes defined by validated task plans. Operate strictly within plan boundaries. Ensure reversibility, traceability, and transparency.\n\n## 2. Core Principles\n1. **Adherence to Plan:** Execute ONLY what is specified in validated plans.\n2. **Reversibility:** Create rollback checkpoints before ANY modification.\n3. **Minimal Footprint:** Touch only explicitly listed files.\n4. **transparency:** Report all actions with detailed logs.\n5. **Fail-Safe:** Stop and revert on unexpected errors.\n\n## 3. Governance Rules\n\n### Hard Constraints (NEVER Violate)\n- **PLAN_ONLY:** Execute only actions from validated plans.\n- **FILE_WHITELIST:** Modify only files listed in the plan.\n- **PROTECTED_FILES_CHECK:** NEVER modify files in the blacklist.\n- **CHECKPOINT_FIRST:** Create rollback checkpoint before modification.\n\n### Protected Files Blacklist\n- `.git/**`, `.env`, `.env.*`, `credentials.json`, `secrets.*`\n- `requirements.txt`, `pyproject.toml`, `setup.py`, `.pre-commit-config.yaml`\n- `agent/agent_rules.md`, `agent/architecture_proposal.md`\n- `agent/agent_inspector/agent_inspector.md`\n- `agent/agent_executor/agent_executor.md`\n- `agent/agent_protocol/README.md`, `README.md`\n\n## 4. Operational Capabilities\n**Allowed Operations:**\n- `FILE_CREATE`: Reversible (delete).\n- `FILE_MODIFY`: Reversible (git revert).\n- `FILE_DELETE`: Reversible (git revert).\n- `FILE_RENAME`: Reversible (git revert).\n- `SCHEMA_UPDATE`: Reversible (git revert).\n\n**Modifications Allowed In:**\n- Project root (for explicitly planned files).\n- `agent/agent_outputs/` (Free write access).\n- `agent/temp/` (Free write access).\n\n## 5. Error Handling & Recovery\n| Error Type | Action |\n| :--- | :--- |\n| **File not found** | Skip action, mark as failed. |\n| **Permission denied** | Skip action, mark as failed. |\n| **Protected violation** | **REJECT PLAN IMMEDIATELY**, alert user. |\n| **Unknown/Critical** | Stop execution, initiate Rollback. |\n\n## 6. Output Requirements\nAll reports must be persisted to `agent/agent_outputs/reports/{timestamp}_{task_id}/`.\n1. **execution_report.json**: Status, actions summary, success/fail lists.\n2. **change_log.json**: Before/after states, diffs.\n3. **rollback_manifest.json**: Checkpoint details.\n4. **executor_prompt.txt**: Auto-generated prompt for re-execution.\n",
+      "workflow": "# Workflow - Agent Executor\n\n## Step 1: Context & Input Loading\n**Role:** agent_executor\n**Description:**\n1. Run `agent_tools/load_static_context.py` to get authoritative context.\n2. Check for `agent/user_task.yaml`. If present and requested, load `objective` and `files` from it.\n3. Load primary inputs: `task_plan.json`, `system_config.yaml`, (optional) `IMPLEMENTATION_SUMMARY.md`.\n4. **Validate:** Key context keys exist (`skills_registry`, `agent_rules`, etc.).\n\n## Step 2: Pre-Execution Protocol\n**Role:** agent_executor\n**Description:**\n1. **Archive Active Plans:** Move existing files in `agent/agent_outputs/plans/plan_active/` to archive.\n2. **Validate Inputs:**\n   - Parse plan and config.\n   - Verify all target files exist (for MODIFY/DELETE).\n   - **CRITICAL:** Check targets against **Protected Files Blacklist**.\n3. **Create Checkpoint:**\n   - Ensure clean git working directory.\n   - Record current commit hash as rollback point.\n\n## Step 3: Execution Engine\n**Role:** agent_executor\n**Description:**\nExecute the `action_plan` from `task_plan.json` sequentially:\n1. **Build Graph:** dependency check (DAG).\n2. **Loop Actions:**\n   - Verify preconditions.\n   - Execute operation (`FILE_MODIFY`, `FILE_CREATE`, etc.).\n   - Validate result.\n   - Log to internal change log.\n   - Update status.\n3. **Handle Errors:** If `stop_on_error` is true, halt. If `rollback_on_failure` is true, trigger Step 4.\n\n## Step 4: Rollback (Conditional)\n**Role:** agent_executor\n**Description:**\n**Trigger:** Critical error + `rollback_on_failure=true` OR User Request.\n1. Identify commit(s) to revert.\n2. Execute `git revert`.\n3. Log revert operation.\n4. Update status to `ROLLED_BACK`.\n\n## Step 5: Reporting & Persistence\n**Role:** agent_executor\n**Description:**\nGenerate and save mandatory reports to `agent/agent_outputs/reports/{timestamp}_{task_id}/`:\n1. `execution_report.json`\n2. `change_log.json`\n3. `rollback_manifest.json`\n4. `executor_prompt.txt`\n"
+    },
+    "inspector": {
+      "context": "# Context - Agent Inspector\n\n## 1. Identity & Role\n**Role:** System Analyst and Planner\n**Trust Level:** WORKSPACE_ADMIN\n**Language:** English\n**Mission:** Analyze structure and risk, then generate structured execution plans. Serve as the intellectual core that plans for the Executor.\n\n## 2. Core Principles\n1. **Analysis First:** Always analyze before proposing changes.\n2. **Behavioral Preservation:** Proposed changes must maintain system invariants.\n3. **Risk Awareness:** Identify and document all potential risks.\n4. **Structured Output:** All outputs must follow defined schemas (JSON/YAML).\n5. **Mandatory Persistence:** ALWAYS write plans to `agent/agent_outputs/`.\n\n## 3. Governance Rules\n- **Manifest Priority:** If the user points to `agent/user_task.yaml`, load all planning parameters from there. This ensures structural alignment between your plan and the user's intent.\n- **NEVER** modify protected files (see Blacklist).\n- **NEVER** execute scripts or commands (Planning only).\n- **NEVER** make assumptions without documentation.\n- **NEVER** skip risk assessment.\n\n### Protected Files Blacklist\n- `.git/**`, `.env`, `.env.*`, `credentials.json`, `secrets.*`\n- `requirements.txt`, `pyproject.toml`, `setup.py`, `.pre-commit-config.yaml`\n- `agent/agent_rules.md`, `agent/architecture_proposal.md`\n- `agent/agent_inspector/agent_inspector.md`\n- `agent/agent_executor/agent_executor.md`\n- `agent/agent_protocol/README.md`, `README.md`\n\n## 4. Decision Framework\n**Categories:**\n- **Trivial:** Formatting, typos (Auto-approved).\n- **Minor:** Single file, non-breaking (Auto-approved).\n- **Standard:** Multi-file, new features (Configurable approval).\n- **Major/Critical:** Architecture, breaking changes, security (User approval required).\n\n**Risk Scoring:**\nProbability x Impact Matrix (Low/Medium/High/Critical).\n\n## 5. Output Specifications\n1. **Primary: task_plan.json**\n   - Location: `agent/agent_outputs/plans/{timestamp}_{task_id}/task_plan.json`\n   - Contains: Decisions, Action Plan, Risk Assessment.\n2. **Secondary: system_config.yaml**\n   - Location: `agent/agent_outputs/plans/{timestamp}_{task_id}/system_config.yaml`\n   - Contains: System definitions, workflow config, execution constraints.\n\n## 6. Analysis Scope\nBefore planning, you MUST analyze:\n- **Structural:** File dependencies (`dependencies_report.md`), module relationships.\n- **Behavioral:** Function contracts, data flow, side effects.\n- **Risk:** Breaking changes, backward compatibility.\n",
+      "workflow": "# Workflow - Agent Inspector\n\n## Step 1: Context Loading\n**Role:** agent_inspector\n**Description:**\n1. Run `agent_tools/load_static_context.py` to get authoritative context.\n2. Load core maps: `treemap.md` (structure), `dependencies_report.md` (relationships).\n3. Load `skills_registry` and `agent_rules`.\n4. Load specific source files ONLY as needed for the task.\n\n## Step 2: Analysis & Impact Assessment\n**Role:** agent_inspector\n**Description:**\n1. **Trace Dependencies:** Use the loaded maps to see what is affected.\n2. **Behavioral Check:** Analyze function contracts and data flows.\n3. **Risk Check:** Identify potential breaking changes or data issues.\n\n## Step 3: Option Evaluation\n**Role:** agent_inspector\n**Description:**\n1. Generate 2-3 alternative approaches.\n2. Score each by Risk, Complexity, and Reversibility.\n3. Select the best approach and document the Rationale (`decisions` field).\n\n## Step 4: Plan Generation\n**Role:** agent_inspector\n**Description:**\n1. **Decompose:** Break the selected approach into atomic actions.\n2. **Structure:** Create the `action_plan` array (CREATE, MODIFY, DELETE, etc.).\n3. **Sequence:** Establish dependency order.\n\n## Step 5: Validation & Persistence\n**Role:** agent_inspector\n**Description:**\n1. **Validate:** Check against Schema requirements and Protected Files Blacklist.\n2. **Persist:** Write `task_plan.json` and `system_config.yaml` to `agent/agent_outputs/plans/{timestamp}_{task_id}/`.\n3. **Confirm:** Return the path of the generated plan to the user.\n"
+    }
+  }
+}

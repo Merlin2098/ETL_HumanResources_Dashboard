@@ -218,7 +218,7 @@ properties:
         items:
           type: string
         default:
-          - "agent/agent_rules.md"
+          - "agent/rules/agent_rules.md"
           - ".pre-commit-config.yaml"
           - "requirements.txt"
           - ".gitignore"

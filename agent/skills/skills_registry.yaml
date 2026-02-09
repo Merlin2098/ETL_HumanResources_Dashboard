@@ -1,0 +1,1839 @@
+# =============================================================================
+# SKILLS REGISTRY
+# Complete registry for the Agent Framework
+# =============================================================================
+#
+# Total Skills: 98
+# Categories:   18
+# Version:      1.0.0
+# Updated:      2026-02-08
+#
+# Categories:
+#   Python (17) | File Exploration (14) | Governance (10) | UI (7)
+#   Planning (6) | Execution (3) | IO (4) | Formats (3) | Database (2)
+#   Debugging (2) | Architecture (1) | DevOps (2) | File Handling (2)
+#   Observability (3) | Runtime (1) | Streamlit (5) | Notion Curator (5)
+#   GitHub README (11)
+#
+# Modes:
+#   ANALYZE_AND_IMPLEMENT - Analyze context first, then implement
+#   IMPLEMENT_ONLY        - Execute directly without analysis phase
+# =============================================================================
+
+metadata:
+  version: "1.0.0"
+  total_skills: 98
+  total_categories: 18
+  last_updated: "2026-02-08"
+  framework: "Agent-Based Systems"
+
+skills:
+  # ===========================================================================
+  # PYTHON — 17 skills
+  # Code quality, architecture, testing, security, and tooling for Python
+  # ===========================================================================
+
+  - name: type_master
+    category: Python
+    purpose: Enforces comprehensive type hints using typing module, Mypy/Pyright static checking, and Pydantic runtime validation
+    triggers:
+      - "add type hints"
+      - "type annotations"
+      - "typing"
+      - "mypy"
+      - "pyright"
+      - "pydantic validation"
+      - "type safety"
+    files_required:
+      - "*.py"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+      - IMPLEMENT_ONLY
+
+  - name: async_concurrency_expert
+    category: Python
+    purpose: Implements async/await patterns, manages event loops, and handles concurrent tasks preventing deadlocks and race conditions
+    triggers:
+      - "async"
+      - "await"
+      - "asyncio"
+      - "concurrency"
+      - "event loop"
+      - "parallel tasks"
+      - "race condition"
+      - "deadlock"
+    files_required:
+      - "*.py"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+      - IMPLEMENT_ONLY
+
+  - name: microservices_api_architect
+    category: Python
+    purpose: Designs FastAPI/Flask APIs with DDD folder structure, dependency injection, middleware, and OpenAPI documentation
+    triggers:
+      - "api design"
+      - "fastapi"
+      - "flask"
+      - "rest api"
+      - "endpoint"
+      - "microservice"
+      - "openapi"
+      - "swagger"
+    files_required:
+      - "*.py"
+      - "*.yaml"
+      - "*.json"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: testing_qa_mentor
+    category: Python
+    purpose: Generates comprehensive unit and integration tests using pytest, fixtures, parametrization, Hypothesis, and mocking
+    triggers:
+      - "write tests"
+      - "unit test"
+      - "integration test"
+      - "pytest"
+      - "coverage"
+      - "test case"
+      - "fixture"
+      - "mock"
+      - "hypothesis"
+    files_required:
+      - "*.py"
+      - "test_*.py"
+      - "*_test.py"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+      - IMPLEMENT_ONLY
+
+  - name: code_structuring_pythonic
+    category: Python
+    purpose: Ensures idiomatic Python patterns, PEP 8 compliance, clean architecture, and separation of concerns
+    triggers:
+      - "pythonic"
+      - "pep 8"
+      - "code structure"
+      - "clean code"
+      - "code smell"
+      - "anti-pattern"
+      - "idiomatic python"
+    files_required:
+      - "*.py"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: naming_control_flow
+    category: Python
+    purpose: Establishes clear naming conventions reflecting intent and explicit, readable control flow patterns
+    triggers:
+      - "naming convention"
+      - "variable names"
+      - "control flow"
+      - "readability"
+      - "magic values"
+      - "code clarity"
+    files_required:
+      - "*.py"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: performance_profiler
+    category: Python
+    purpose: Profiles and optimizes Python code using cProfile, line_profiler, and memory_profiler to identify bottlenecks
+    triggers:
+      - "performance"
+      - "profile"
+      - "bottleneck"
+      - "optimize"
+      - "slow code"
+      - "memory usage"
+      - "benchmark"
+      - "cProfile"
+    files_required:
+      - "*.py"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: data_integrity_guardian
+    category: Python
+    purpose: Ensures data consistency through input validation, constraints, transactions, and corruption prevention
+    triggers:
+      - "data integrity"
+      - "data validation"
+      - "constraint"
+      - "transaction"
+      - "data corruption"
+      - "consistency check"
+    files_required:
+      - "*.py"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+      - IMPLEMENT_ONLY
+
+  - name: secure_python_practices
+    category: Python
+    purpose: Implements security best practices including input validation, injection prevention, and secrets management
+    triggers:
+      - "security"
+      - "sql injection"
+      - "xss prevention"
+      - "input sanitization"
+      - "secrets management"
+      - "vulnerability"
+      - "secure code"
+    files_required:
+      - "*.py"
+      - ".env"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: dependency_audit
+    category: Python
+    purpose: Audits Python dependencies for security vulnerabilities, compatibility, licensing, and version conflicts
+    triggers:
+      - "audit dependencies"
+      - "vulnerability scan"
+      - "outdated packages"
+      - "dependency conflict"
+      - "license check"
+      - "pip audit"
+    files_required:
+      - "requirements.txt"
+      - "pyproject.toml"
+      - "setup.py"
+      - "Pipfile"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: linter_formatter_guru
+    category: Python
+    purpose: Configures linting (Pylint, Flake8) and formatting (Black, Autopep8) with pre-commit hooks
+    triggers:
+      - "lint"
+      - "format code"
+      - "black"
+      - "flake8"
+      - "pylint"
+      - "pre-commit"
+      - "code style"
+      - "autopep8"
+    files_required:
+      - "*.py"
+      - ".flake8"
+      - "pyproject.toml"
+      - ".pre-commit-config.yaml"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+      - IMPLEMENT_ONLY
+
+  - name: refactoring_assistant
+    category: Python
+    purpose: Performs systematic code refactoring to improve readability, reduce duplication, and simplify logic
+    triggers:
+      - "refactor"
+      - "duplication"
+      - "extract function"
+      - "simplify logic"
+      - "code cleanup"
+      - "technical debt"
+      - "dead code"
+    files_required:
+      - "*.py"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: api_client_generator
+    category: Python
+    purpose: Generates type-safe Python API clients for REST/GraphQL services with authentication and pagination
+    triggers:
+      - "api client"
+      - "http client"
+      - "rest client"
+      - "graphql client"
+      - "sdk generation"
+      - "api wrapper"
+    files_required:
+      - "*.py"
+      - "*.json"
+      - "*.yaml"
+    modes:
+      - IMPLEMENT_ONLY
+
+  - name: config_env_manager
+    category: Python
+    purpose: Manages configuration and environment variables with dotenv, validation, and multi-environment support
+    triggers:
+      - "config management"
+      - "environment variable"
+      - "dotenv"
+      - ".env file"
+      - "settings"
+      - "multi-environment"
+    files_required:
+      - "*.py"
+      - ".env"
+      - "*.yaml"
+      - "*.json"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+      - IMPLEMENT_ONLY
+
+  - name: externalized_logic_handler
+    category: Python
+    purpose: Externalizes business logic into configurable rules, DSLs, or config-driven templates
+    triggers:
+      - "business rules"
+      - "externalize logic"
+      - "rule engine"
+      - "dsl"
+      - "config-driven"
+      - "dynamic logic"
+    files_required:
+      - "*.py"
+      - "*.yaml"
+      - "*.json"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: serialization_persistence
+    category: Python
+    purpose: Handles data serialization (pickle/JSON/YAML), file I/O, caching strategies, and data versioning
+    triggers:
+      - "serialize"
+      - "deserialize"
+      - "pickle"
+      - "persistence"
+      - "cache strategy"
+      - "save data"
+      - "load data"
+    files_required:
+      - "*.py"
+      - "*.json"
+      - "*.yaml"
+      - "*.pkl"
+    modes:
+      - IMPLEMENT_ONLY
+
+  - name: devops_packaging
+    category: Python
+    purpose: Handles Python packaging, versioning, and distribution via setup.py/pyproject.toml and PyPI publishing
+    triggers:
+      - "package python"
+      - "pypi"
+      - "setup.py"
+      - "pyproject.toml"
+      - "distribution"
+      - "versioning"
+      - "wheel"
+      - "sdist"
+    files_required:
+      - "setup.py"
+      - "pyproject.toml"
+      - "setup.cfg"
+      - "MANIFEST.in"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+      - IMPLEMENT_ONLY
+
+  # ===========================================================================
+  # FILE EXPLORATION — 14 skills
+  # Format-specific readers and analyzers for diverse file types
+  # ===========================================================================
+
+  - name: file_explorer
+    category: File Exploration
+    purpose: Unified facade that detects file type, validates format, and delegates to the appropriate format-specific explorer
+    triggers:
+      - "explore file"
+      - "inspect file"
+      - "file info"
+      - "file metadata"
+      - "analyze file"
+      - "what is this file"
+    files_required:
+      - "*"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: csv_explorer
+    category: File Exploration
+    purpose: Reads and analyzes CSV files with encoding detection, delimiter inference, and schema inspection
+    triggers:
+      - "csv"
+      - "comma separated"
+      - "explore csv"
+      - "csv schema"
+      - "csv columns"
+      - "delimiter"
+    files_required:
+      - "*.csv"
+      - "*.tsv"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: excel_explorer
+    category: File Exploration
+    purpose: Explores Excel workbooks detecting sheets, reading cell data, and extracting workbook metadata
+    triggers:
+      - "explore excel"
+      - "xlsx info"
+      - "excel sheets"
+      - "workbook structure"
+      - "spreadsheet analysis"
+    files_required:
+      - "*.xlsx"
+      - "*.xls"
+      - "*.xlsm"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: json_explorer
+    category: File Exploration
+    purpose: Parses and explores JSON files validating structure, extracting values, and navigating nested objects
+    triggers:
+      - "explore json"
+      - "json structure"
+      - "json keys"
+      - "json schema"
+      - "json inspect"
+    files_required:
+      - "*.json"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: yaml_explorer
+    category: File Exploration
+    purpose: Reads YAML configuration files, validates syntax, and extracts structured data hierarchies
+    triggers:
+      - "explore yaml"
+      - "yaml structure"
+      - "yaml config"
+      - "yml inspect"
+    files_required:
+      - "*.yaml"
+      - "*.yml"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: xml_explorer
+    category: File Exploration
+    purpose: Parses XML documents navigating element hierarchy, extracting attributes, and reading text content
+    triggers:
+      - "xml"
+      - "explore xml"
+      - "xml structure"
+      - "xml attributes"
+      - "xml namespace"
+    files_required:
+      - "*.xml"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: html_explorer
+    category: File Exploration
+    purpose: Parses HTML documents extracting text, tables, links, and page metadata
+    triggers:
+      - "html"
+      - "explore html"
+      - "html tables"
+      - "web page parse"
+      - "scrape html"
+    files_required:
+      - "*.html"
+      - "*.htm"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: pdf_explorer
+    category: File Exploration
+    purpose: Extracts text and metadata from PDF files handling multi-page documents and preserving layout
+    triggers:
+      - "pdf"
+      - "explore pdf"
+      - "pdf text"
+      - "pdf metadata"
+      - "read pdf"
+    files_required:
+      - "*.pdf"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: docx_explorer
+    category: File Exploration
+    purpose: Reads Word documents extracting text, tables, images, and formatting metadata
+    triggers:
+      - "docx"
+      - "word document"
+      - "explore docx"
+      - "word file"
+      - "doc content"
+    files_required:
+      - "*.docx"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: pptx_explorer
+    category: File Exploration
+    purpose: Explores PowerPoint presentations extracting slides, text content, and speaker notes
+    triggers:
+      - "pptx"
+      - "powerpoint"
+      - "presentation"
+      - "slides"
+      - "explore pptx"
+      - "speaker notes"
+    files_required:
+      - "*.pptx"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: parquet_explorer
+    category: File Exploration
+    purpose: Explores Parquet columnar data files inspecting schema, column statistics, and data previews
+    triggers:
+      - "explore parquet"
+      - "parquet schema"
+      - "parquet metadata"
+      - "parquet preview"
+      - "parquet columns"
+    files_required:
+      - "*.parquet"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: db_explorer
+    category: File Exploration
+    purpose: Explores database connections listing tables, inspecting schemas, and previewing row data
+    triggers:
+      - "explore database"
+      - "db schema"
+      - "list tables"
+      - "database structure"
+      - "db inspect"
+    files_required:
+      - "*.db"
+      - "*.sqlite"
+      - "*.duckdb"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: powerbi_explorer
+    category: File Exploration
+    purpose: Explores Power BI files extracting data models, DAX measures, and table relationships
+    triggers:
+      - "power bi"
+      - "pbix"
+      - "explore power bi"
+      - "dax measures"
+      - "power bi model"
+    files_required:
+      - "*.pbix"
+      - "*.pbit"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: markdown_explorer
+    category: File Exploration
+    purpose: Parses Markdown files extracting headings, links, code blocks, and document structure
+    triggers:
+      - "markdown"
+      - "explore markdown"
+      - "md structure"
+      - "markdown headings"
+      - "read markdown"
+    files_required:
+      - "*.md"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  # ===========================================================================
+  # GOVERNANCE — 10 skills
+  # Behavioral rules, security boundaries, and operational discipline
+  # ===========================================================================
+
+  - name: skill_authority_first
+    category: Governance
+    purpose: Enforces that skills are authoritative units invoked BEFORE any agent action, with priority ordering and anti-rationalization safeguards
+    triggers:
+      - "skill invocation"
+      - "skill priority"
+      - "invoke skill"
+      - "skill authority"
+      - "before action"
+    files_required:
+      - "*.md"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: workspace_model_awareness
+    category: Governance
+    purpose: Ensures agents understand and respect the workspace model treating agent/ as writable and source code as protected
+    triggers:
+      - "workspace model"
+      - "workspace boundaries"
+      - "agent workspace"
+      - "writable directory"
+      - "protected code"
+    files_required:
+      - "*"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: scope_control_discipline
+    category: Governance
+    purpose: Enforces strict scope boundaries preventing scope creep and limiting modifications to authorized areas
+    triggers:
+      - "scope control"
+      - "scope creep"
+      - "out of scope"
+      - "boundary enforcement"
+      - "authorized changes"
+    files_required:
+      - "*"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: immutable_resource_respect
+    category: Governance
+    purpose: Prevents modification of immutable resources, external dependencies, and protected system infrastructure
+    triggers:
+      - "immutable resource"
+      - "read only"
+      - "do not modify"
+      - "protected resource"
+      - "external dependency"
+    files_required:
+      - "*"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: artifact_persistence_discipline
+    category: Governance
+    purpose: Enforces that agent-generated plans, reports, and outputs are persisted to disk and never deleted
+    triggers:
+      - "persist artifact"
+      - "save output"
+      - "artifact history"
+      - "do not delete"
+      - "audit trail"
+    files_required:
+      - "*.md"
+      - "*.json"
+      - "*.yaml"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: minimal_documentation_policy
+    category: Governance
+    purpose: Restricts documentation generation to only explicitly requested or strictly required cases, preventing duplication
+    triggers:
+      - "documentation policy"
+      - "no unnecessary docs"
+      - "minimal docs"
+      - "avoid duplication"
+    files_required:
+      - "*.md"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: ambiguity_escalation
+    category: Governance
+    purpose: Escalates unclear requirements instead of guessing, preventing incorrect assumptions and unauthorized actions
+    triggers:
+      - "unclear requirement"
+      - "ambiguous request"
+      - "escalate"
+      - "need clarification"
+      - "uncertain scope"
+    files_required:
+      - "*"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: protected_file_validation
+    category: Governance
+    purpose: Validates that protected files on the immutability blacklist are not modified by any agent action
+    triggers:
+      - "protected file"
+      - "immutability blacklist"
+      - "file protection"
+      - "cannot modify"
+      - "blacklisted file"
+    files_required:
+      - "rules/agent_rules.md"
+      - "agent_inspector.md"
+      - "agent_executor.md"
+      - "README.md"
+      - ".env"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: path_traversal_prevention
+    category: Governance
+    purpose: Prevents path traversal attacks by validating file paths, preventing directory escape, and enforcing sandbox boundaries
+    triggers:
+      - "path traversal"
+      - "directory escape"
+      - "sandbox boundary"
+      - "path validation"
+      - "security path"
+    files_required:
+      - "*"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: verification_before_completion
+    category: Governance
+    purpose: Requires fresh verification evidence before any completion claims using a 5-step gate protocol (Identify, Run, Read, Verify, Claim)
+    triggers:
+      - "verify completion"
+      - "prove it works"
+      - "evidence required"
+      - "completion claim"
+      - "verify fix"
+      - "run tests before done"
+    files_required:
+      - "*"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  # ===========================================================================
+  # UI — 7 skills
+  # Desktop application UI patterns for Tkinter and PySide6
+  # ===========================================================================
+
+  - name: ui_framework_selection
+    category: UI
+    purpose: Selects appropriate UI framework — Tkinter for MVP prototypes, PySide6 for production builds
+    triggers:
+      - "ui framework"
+      - "tkinter vs pyside"
+      - "gui framework"
+      - "desktop app"
+      - "which ui library"
+    files_required:
+      - "*.py"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: ui_widget_modularity
+    category: UI
+    purpose: Creates self-contained, reusable widgets decoupled from global layout enabling component composition
+    triggers:
+      - "widget"
+      - "reusable component"
+      - "ui module"
+      - "widget decoupling"
+      - "component composition"
+    files_required:
+      - "*.py"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+      - IMPLEMENT_ONLY
+
+  - name: ui_theme_binding
+    category: UI
+    purpose: Implements reactive theme systems with automatic widget updates supporting light/dark mode switching
+    triggers:
+      - "theme"
+      - "dark mode"
+      - "light mode"
+      - "theme binding"
+      - "color scheme"
+      - "ui theme"
+    files_required:
+      - "*.py"
+      - "*.json"
+      - "*.yaml"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+      - IMPLEMENT_ONLY
+
+  - name: ui_layout_proportionality
+    category: UI
+    purpose: Builds adaptive, proportional layouts that scale correctly across multiple screen resolutions
+    triggers:
+      - "responsive layout"
+      - "proportional ui"
+      - "screen resolution"
+      - "adaptive layout"
+      - "layout scaling"
+    files_required:
+      - "*.py"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+      - IMPLEMENT_ONLY
+
+  - name: ui_identity_policy
+    category: UI
+    purpose: Displays application identity (name, version) without redundancy, maintaining a clean professional appearance
+    triggers:
+      - "app identity"
+      - "app title"
+      - "version display"
+      - "window title"
+      - "branding"
+    files_required:
+      - "*.py"
+    modes:
+      - IMPLEMENT_ONLY
+
+  - name: ui_splash_and_lazy_loading
+    category: UI
+    purpose: Shows splash screens during lazy resource loading to prevent frozen UI and improve perceived responsiveness
+    triggers:
+      - "splash screen"
+      - "lazy loading"
+      - "loading screen"
+      - "startup performance"
+      - "progress indicator"
+    files_required:
+      - "*.py"
+    modes:
+      - IMPLEMENT_ONLY
+
+  - name: ui_application_assets
+    category: UI
+    purpose: Manages centralized, cross-platform application assets (icons, images, themes) in a single location
+    triggers:
+      - "app assets"
+      - "icons"
+      - "images"
+      - "asset management"
+      - "resource directory"
+    files_required:
+      - "*.py"
+      - "*.png"
+      - "*.ico"
+      - "*.svg"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+      - IMPLEMENT_ONLY
+
+  # ===========================================================================
+  # PLANNING — 6 skills
+  # Task planning, decision workflows, risk assessment, and design exploration
+  # ===========================================================================
+
+  - name: context_loading_protocol
+    category: Planning
+    purpose: Loads context files in structured order — treemap.md first, then dependencies_report.md, then task-specific files
+    triggers:
+      - "load context"
+      - "context loading"
+      - "treemap"
+      - "dependencies report"
+      - "project context"
+      - "initialize context"
+    files_required:
+      - "treemap.md"
+      - "dependencies_report.md"
+      - "*.md"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: decision_process_flow
+    category: Planning
+    purpose: Structures decision-making from request validation through context loading, impact analysis, option scoring, plan generation, and output persistence
+    triggers:
+      - "decision process"
+      - "make decision"
+      - "evaluate options"
+      - "plan generation"
+      - "impact analysis"
+      - "score options"
+    files_required:
+      - "*.md"
+      - "*.yaml"
+      - "*.json"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: risk_scoring_matrix
+    category: Planning
+    purpose: Standardizes risk assessment using a 3x4 probability/impact matrix producing Trivial through Critical categories with approval thresholds
+    triggers:
+      - "risk assessment"
+      - "risk score"
+      - "risk matrix"
+      - "probability impact"
+      - "risk level"
+      - "approval threshold"
+    files_required:
+      - "*.md"
+      - "*.yaml"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: output_validation_checklist
+    category: Planning
+    purpose: Validates outputs before emission checking plan IDs (UUID v4), version matching, ISO-8601 timestamps, DAG dependencies, and persistence
+    triggers:
+      - "validate output"
+      - "output checklist"
+      - "plan validation"
+      - "schema check"
+      - "pre-emission check"
+    files_required:
+      - "*.md"
+      - "*.json"
+      - "*.yaml"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: brainstorming_design_explorer
+    category: Planning
+    purpose: Collaborative pre-planning design exploration asking one question at a time, proposing 2-3 approaches with trade-offs, and enforcing YAGNI
+    triggers:
+      - "brainstorm"
+      - "design exploration"
+      - "explore approaches"
+      - "what to build"
+      - "ideation"
+      - "trade-off analysis"
+      - "design options"
+    files_required:
+      - "*.md"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: llm_inference_optimization
+    category: Planning
+    purpose: Meta-layer governing how skills are invoked — manages token budget (4 chars/token), context pruning at 60%, temperature selection, and reasoning patterns
+    triggers:
+      - "token budget"
+      - "context optimization"
+      - "inference quality"
+      - "temperature selection"
+      - "context pruning"
+      - "reasoning pattern"
+      - "token estimation"
+    files_required:
+      - "*.md"
+      - "*.yaml"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  # ===========================================================================
+  # EXECUTION — 3 skills
+  # Workflow orchestration, rollback, and plan lifecycle management
+  # ===========================================================================
+
+  - name: execution_flow_orchestration
+    category: Execution
+    purpose: Orchestrates structured execution workflows coordinating atomic actions, monitoring progress, and handling failures gracefully
+    triggers:
+      - "execute plan"
+      - "orchestrate"
+      - "workflow execution"
+      - "run pipeline"
+      - "coordinate tasks"
+      - "atomic action"
+    files_required:
+      - "*.py"
+      - "*.md"
+      - "*.yaml"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+      - IMPLEMENT_ONLY
+
+  - name: git_rollback_strategy
+    category: Execution
+    purpose: Uses git revert for rollback operations maintaining commit history and allowing targeted change reversal
+    triggers:
+      - "rollback"
+      - "git revert"
+      - "undo commit"
+      - "revert changes"
+      - "restore previous"
+    files_required:
+      - ".git/*"
+      - "*.py"
+    modes:
+      - IMPLEMENT_ONLY
+
+  - name: plan_archive_protocol
+    category: Execution
+    purpose: Archives active plans before new execution ensuring historical plans and reports are preserved for auditability
+    triggers:
+      - "archive plan"
+      - "plan history"
+      - "preserve plan"
+      - "plan lifecycle"
+      - "plan versioning"
+    files_required:
+      - "*.md"
+      - "*.json"
+      - "*.yaml"
+    modes:
+      - IMPLEMENT_ONLY
+
+  # ===========================================================================
+  # IO — 4 skills
+  # Data input/output operations for Excel and Parquet formats
+  # ===========================================================================
+
+  - name: read_excel_pandas
+    category: IO
+    purpose: Loads Excel files using pandas for exploratory analysis, best for files under 50MB and interactive data exploration
+    triggers:
+      - "read excel"
+      - "pandas excel"
+      - "exploratory analysis"
+      - "small excel"
+      - "quick excel read"
+    files_required:
+      - "*.xlsx"
+      - "*.xls"
+    modes:
+      - IMPLEMENT_ONLY
+
+  - name: read_excel_polars_openpyxl
+    category: IO
+    purpose: High-performance Excel reading using Polars+Openpyxl, 2-5x faster than pandas with 70% less memory for production ETL
+    triggers:
+      - "large excel"
+      - "polars excel"
+      - "performance excel"
+      - "production excel read"
+      - "big file excel"
+    files_required:
+      - "*.xlsx"
+      - "*.xls"
+    modes:
+      - IMPLEMENT_ONLY
+
+  - name: excel_to_parquet
+    category: IO
+    purpose: Converts Excel files to Parquet format achieving 60-80% compression, optimized for data lake bronze layer ingestion
+    triggers:
+      - "excel to parquet"
+      - "convert excel"
+      - "parquet conversion"
+      - "data lake ingestion"
+      - "compress excel"
+    files_required:
+      - "*.xlsx"
+      - "*.xls"
+      - "*.parquet"
+    modes:
+      - IMPLEMENT_ONLY
+
+  - name: parquet_to_excel_polars_xlsxwriter
+    category: IO
+    purpose: Exports Parquet data to Excel for business users using Polars+XlsxWriter exclusively (pandas is forbidden)
+    triggers:
+      - "parquet to excel"
+      - "export to excel"
+      - "business report"
+      - "excel export"
+      - "gold layer export"
+    files_required:
+      - "*.parquet"
+      - "*.xlsx"
+    modes:
+      - IMPLEMENT_ONLY
+
+  # ===========================================================================
+  # FORMATS — 3 skills
+  # Structured data loaders for configuration and query files
+  # ===========================================================================
+
+  - name: load_json_files
+    category: Formats
+    purpose: Loads configuration and data from JSON files with validation, schema enforcement, and clear error messages
+    triggers:
+      - "load json"
+      - "json config"
+      - "parse json"
+      - "json file"
+      - "read json config"
+    files_required:
+      - "*.json"
+    modes:
+      - IMPLEMENT_ONLY
+
+  - name: load_yaml_files
+    category: Formats
+    purpose: Loads human-readable YAML configurations supporting multi-environment setups and complex nested structures
+    triggers:
+      - "load yaml"
+      - "yaml config"
+      - "parse yaml"
+      - "yaml file"
+      - "pipeline config"
+    files_required:
+      - "*.yaml"
+      - "*.yml"
+    modes:
+      - IMPLEMENT_ONLY
+
+  - name: load_sql_queries
+    category: Formats
+    purpose: Loads SQL queries from a dedicated directory enabling version-controlled, reusable query templates
+    triggers:
+      - "load sql"
+      - "sql file"
+      - "query template"
+      - "sql loader"
+      - "reusable query"
+    files_required:
+      - "*.sql"
+    modes:
+      - IMPLEMENT_ONLY
+
+  # ===========================================================================
+  # DATABASE — 2 skills
+  # DuckDB connections and analytical query execution
+  # ===========================================================================
+
+  - name: connect_duckdb
+    category: Database
+    purpose: Establishes and configures DuckDB connections optimized for OLAP workloads and embedded analytical databases
+    triggers:
+      - "duckdb"
+      - "connect database"
+      - "olap"
+      - "analytical database"
+      - "duckdb connection"
+    files_required:
+      - "*.py"
+      - "*.duckdb"
+    modes:
+      - IMPLEMENT_ONLY
+
+  - name: query_parquet_duckdb
+    category: Database
+    purpose: Executes SQL queries on Parquet files via DuckDB with zero-copy reads, 5-10x faster than pandas for large datasets
+    triggers:
+      - "query parquet"
+      - "sql on parquet"
+      - "duckdb query"
+      - "analytical query"
+      - "parquet sql"
+    files_required:
+      - "*.parquet"
+      - "*.sql"
+      - "*.py"
+    modes:
+      - IMPLEMENT_ONLY
+
+  # ===========================================================================
+  # DEBUGGING — 2 skills
+  # Structured investigation methodologies for bug resolution
+  # ===========================================================================
+
+  - name: systematic_debugging
+    category: Debugging
+    purpose: "4-phase structured debugging: Root Cause Investigation, Pattern Analysis, Hypothesis Testing, Implementation — no fixes without root cause"
+    triggers:
+      - "debug"
+      - "bug"
+      - "investigate error"
+      - "root cause"
+      - "fix issue"
+      - "troubleshoot"
+      - "error investigation"
+    files_required:
+      - "*.py"
+      - "*.log"
+      - "*"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: root_cause_tracing
+    category: Debugging
+    purpose: Traces bugs backward through the call stack using 5-step methodology to find the original trigger and apply defense-in-depth
+    triggers:
+      - "trace root cause"
+      - "call stack"
+      - "data flow trace"
+      - "backward trace"
+      - "where does this come from"
+      - "polluter bisection"
+    files_required:
+      - "*.py"
+      - "*.log"
+      - "*"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  # ===========================================================================
+  # ARCHITECTURE — 1 skill
+  # Data lake and structural patterns
+  # ===========================================================================
+
+  - name: setup_medallion_structure
+    category: Architecture
+    purpose: Creates Bronze/Silver/Gold data lake directory structure enforcing progressive data quality layers
+    triggers:
+      - "medallion architecture"
+      - "data lake"
+      - "bronze silver gold"
+      - "data lake setup"
+      - "lake structure"
+    files_required:
+      - "*"
+    modes:
+      - IMPLEMENT_ONLY
+
+  # ===========================================================================
+  # DEVOPS — 2 skills
+  # Deployment, packaging, and dependency management
+  # ===========================================================================
+
+  - name: library_manager
+    category: DevOps
+    purpose: Manages Python package dependencies, versioning, environment configuration, and dependency resolution
+    triggers:
+      - "manage dependencies"
+      - "install package"
+      - "pip install"
+      - "dependency resolution"
+      - "package version"
+      - "requirements"
+    files_required:
+      - "requirements.txt"
+      - "pyproject.toml"
+      - "setup.py"
+      - "Pipfile"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+      - IMPLEMENT_ONLY
+
+  - name: generate_exe_pyinstaller_onedir
+    category: DevOps
+    purpose: Generates standalone Windows executables from Python scripts using PyInstaller with venv, --onedir, and --windowed flags
+    triggers:
+      - "pyinstaller"
+      - "generate exe"
+      - "build executable"
+      - "standalone app"
+      - "distribute application"
+      - "windows executable"
+    files_required:
+      - "*.py"
+      - "*.spec"
+    modes:
+      - IMPLEMENT_ONLY
+
+  # ===========================================================================
+  # FILE HANDLING — 2 skills
+  # File input operations, validation, and sanitization
+  # ===========================================================================
+
+  - name: input_file_handler
+    category: File Handling
+    purpose: Handles file input operations including validation, reading, encoding detection, and error handling
+    triggers:
+      - "file input"
+      - "open file"
+      - "file validation"
+      - "encoding detection"
+      - "read file"
+      - "file dialog"
+    files_required:
+      - "*"
+    modes:
+      - IMPLEMENT_ONLY
+
+  - name: input_validation_sanitizer
+    category: File Handling
+    purpose: Validates and sanitizes incoming file data ensuring correct types, ranges, and formats before processing
+    triggers:
+      - "validate input"
+      - "sanitize data"
+      - "input check"
+      - "data cleaning"
+      - "format validation"
+      - "type checking input"
+    files_required:
+      - "*"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+      - IMPLEMENT_ONLY
+
+  # ===========================================================================
+  # OBSERVABILITY — 3 skills
+  # Performance monitoring, logging policies, and execution telemetry
+  # ===========================================================================
+
+  - name: execution_timer
+    category: Observability
+    purpose: Measures execution time with appropriate precision — hh:mm:ss for general tasks, milliseconds for SQL queries
+    triggers:
+      - "execution time"
+      - "timer"
+      - "measure performance"
+      - "benchmark"
+      - "profiling"
+      - "how long"
+    files_required:
+      - "*.py"
+    modes:
+      - IMPLEMENT_ONLY
+
+  - name: log_overwrite_policy
+    category: Observability
+    purpose: Overwrites logs on each execution to prevent accumulation, ensuring fresh logs per run and preventing storage bloat
+    triggers:
+      - "log policy"
+      - "overwrite logs"
+      - "fresh logs"
+      - "log management"
+      - "log cleanup"
+    files_required:
+      - "*.log"
+      - "*.py"
+    modes:
+      - IMPLEMENT_ONLY
+
+  - name: log_bundle_folder_management
+    category: Observability
+    purpose: Creates log folders outside PyInstaller bundles ensuring bundled applications can write logs to user-accessible locations
+    triggers:
+      - "log folder"
+      - "bundle logs"
+      - "pyinstaller logs"
+      - "log directory"
+      - "log path setup"
+    files_required:
+      - "*.py"
+      - "*.log"
+    modes:
+      - IMPLEMENT_ONLY
+
+  # ===========================================================================
+  # RUNTIME — 1 skill
+  # Python execution environment isolation
+  # ===========================================================================
+
+  - name: python_venv_executor
+    category: Runtime
+    purpose: Executes Python scripts exclusively via virtual environment — global Python is never used, enforcing complete isolation
+    triggers:
+      - "venv"
+      - "virtual environment"
+      - "run script"
+      - "execute python"
+      - "isolated execution"
+      - "python environment"
+    files_required:
+      - "*.py"
+      - "requirements.txt"
+    modes:
+      - IMPLEMENT_ONLY
+
+  # ===========================================================================
+  # STREAMLIT — 5 skills
+  # State management, performance, layout, visualization, and secrets for Streamlit
+  # ===========================================================================
+
+  - name: streamlit_lifecycle_state
+    category: Streamlit
+    purpose: Manages st.session_state lifecycle, complex callbacks, and event-driven logic to prevent synchronization errors and unnecessary reruns
+    triggers:
+      - "session_state"
+      - "callbacks"
+      - "st.session_state"
+      - "on_change"
+      - "on_click"
+      - "rerun control"
+      - "state management"
+      - "component lifecycle"
+    files_required:
+      - "*.py"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+      - IMPLEMENT_ONLY
+
+  - name: streamlit_performance_caching
+    category: Streamlit
+    purpose: Optimizes application performance using st.cache_data for computation/data and st.cache_resource for global connections/state
+    triggers:
+      - "st.cache_data"
+      - "st.cache_resource"
+      - "caching"
+      - "performance optimization"
+      - "singleton"
+      - "data persistence"
+      - "lazy loading"
+    files_required:
+      - "*.py"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+      - IMPLEMENT_ONLY
+
+  - name: streamlit_layout_expert
+    category: Streamlit
+    purpose: Designs advanced user interfaces using st.columns, st.tabs, st.container, st.expander, and st.sidebar for professional organization
+    triggers:
+      - "st.columns"
+      - "st.tabs"
+      - "st.container"
+      - "st.sidebar"
+      - "st.expander"
+      - "ui layout"
+      - "dashboard design"
+      - "nested layout"
+    files_required:
+      - "*.py"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+
+  - name: streamlit_data_viz
+    category: Streamlit
+    purpose: Integrates interactive visualizations with Plotly and Altair, and implements real-time data editing using st.data_editor
+    triggers:
+      - "plotly"
+      - "altair"
+      - "st.data_editor"
+      - "data visualization"
+      - "charts"
+      - "interactive plots"
+      - "data editing"
+      - "dataframe display"
+    files_required:
+      - "*.py"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+      - IMPLEMENT_ONLY
+
+  - name: streamlit_secrets_manager
+    category: Streamlit
+    purpose: Implements secure configuration management via .streamlit/secrets.toml and st.secrets for credentials and API keys
+    triggers:
+      - "st.secrets"
+      - "secrets.toml"
+      - "secure config"
+      - "api keys"
+      - "database credentials"
+      - "config security"
+      - ".streamlit/secrets"
+    files_required:
+      - ".streamlit/secrets.toml"
+      - "secrets.toml"
+      - "*.py"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+      - IMPLEMENT_ONLY
+
+  # ===========================================================================
+  # NOTION CURATOR — 5 skills
+  # Internal project reflection, classification, and Notion-style documentation.
+  # Outputs in Spanish. Human-interactive by design.
+  # These are NOT GitHub README generators — they produce internal reflection
+  # documents for personal/team Notion workspaces.
+  # ===========================================================================
+
+  - name: notion_curator_project_assessor
+    category: Notion Curator
+    purpose: Classifies projects by role (core/experimental/learning/archived), estimates multi-dimensional impact (professional, technical, strategic), and evaluates effort-to-return ratio through guided conversation
+    triggers:
+      - "classify project"
+      - "project role"
+      - "impact estimation"
+      - "effort return"
+      - "project assessment"
+      - "evaluar proyecto"
+      - "clasificar proyecto"
+    files_required:
+      - "*.md"
+      - "*.yaml"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+    interaction_mode: interactive
+    language: "es"
+    input_description: Project name, repository or folder reference, and any existing documentation or notes about the project
+    output_description: Structured assessment in Spanish including role classification, impact scores across three dimensions, effort-vs-return verdict, and flagged areas requiring user confirmation
+    constraints:
+      - "Do NOT auto-assign impact levels — ask the user to confirm or adjust"
+      - "If effort-vs-return is ambiguous, state it explicitly and request clarification"
+      - "Flag any claim that appears inflated or unsupported"
+      - "Do NOT generate filler content to make the assessment look more complete"
+
+  - name: notion_curator_keep_archive_advisor
+    category: Notion Curator
+    purpose: Advises whether a project should be kept active, archived, or transformed based on current relevance, and curates output to prevent cognitive overload in Notion workspace
+    triggers:
+      - "keep or archive"
+      - "archive project"
+      - "transform project"
+      - "notion cleanup"
+      - "project relevance"
+      - "archivar proyecto"
+      - "curar notion"
+    files_required:
+      - "*.md"
+      - "*.yaml"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+    interaction_mode: interactive
+    language: "es"
+    input_description: Project name, last modification date, current usage status, and any subjective notes from the user about perceived value
+    output_description: Clear keep/archive/transform recommendation in Spanish with rationale, suggested actions, and explicit question to the user before finalizing
+    constraints:
+      - "Never auto-archive without user confirmation"
+      - "If a project has low impact, state it clearly — do not soften the message"
+      - "Recommend extracting reusable components before archiving"
+      - "Limit Notion output to prevent page sprawl — fewer sections, higher signal"
+
+  - name: notion_curator_reflection_prompter
+    category: Notion Curator
+    purpose: Guides structured reflection through targeted questions, mirrors implicit signals back to the user, and flags inflated claims or low-impact justifications
+    triggers:
+      - "reflect on project"
+      - "project reflection"
+      - "what did I learn"
+      - "truth mirror"
+      - "honest assessment"
+      - "reflexion proyecto"
+      - "reflexionar"
+    files_required:
+      - "*.md"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+    interaction_mode: interactive
+    language: "es"
+    input_description: Project context, user statements about the project, and any previous assessments or narratives
+    output_description: Sequence of focused reflection questions in Spanish, with truth-mirroring observations that surface implicit signals from user behavior or statements
+    constraints:
+      - "Ask ONE question at a time — do not overwhelm with multiple prompts"
+      - "Mirror implicit signals without judgment (e.g., 'you mentioned X but have not touched it in months')"
+      - "Do NOT answer your own questions or assume the user's intent"
+      - "If the user's response feels performative, gently probe deeper"
+
+  - name: notion_curator_narrative_builder
+    category: Notion Curator
+    purpose: Constructs first-person, technically honest project narratives for Notion pages, extracting concrete learnings from design decisions and implementation trade-offs
+    triggers:
+      - "notion readme"
+      - "project narrative"
+      - "write project page"
+      - "notion page"
+      - "narrativa proyecto"
+      - "design decisions"
+      - "escribir narrativa"
+    files_required:
+      - "*.md"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+    interaction_mode: hybrid
+    language: "es"
+    input_description: Reflection outputs from notion_curator_reflection_prompter, project assessment from notion_curator_project_assessor, and any raw notes or code context
+    output_description: First-person Notion-style project page in Spanish with sections for context, key decisions, learnings, and current status — concise, technically honest, no filler
+    constraints:
+      - "Write in first person — this is the user's voice, not a report"
+      - "Each design decision must link to a concrete learning"
+      - "Do NOT add sections just to fill space — omit empty categories"
+      - "This is NOT a GitHub README — no installation instructions, no badges, no API docs"
+      - "Maximum 5 sections per narrative to prevent Notion overload"
+
+  - name: notion_curator_skill_evolution_tracker
+    category: Notion Curator
+    purpose: Tracks how technical skills and evaluation criteria evolve across projects, identifying growth patterns, consolidated competencies, and emerging areas
+    triggers:
+      - "skill growth"
+      - "track skills"
+      - "criteria evolution"
+      - "skill progression"
+      - "evolucion habilidades"
+      - "seguimiento competencias"
+    files_required:
+      - "*.md"
+      - "*.yaml"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+    interaction_mode: hybrid
+    language: "es"
+    input_description: Previous project assessments, narrative history, and user-reported skill changes or new tools adopted
+    output_description: Periodic skill evolution summary in Spanish documenting consolidated skills, emerging skills, stalled areas, and shifted evaluation criteria
+    constraints:
+      - "Distinguish between 'used once' and 'consolidated' — frequency matters"
+      - "Ask the user about skills that appear stalled or abandoned"
+      - "Track criteria changes explicitly (e.g., 'before: speed. now: maintainability')"
+      - "Do NOT inflate skill levels — if usage is limited, say so"
+
+  # ===========================================================================
+  # GITHUB README — 11 skills
+  # Objective, external-facing repository analysis and GitHub README generation.
+  # Autonomous execution. All outputs in English.
+  # These are NOT internal reflections — they produce factual, defensible
+  # documentation suitable for public GitHub repositories.
+  # ===========================================================================
+
+  - name: github_readme_intent_detector
+    category: GitHub README
+    purpose: Analyzes repository contents to determine what the project actually is, what problem it addresses, and its primary technical domain
+    triggers:
+      - "repo intent"
+      - "what is this repo"
+      - "project purpose"
+      - "repository analysis"
+      - "detect intent"
+    files_required:
+      - "*"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+    interaction_mode: autonomous
+    language: "en"
+    input_description: Repository root path or context.json containing treemap, dependencies, and file structure
+    output_description: Structured intent summary including primary purpose, technical domain, target audience, and confidence level
+    constraints:
+      - "Derive intent exclusively from code, configs, and existing docs — never invent purposes"
+      - "If intent is ambiguous, state multiple hypotheses with confidence levels"
+      - "Do NOT assume the project is production-ready unless evidence supports it"
+      - "Do NOT use marketing language or superlatives"
+
+  - name: github_readme_maturity_classifier
+    category: GitHub README
+    purpose: Classifies repository maturity level (prototype, internal-tool, production, archived) based on objective signals like tests, CI, docs, versioning, and commit activity
+    triggers:
+      - "repo maturity"
+      - "project stage"
+      - "is this production ready"
+      - "maturity classification"
+      - "project lifecycle stage"
+    files_required:
+      - "*"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+    interaction_mode: autonomous
+    language: "en"
+    input_description: Repository root path or context.json with treemap, dependencies report, and commit metadata
+    output_description: Maturity classification (prototype | internal-tool | production | archived) with supporting evidence and signal breakdown
+    constraints:
+      - "Base classification on objective signals only — presence of tests, CI config, version tags, LICENSE, changelog"
+      - "If signals conflict (e.g., production docs but no tests), report the conflict explicitly"
+      - "Do NOT upgrade maturity based on README claims alone"
+      - "A repo with no tests and no CI is not production-grade regardless of what docs say"
+
+  - name: github_readme_value_extractor
+    category: GitHub README
+    purpose: Identifies what is non-generic in the repository — the unique technical contributions, patterns, or approaches that distinguish it from standard implementations
+    triggers:
+      - "core value"
+      - "what makes this unique"
+      - "differentiator"
+      - "non-generic value"
+      - "unique contribution"
+    files_required:
+      - "*.py"
+      - "*.md"
+      - "*.yaml"
+      - "*.json"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+    interaction_mode: autonomous
+    language: "en"
+    input_description: Repository root path or context.json with skills registry, treemap, and dependency information
+    output_description: List of non-generic elements with evidence, plus explicit statement of which parts are standard/boilerplate
+    constraints:
+      - "If the entire repo is a standard implementation with no unique contribution, state that clearly"
+      - "Do NOT fabricate uniqueness — generic CRUD apps are generic CRUD apps"
+      - "Distinguish between 'genuinely novel' and 'well-executed but standard'"
+      - "Every claimed value must reference specific code, config, or architectural evidence"
+
+  - name: github_readme_section_planner
+    category: GitHub README
+    purpose: Determines which README sections are warranted based on repository content, maturity, and scope — producing structure before content to prevent bloat
+    triggers:
+      - "readme structure"
+      - "readme sections"
+      - "plan readme"
+      - "readme outline"
+      - "documentation structure"
+    files_required:
+      - "*.md"
+      - "*.py"
+      - "*.yaml"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+    interaction_mode: autonomous
+    language: "en"
+    input_description: Outputs from intent_detector, maturity_classifier, and value_extractor
+    output_description: Ordered list of warranted README sections with justification for inclusion and explicit list of sections deliberately omitted
+    constraints:
+      - "Only include sections supported by actual repository content"
+      - "A prototype does NOT need Contributing, Changelog, or API Reference sections"
+      - "Omit sections rather than fill them with placeholder text"
+      - "Justify every included section — no section exists by default"
+
+  - name: github_readme_problem_statement_generator
+    category: GitHub README
+    purpose: Generates a concise, external-facing problem statement that explains what technical problem the repository addresses and for whom
+    triggers:
+      - "problem statement"
+      - "what problem does this solve"
+      - "project description"
+      - "readme introduction"
+      - "external description"
+    files_required:
+      - "*.md"
+      - "*.py"
+      - "*.yaml"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+    interaction_mode: autonomous
+    language: "en"
+    input_description: Output from intent_detector and value_extractor, plus repository context
+    output_description: 2-4 sentence problem statement in third person, technically precise, free of jargon inflation
+    constraints:
+      - "Write in third person — no 'we', 'our', or 'I'"
+      - "State the problem before the solution"
+      - "Do NOT claim the project 'solves' a problem unless evidence supports functional completeness"
+      - "Use 'addresses', 'provides', or 'implements' over 'revolutionizes', 'powerful', or 'cutting-edge'"
+
+  - name: github_readme_architecture_annotator
+    category: GitHub README
+    purpose: Documents observable architecture and design decisions from code structure, dependency choices, and configuration patterns — never speculates beyond what is present
+    triggers:
+      - "architecture docs"
+      - "design decisions"
+      - "technical architecture"
+      - "repo architecture"
+      - "system design"
+    files_required:
+      - "*.py"
+      - "*.yaml"
+      - "*.json"
+      - "*.toml"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+    interaction_mode: autonomous
+    language: "en"
+    input_description: Repository treemap, dependency report, and file structure from context.json
+    output_description: Architecture summary listing observable patterns, dependency rationale (where inferrable), and directory structure semantics
+    constraints:
+      - "Only document architecture that is observable from code and config — do NOT infer unstated patterns"
+      - "If a design decision is unclear, note it as 'not documented' rather than guessing the rationale"
+      - "Do NOT produce architecture diagrams based on speculation"
+      - "List dependencies as facts, not as endorsements"
+
+  - name: github_readme_scope_definer
+    category: GitHub README
+    purpose: Defines what the repository explicitly supports and what falls outside its scope, preventing users from forming incorrect expectations
+    triggers:
+      - "usage scope"
+      - "what is supported"
+      - "scope definition"
+      - "supported features"
+      - "intended usage"
+    files_required:
+      - "*.md"
+      - "*.py"
+      - "*.yaml"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+    interaction_mode: autonomous
+    language: "en"
+    input_description: Outputs from intent_detector, maturity_classifier, and repository context
+    output_description: Two lists — 'Supported' and 'Not Supported / Out of Scope' — derived from actual repository capabilities
+    constraints:
+      - "Only list features as 'supported' if there is code implementing them"
+      - "If tests exist for a feature, note it; if not, flag the gap"
+      - "Do NOT list aspirational features as supported"
+      - "Err on the side of under-claiming rather than over-claiming"
+
+  - name: github_readme_nongoals_extractor
+    category: GitHub README
+    purpose: Extracts explicit non-goals and limitations from repository evidence — what the project intentionally does not do and where it falls short
+    triggers:
+      - "non-goals"
+      - "limitations"
+      - "what this is not"
+      - "known limitations"
+      - "out of scope"
+    files_required:
+      - "*.md"
+      - "*.py"
+      - "*.yaml"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+    interaction_mode: autonomous
+    language: "en"
+    input_description: Repository context, dependency report, and maturity classification
+    output_description: Structured list of non-goals (intentional exclusions) and limitations (known shortcomings) with evidence
+    constraints:
+      - "Distinguish between 'intentional non-goal' and 'limitation/gap'"
+      - "If the repo lacks error handling, say so — do not frame it as 'minimal by design' without evidence"
+      - "Missing tests are a limitation, not a feature"
+      - "Do NOT soften limitations to protect project perception"
+
+  - name: github_readme_inconsistency_detector
+    category: GitHub README
+    purpose: Detects mismatches between existing README claims and actual repository contents — identifies stale docs, missing features, and overclaims
+    triggers:
+      - "readme drift"
+      - "docs vs code"
+      - "inconsistency check"
+      - "stale documentation"
+      - "readme accuracy"
+    files_required:
+      - "README.md"
+      - "*.py"
+      - "*.yaml"
+      - "*.json"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+    interaction_mode: autonomous
+    language: "en"
+    input_description: Existing README content and repository context from context.json (treemap, dependencies, skills registry)
+    output_description: List of detected inconsistencies categorized as stale, overclaimed, underdocumented, or structurally misleading, with specific evidence
+    constraints:
+      - "Every inconsistency must cite the specific README claim AND the contradicting repository evidence"
+      - "Do NOT flag stylistic preferences as inconsistencies — focus on factual mismatches"
+      - "If README mentions features not present in code, flag as overclaim"
+      - "If code has capabilities not mentioned in README, flag as underdocumented"
+
+  - name: github_readme_claim_validator
+    category: GitHub README
+    purpose: Validates claims in README drafts against repository evidence — enforces anti-hype by flagging unsupported superlatives, unverifiable benchmarks, and inflated descriptions
+    triggers:
+      - "validate claims"
+      - "anti-hype check"
+      - "claim verification"
+      - "readme review"
+      - "fact check readme"
+    files_required:
+      - "*.md"
+      - "*.py"
+      - "*.yaml"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+    interaction_mode: autonomous
+    language: "en"
+    input_description: README draft text and repository context from context.json
+    output_description: Annotated claim review with verdicts (supported, unsupported, unverifiable, inflated) and suggested rewording for flagged claims
+    constraints:
+      - "Flag any superlative ('best', 'fastest', 'most powerful') as requiring evidence"
+      - "Performance claims without benchmarks in the repo are 'unverifiable'"
+      - "Feature claims without corresponding code are 'unsupported'"
+      - "Suggest neutral, defensible alternatives for every flagged claim"
+
+  - name: github_readme_cross_repo_positioner
+    category: GitHub README
+    purpose: Positions the repository relative to other projects in the same organization or domain — clarifying overlaps, dependencies, and complementary roles
+    triggers:
+      - "cross-repo position"
+      - "how does this fit"
+      - "repo relationship"
+      - "project portfolio"
+      - "repo comparison"
+    files_required:
+      - "*.md"
+      - "*.yaml"
+      - "*.json"
+    modes:
+      - ANALYZE_AND_IMPLEMENT
+    interaction_mode: autonomous
+    language: "en"
+    input_description: Current repository context plus list of related repositories or organization-level metadata
+    output_description: Positioning statement clarifying this repo's role relative to siblings, noting dependencies, overlaps, and complementary functions
+    constraints:
+      - "Only state relationships that are evidenced by imports, configs, or explicit references"
+      - "Do NOT assume organizational intent — only report observable connections"
+      - "If no cross-repo relationship is detectable, state that explicitly"
+      - "Do NOT fabricate ecosystem narratives from isolated repositories"

@@ -380,8 +380,9 @@ def main():
     
     # Generar reporte
     agent_dir = raiz / "agent"
-    agent_dir.mkdir(exist_ok=True)
-    archivo_salida = agent_dir / "dependencies_report.md"
+    analysis_dir = agent_dir / "analysis"
+    analysis_dir.mkdir(exist_ok=True)
+    archivo_salida = analysis_dir / "dependencies_report.md"
     exito = generar_reporte_markdown(grafo, raiz, str(archivo_salida))
     
     return 0 if exito else 1

@@ -37,10 +37,3 @@ repos:
         language: system
         files: ^agent/agent_outputs/reports/.*execution_report\.json$
         pass_filenames: true
-
-      - id: validate-protocol-schemas
-        name: Validate protocol schemas
-        entry: .venv/Scripts/python.exe agent_tools/validate_message.py
-        language: system
-        files: ^agent/agent_protocol/message_queue/.*\.json$
-        pass_filenames: true

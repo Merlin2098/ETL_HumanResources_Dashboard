@@ -130,8 +130,9 @@ def main():
 
     # Write treemap.md
     agent_dir = os.path.join(project_root, "agent")
-    os.makedirs(agent_dir, exist_ok=True)
-    output_file = os.path.join(agent_dir, "treemap.md")
+    analysis_dir = os.path.join(agent_dir, "analysis")
+    os.makedirs(analysis_dir, exist_ok=True)
+    output_file = os.path.join(analysis_dir, "treemap.md")
     existed = os.path.exists(output_file)
 
     with open(output_file, "w", encoding="utf-8") as f:

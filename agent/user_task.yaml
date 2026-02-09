@@ -1,0 +1,8 @@
+role: senior
+mode: ANALYZE_AND_IMPLEMENT
+objective: "review data\scripts\buscarv_esteroides.py and test it with data\Lista_Personas_Corregida.parquet and data\outputs\resultado_final.parquet. Then, optimize the code for better performance and readability."
+files: 
+  - data\scripts\buscarv_esteroides.py
+  - data\Lista_Personas_Corregida.parquet
+  - data\outputs\resultado_final.parquet
+constraints: 

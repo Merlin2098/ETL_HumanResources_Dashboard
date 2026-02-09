@@ -133,7 +133,7 @@ def check_protected_file(file_path: Path, project_root: Path) -> bool:
         ".env",
         "credentials",
         "secrets",
-        "agent/agent_rules.md",
+        "agent/rules/agent_rules.md",
     ]
     relative_path = str(file_path.relative_to(project_root))
     return any(pattern in relative_path.lower() for pattern in protected_patterns)

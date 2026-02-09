@@ -13,15 +13,13 @@ logs/
 *.log
 
 # Specific files
-ignorar/
-diagnostico.py
-validar_esquema.py
-config/path_cache.json
+config/json/path_cache.json
 .claude/
+data/
 
 # Agent system - auto-generated files
-agent/treemap.md
-agent/dependencies_report.md
+agent/analysis/treemap.md
+agent/analysis/dependencies_report.md
 
 # Agent outputs - dynamic content
 agent/agent_outputs/plans/
