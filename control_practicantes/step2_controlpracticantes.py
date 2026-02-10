@@ -104,11 +104,11 @@ def generar_gold_con_flags(ruta_silver: Path) -> pl.DataFrame:
     
     # Estadísticas de flags
     flags_stats = {
-        'por_cumplir_1': df_gold.filter(pl.col("por_cumplir_1") == 1).height,
-        'cumplio_1': df_gold.filter(pl.col("cumplio_1") == 1).height,
-        'por_cumplir_2': df_gold.filter(pl.col("por_cumplir_2") == 1).height
+        'por_cumplir_1': df_gold.filter(pl.col("por_cumplir_1") == "SI").height,
+        'cumplio_1': df_gold.filter(pl.col("cumplio_1") == "SI").height,
+        'por_cumplir_2': df_gold.filter(pl.col("por_cumplir_2") == "SI").height
     }
-    
+
     print(f"   ✓ Capa Gold generada")
     print(f"\n📊 Estadísticas de flags (PRACTICANTE PROFESIONAL):")
     print(f"   - Por cumplir 1 año (falta ≤ 1 mes): {flags_stats['por_cumplir_1']:,}")
@@ -267,9 +267,9 @@ def procesar_sin_gui(ruta_silver: Path, carpeta_gold: Path) -> dict:
         
         # Estadísticas de flags
         flags_stats = {
-            'por_cumplir_1': df_gold.filter(pl.col("por_cumplir_1") == 1).height,
-            'cumplio_1': df_gold.filter(pl.col("cumplio_1") == 1).height,
-            'por_cumplir_2': df_gold.filter(pl.col("por_cumplir_2") == 1).height
+            'por_cumplir_1': df_gold.filter(pl.col("por_cumplir_1") == "SI").height,
+            'cumplio_1': df_gold.filter(pl.col("cumplio_1") == "SI").height,
+            'por_cumplir_2': df_gold.filter(pl.col("por_cumplir_2") == "SI").height
         }
         
         print(f"   ✓ Capa Gold generada: {len(df_gold):,} registros")

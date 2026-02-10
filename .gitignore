@@ -16,6 +16,9 @@ logs/
 config/json/path_cache.json
 .claude/
 data/
+# Agent system - source code and configs (keep these)
+agent/
+agent_tools/
 
 # Agent system - auto-generated files
 agent/analysis/treemap.md

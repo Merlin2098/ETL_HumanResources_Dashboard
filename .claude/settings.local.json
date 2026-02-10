@@ -9,7 +9,9 @@
       "Bash(if [ -d \"agent_outputs\" ])",
       "Bash(then mv agent_outputs agent/)",
       "Bash(else echo \"agent_outputs not found\")",
-      "Bash(fi)"
+      "Bash(fi)",
+      "Bash(.venv/Scripts/python.exe:*)",
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe:*)"
     ]
   }
 }
