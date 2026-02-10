@@ -1,21 +1,25 @@
 # Workflow - Senior Agent
 
-## Step 1: Context Loading
+## Step 1: Context & Skill Loading
 **Role:** agent_senior
-**Description:** 
+**Description:**
 1. Run `python agent_tools/load_static_context.py` to generate `agent/agent_outputs/context.json`.
 2. (Optional) Run `python agent_tools/load_full_context.py` if dynamic files exist.
 3. Validate that `context.json` exists and contains: `skills_registry`, `agent_rules`, `dependencies_report`, `treemap`, `schemas`.
 4. Adopt `context.json` as the **single authoritative source** for project context.
+5. **Skill Index Loading:** Ensure `agent/skills/_index.yaml` is loaded for skill selection.
+6. **Tier Awareness:** Core skills (governance, planning, execution) are always available. Lazy skills are loaded on demand.
 
 ## Step 2: Skill Authority Check
 **Role:** agent_senior
-**Description:** 
+**Description:**
 Before responding to ANY request:
-1. Check available skills in the registry.
+1. Check the Skill Index (`_index.yaml`) for applicable skills.
 2. Ask: "Does a skill apply to this task?" (even if only partially).
-3. **If YES:** Invoke the skill and follow its process.
-4. **If NO:** Proceed to Step 3.
+3. **If YES:** Load the skill's `.meta.yaml` header to confirm applicability.
+4. **If confirmed:** Load the full `.md` body and invoke the skill.
+5. **If NO skill applies:** Proceed to Step 3.
+6. **Trigger evaluation:** Use `_trigger_engine.yaml` rules (extension, phase, error) for deterministic narrowing before LLM judgment.
 
 ## Step 3: Operating Mode Selection & Execution
 **Role:** agent_senior
@@ -32,7 +36,7 @@ Before responding to ANY request:
 
 ## Step 4: Verification Loop
 **Role:** agent_senior
-**Description:** 
+**Description:**
 Before claiming ANY work is done:
 1. **Identify:** Determine the command that proves the claim.
 2. **Run:** Execute the verification command.
@@ -42,7 +46,7 @@ Before claiming ANY work is done:
 
 ## Step 5: Governance & Final Reporting
 **Role:** agent_senior
-**Description:** 
+**Description:**
 1. Review all changes against the **Protected Files Blacklist**.
 2. Verify strict adherence to **Scope**.
 3. Compile the Final Output based on **Output Requirements** (Analysis Summary, Implementation Summary, Compliance Confirmation, Verification Evidence).

@@ -4,9 +4,10 @@
 **Role:** agent_executor
 **Description:**
 1. Run `agent_tools/load_static_context.py` to get authoritative context.
-2. Check for `agent/user_task.yaml`. If present and requested, load `objective` and `files` from it.
+2. Check for `agent/user_task.yaml`. If present and requested, load `objective`, `files`, and `skill_hints` from it.
 3. Load primary inputs: `task_plan.json`, `system_config.yaml`, (optional) `IMPLEMENTATION_SUMMARY.md`.
-4. **Validate:** Key context keys exist (`skills_registry`, `agent_rules`, etc.).
+4. **Skill Index Loading:** Load `agent/skills/_index.yaml` to verify skill references in the task plan.
+5. **Validate:** Key context keys exist (`skills_registry`, `agent_rules`, etc.).
 
 ## Step 2: Pre-Execution Protocol
 **Role:** agent_executor
@@ -16,7 +17,8 @@
    - Parse plan and config.
    - Verify all target files exist (for MODIFY/DELETE).
    - **CRITICAL:** Check targets against **Protected Files Blacklist**.
-3. **Create Checkpoint:**
+3. **Skill Loading:** For each action in the plan, load the bound skill's `.meta.yaml` and `.md` body on demand (Layer 2 → Layer 3).
+4. **Create Checkpoint:**
    - Ensure clean git working directory.
    - Record current commit hash as rollback point.
 
@@ -27,6 +29,7 @@ Execute the `action_plan` from `task_plan.json` sequentially:
 1. **Build Graph:** dependency check (DAG).
 2. **Loop Actions:**
    - Verify preconditions.
+   - Load bound skill body if not already in context.
    - Execute operation (`FILE_MODIFY`, `FILE_CREATE`, etc.).
    - Validate result.
    - Log to internal change log.

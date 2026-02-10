@@ -1,19 +1,20 @@
-role: senior
-mode: ANALYZE_AND_IMPLEMENT
+# User Task Manifest v2.0.0
+# Fill this file with your task details, then tell the agent: "Run task"
+#
+# The agent will:
+#   1. Load the skill index (_index.yaml)
+#   2. Evaluate skill_hints and deterministic triggers
+#   3. Load relevant skill headers and bodies on demand
+#   4. Execute its workflow
 
+role: senior # senior | executor | inspector
+mode: ANALYZE_AND_IMPLEMENT # ANALYZE_AND_IMPLEMENT | IMPLEMENT_ONLY
 objective: |
-  In the interns pipeline, Step 2 is failing.
-  Review the error log, identify what is happening, and explain how to fix the bug.
-
+  Describe your objective here.
 files:
-  - control_practicantes/step1_controlpracticantes.py
-  - control_practicantes/step2_controlpracticantes.py
-  - queries/query_control_practicantes_gold.sql
-  - logs/control_practicantes_pipeline.log
-  - .claude/inputs/LISTA DE CONTRATOS Y PRACTICANTES - CONTROL.xlsx
-
+  - path/to/file1.py
 constraints: |
-  None
-
+  Any specific limitations.
+skill_hints: []  # Optional: suggest specific skills by name (e.g., [systematic_debugging, testing_qa_mentor])
 params:
   extra_key: value

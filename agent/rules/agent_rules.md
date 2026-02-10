@@ -137,6 +137,21 @@ Python execution is subject to a mandatory isolation policy.
 - All Python execution MUST occur through an approved virtual environment
 - This policy is non-negotiable and applies to all agents and execution contexts
 
+**Mandatory runtime environment:**
+
+- **Virtual environment**: EVERY Python invocation in the terminal MUST use the local virtual environment interpreter:
+  - Windows: `.venv/Scripts/python.exe`
+  - Unix/macOS: `.venv/bin/python`
+- **UTF-8 encoding**: EVERY Python execution MUST set `PYTHONIOENCODING=utf-8` as an environment variable. This prevents `UnicodeEncodeError` on Windows terminals with non-UTF-8 default codepages.
+- **Combined command pattern** (Windows):
+  ```
+  set PYTHONIOENCODING=utf-8 && .venv\Scripts\python.exe <script.py>
+  ```
+- **Combined command pattern** (Unix/macOS):
+  ```
+  PYTHONIOENCODING=utf-8 .venv/bin/python <script.py>
+  ```
+
 **Enforcement model:**
 
 - This policy is enforced exclusively through a governance-approved runtime skill

@@ -5,7 +5,7 @@ description: Use when encountering any bug, test failure, or unexpected behavior
 
 # Skill: systematic_debugging
 
-The agent follows a structured 4-phase debugging methodology. Random fixes waste time and create new bugs. This is a rigid skill — follow exactly.
+The agent follows a structured 5-phase debugging methodology. Random fixes waste time and create new bugs. This is a rigid skill — follow exactly.
 
 ## Responsibility
 
@@ -13,6 +13,7 @@ Investigate bugs systematically by finding root cause before attempting fixes. P
 
 ## Rules
 
+- Pre-flight environment check MUST pass before any investigation
 - No fixes without root cause investigation first
 - Complete each phase before proceeding to the next
 - One hypothesis at a time, one variable at a time
@@ -22,6 +23,34 @@ Investigate bugs systematically by finding root cause before attempting fixes. P
 - Say "I don't understand" when you don't — do not pretend
 
 ## Behavior
+
+### Phase 0: Pre-flight Environment Check
+
+**BEFORE starting any investigation, verify the execution environment:**
+
+1. **Detect Operating System**
+   - Determine if the environment is Windows, Linux, or macOS
+   - Note path separator differences (`\` vs `/`)
+   - Note shell differences (PowerShell/cmd vs bash/zsh)
+
+2. **Verify Terminal Encoding**
+   - Run: `python -c "import sys; print(sys.stdout.encoding)"`
+   - If NOT `utf-8`: set `PYTHONIOENCODING=utf-8` before proceeding
+   - On Windows, also check: `chcp` (should be `65001` for UTF-8)
+   - **Do NOT skip this step** — encoding mismatches cause phantom `UnicodeEncodeError` that mask real bugs
+
+3. **Verify Virtual Environment**
+   - Confirm the active Python interpreter is from `.venv/`, NOT the global interpreter
+   - Run: `python -c "import sys; print(sys.executable)"`
+   - If the path does NOT contain `.venv` or `venv`: STOP — activate the correct environment first
+   - Missing packages (`ModuleNotFoundError`) often mean the wrong interpreter is active
+
+4. **Record Environment Baseline**
+   - Python version, OS, encoding, interpreter path
+   - Log this at the top of any debugging report
+   - This prevents environment-related red herrings from polluting the root cause investigation
+
+**If any pre-flight check fails, fix the environment FIRST before proceeding to Phase 1.**
 
 ### Phase 1: Root Cause Investigation
 
@@ -186,6 +215,7 @@ If you catch yourself thinking:
 
 | Phase | Key Activities | Success Criteria |
 |-------|---------------|------------------|
+| **0. Pre-flight** | Detect OS, verify encoding (UTF-8), verify venv, record baseline | Environment confirmed stable |
 | **1. Root Cause** | Read errors, reproduce, check changes, gather evidence | Understand WHAT and WHY |
 | **2. Pattern** | Find working examples, compare | Identify differences |
 | **3. Hypothesis** | Form theory, test minimally | Confirmed or new hypothesis |

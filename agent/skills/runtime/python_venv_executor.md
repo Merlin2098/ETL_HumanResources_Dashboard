@@ -15,13 +15,15 @@ Execute Python scripts and commands exclusively through virtual environment inte
 - Interactive Python sessions (use venv activation directly)
 - Jupyter notebooks (use kernel selection)
 
-## CRITICAL REQUIREMENT
+## CRITICAL REQUIREMENTS
 
-**This skill MUST use virtual environment Python. Global Python is NEVER used.**
+1. **This skill MUST use virtual environment Python. Global Python is NEVER used.**
+2. **UTF-8 encoding is MANDATORY.** Every subprocess MUST set `PYTHONIOENCODING=utf-8` in its environment to prevent `UnicodeEncodeError` on Windows terminals with non-UTF-8 codepages.
 
 ## Implementation
 
 ```python
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -123,9 +125,12 @@ def venv_python_executor(
             raise FileNotFoundError(f"Working directory not found: {cwd}")
         cwd = str(cwd_path)
     
-    # Execute command
+    # Execute command — force UTF-8 encoding to prevent UnicodeEncodeError
+    env = os.environ.copy()
+    env["PYTHONIOENCODING"] = "utf-8"
+
     start_time = time.perf_counter()
-    
+
     try:
         result = subprocess.run(
             cmd,
@@ -133,7 +138,8 @@ def venv_python_executor(
             text=True,
             cwd=cwd,
             timeout=timeout_seconds,
-            encoding='utf-8'
+            encoding='utf-8',
+            env=env
         )
         
         end_time = time.perf_counter()

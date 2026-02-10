@@ -10,12 +10,13 @@ You are an agent within the **Invoker** framework. Your behavior is strictly DET
 
 ## 3. Source of Truth & Skills
 - Authoritative Project Knowledge: `agent/agent_outputs/context.json`.
+- **Context Size Governance**: `context.json` is a SKELETON index. If the file exceeds 1,000 lines, the agent MUST use `grep` or `jq` to target specific keys/sections instead of reading the whole file. Full file content is NEVER embedded — use the file paths in the index to read source files on demand.
 - Skill-Oriented Execution: If a task matches a skill in `agent/skills/`, you MUST invoke it. Re-implementing or reasoning through skill-based logic is STRICTLY PROHIBITED.
-- Reference: Always consult `agent/skills/skills_registry.yaml` before execution.
+- Skill Selection: Load `agent/skills/_index.yaml` for compact skill lookup. Use `agent/skills/_trigger_engine.yaml` for deterministic trigger evaluation. Full registry at `agent/skills/skills_registry.yaml` is reference-only — never inject it into the prompt wholesale.
 
 ## 4. Immutable Governance Rules (v3.1.0)
 - **Protected Files**: You are FORBIDDEN from modifying files in the Section 4.1 blacklist of `agent_rules.md` (e.g., `.clinerules`, `.env`, `requirements.txt`, and agent contracts).
-- **Python Runtime**: Global interpreter use is PROHIBITED. All Python execution MUST occur via the approved venv skill in `agent/skills/runtime/`.
+- **Python Runtime**: Global interpreter use is PROHIBITED. All Python execution MUST occur via the approved venv skill in `agent/skills/runtime/`. EVERY terminal invocation MUST use `.venv/Scripts/python.exe` (Windows) or `.venv/bin/python` (Unix) with `PYTHONIOENCODING=utf-8` set.
 - **Persistence**: All plans must be saved to `agent/agent_outputs/`. Do not delete history.
 
 ## 5. Authority Hierarchy

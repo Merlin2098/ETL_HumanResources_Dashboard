@@ -3,16 +3,21 @@ load_full_context.py
 
 Carga contexto estático + dinámico y genera un JSON consolidado
 para que los agentes LLM lo consuman de manera eficiente.
+
+On-demand files (treemap, dependencies_report) are NOT included by default.
+Use context_loader.enrich_context() to attach them when needed.
 """
 
 import os
 import json
 import yaml
-from typing import Dict, Any
+from typing import Dict, Any, List, Optional
 try:
     from .load_static_context import load_static_context
+    from .context_loader import enrich_context
 except (ImportError, ValueError):
     from load_static_context import load_static_context
+    from context_loader import enrich_context
 
 
 
@@ -26,7 +31,19 @@ def load_json_file(path):
         return json.load(f)
 
 
-def load_full_context(task_plan_path, system_config_path, summary_path):
+def load_full_context(
+    task_plan_path,
+    system_config_path,
+    summary_path,
+    on_demand: Optional[List[str]] = None,
+):
+    """Load static + dynamic context, optionally enriched with on-demand files.
+
+    Args:
+        on_demand: Optional list of on-demand file names to attach.
+                   E.g. ["treemap", "dependencies_report"].
+                   These are gitignored files loaded temporarily for analysis.
+    """
     # 1. Cargar contexto estático
     context = load_static_context()
 
@@ -53,6 +70,10 @@ def load_full_context(task_plan_path, system_config_path, summary_path):
 
     # 3. Combinar contexto
     full_context = {**context, **dynamic_context}
+
+    # 4. On-demand enrichment (gitignored files loaded temporarily)
+    if on_demand:
+        full_context = enrich_context(full_context, on_demand)
 
     return full_context
 

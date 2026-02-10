@@ -16,9 +16,12 @@ logs/
 config/json/path_cache.json
 .claude/
 data/
-# Agent system - source code and configs (keep these)
+
+# Invoker agent framework (portable)
 agent/
 agent_tools/
+agent_framework_config.yaml
+
 
 # Agent system - auto-generated files
 agent/analysis/treemap.md
