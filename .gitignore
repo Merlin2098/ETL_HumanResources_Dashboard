@@ -17,30 +17,13 @@ config/json/path_cache.json
 .claude/
 data/
 
-# Invoker agent framework (portable)
+# Invoker agent framework (portable — not part of host project)
 agent/
 agent_tools/
+.clinerules
 agent_framework_config.yaml
-
-
-# Agent system - auto-generated files
-agent/analysis/treemap.md
-agent/analysis/dependencies_report.md
-
-# Agent outputs - dynamic content
-agent/agent_outputs/plans/
-agent/agent_outputs/reports/
-agent/agent_outputs/archive/
-agent/agent_logs/
-
-# Agent protocol - message queue (runtime)
-agent/agent_protocol/message_queue/pending/*
-agent/agent_protocol/message_queue/in_progress/*
-agent/agent_protocol/message_queue/completed/*
-# Keep the queue directories
-!agent/agent_protocol/message_queue/pending/.gitkeep
-!agent/agent_protocol/message_queue/in_progress/.gitkeep
-!agent/agent_protocol/message_queue/completed/.gitkeep
+trigger_vscode.md
+PORTABLE_DEPLOYMENT.md
 
 # __pycache__ and Python temp files
 __pycache__/
