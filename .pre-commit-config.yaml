@@ -16,6 +16,13 @@ repos:
         pass_filenames: false
         always_run: true
 
+      - id: generate-skill-wrappers
+        name: Generate skill wrappers
+        entry: .venv/Scripts/python.exe agent_tools/generate_skill_wrappers.py
+        language: system
+        pass_filenames: false
+        files: ^agent/skills/|^agent_tools/generate_skill_wrappers\.py$
+
       # New hooks - agent protocol validation
       - id: validate-task-plans
         name: Validate task plans

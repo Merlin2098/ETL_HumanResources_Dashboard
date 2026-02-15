@@ -105,7 +105,7 @@ The following files and paths are IMMUTABLE by default:
 ```yaml
 protected_files:
   documentation:
-    - agent/agent_rules.md
+    - agent/rules/agent_rules.md
     - agent/architecture_proposal.md
     - agent/agent_inspector/agent_inspector.md
     - agent/agent_executor/agent_executor.md
@@ -126,7 +126,9 @@ protected_files:
 
 Any attempt to modify protected files MUST be rejected.
 
+
 ### 4.2 Execution Environment Policies
+
 #### 4.2.1 Python Execution Isolation Policy
 
 Python execution is subject to a mandatory isolation policy.
@@ -144,10 +146,13 @@ Python execution is subject to a mandatory isolation policy.
   - Unix/macOS: `.venv/bin/python`
 - **UTF-8 encoding**: EVERY Python execution MUST set `PYTHONIOENCODING=utf-8` as an environment variable. This prevents `UnicodeEncodeError` on Windows terminals with non-UTF-8 default codepages.
 - **Combined command pattern** (Windows):
+
   ```
   set PYTHONIOENCODING=utf-8 && .venv\Scripts\python.exe <script.py>
   ```
+
 - **Combined command pattern** (Unix/macOS):
+
   ```
   PYTHONIOENCODING=utf-8 .venv/bin/python <script.py>
   ```
