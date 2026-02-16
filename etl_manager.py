@@ -1,5 +1,5 @@
 """
-ETL Manager - Tawa Consulting
+ETL Manager - Metso
 Entry point principal de la aplicación
 """
 import sys
@@ -23,10 +23,10 @@ def main():
     print("="*60)
     
     app = QApplication(sys.argv)
-    app.setApplicationName("ETL Manager - Tawa Consulting")
-    app.setOrganizationName("Tawa Consulting")
+    app.setApplicationName("ETL Manager - Metso")
+    app.setOrganizationName("Metso")
 
-    splash = StartupSplashScreen("ETL Manager - Tawa Consulting")
+    splash = StartupSplashScreen("ETL Manager - Metso")
     splash.show()
     splash.update_status(5, "Iniciando aplicacion")
     

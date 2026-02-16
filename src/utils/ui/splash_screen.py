@@ -15,7 +15,8 @@ class StartupSplashScreen(QSplashScreen):
         self._status_label = QLabel(self)
         self._status_label.setGeometry(40, 320, 680, 24)
         self._status_label.setAlignment(Qt.AlignCenter)
-        self._status_label.setStyleSheet("color: #f9fafb; font-size: 12px;")
+        self._status_label.setStyleSheet("color: #f9fafb;")
+        self._status_label.setFont(QFont("Segoe UI", 12))
 
         self._progress_bar = QProgressBar(self)
         self._progress_bar.setGeometry(40, 350, 680, 12)
@@ -55,7 +56,7 @@ class StartupSplashScreen(QSplashScreen):
 
         painter.setPen(QColor("#60a5fa"))
         painter.setFont(QFont("Segoe UI", 10))
-        painter.drawText(40, 380, "Tawa Consulting")
+        painter.drawText(40, 380, "Metso")
 
         painter.end()
         return pixmap

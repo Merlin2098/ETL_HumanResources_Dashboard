@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QFont, QIcon
 
 # ✅ Imports absolutos (compatibles con PyInstaller)
 from src.utils.ui.theme_loader import load_theme
@@ -132,7 +132,8 @@ class ETLManagerWindow(QMainWindow):
         )
         placeholder.setAlignment(Qt.AlignCenter)
         placeholder.setWordWrap(True)
-        placeholder.setStyleSheet("color: #4b5563; font-size: 14px;")
+        placeholder.setStyleSheet("color: #4b5563;")
+        placeholder.setFont(QFont("Segoe UI", 14))
 
         layout.addStretch()
         layout.addWidget(placeholder)
@@ -147,7 +148,7 @@ class ETLManagerWindow(QMainWindow):
             return
 
         color = "#b91c1c" if is_error else "#4b5563"
-        placeholder.setStyleSheet(f"color: {color}; font-size: 14px;")
+        placeholder.setStyleSheet(f"color: {color};")
         placeholder.setText(message)
 
     def _on_tab_changed(self, index: int):
