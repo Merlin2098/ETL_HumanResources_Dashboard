@@ -11,7 +11,6 @@ Arquitectura:
 
 Salida: 
     - /silver/control_practicantes_silver.parquet
-    - /silver/control_practicantes_silver.xlsx
 
 Autor: Richi via Claude
 Fecha: 27.01.2026
@@ -347,7 +346,7 @@ def exportar_silver(
     carpeta_silver: Path
 ):
     """
-    Exporta DataFrame a archivos Parquet y Excel en capa Silver.
+    Exporta DataFrame a Parquet en capa Silver.
     
     Args:
         df: DataFrame a exportar
@@ -359,11 +358,6 @@ def exportar_silver(
     ruta_parquet = carpeta_silver / "control_practicantes_silver.parquet"
     df.write_parquet(ruta_parquet, compression="snappy")
     print(f" ✓ Parquet: {ruta_parquet.name}")
-    
-    # Exportar Excel para visualización
-    ruta_excel = carpeta_silver / "control_practicantes_silver.xlsx"
-    df.write_excel(ruta_excel)
-    print(f" ✓ Excel: {ruta_excel.name}")
     
     print(f"\n📊 Estadísticas:")
     print(f"  - Total registros: {len(df):,}")
@@ -452,7 +446,6 @@ def main():
         
         print(f"\n📂 Archivos generados en /silver/:")
         print(f"  - control_practicantes_silver.parquet")
-        print(f"  - control_practicantes_silver.xlsx")
         
         print(f"\n⏱️  Tiempo de ejecución: {tiempo_total:.2f}s")
         
@@ -514,15 +507,9 @@ def procesar_sin_gui(ruta_archivo: Path, carpeta_salida: Path) -> dict:
         df.write_parquet(ruta_parquet, compression="snappy")
         print(f"   ✓ Parquet guardado: {ruta_parquet.name}")
         
-        # Guardar Excel
-        ruta_excel = carpeta_salida / "control_practicantes_silver.xlsx"
-        df.write_excel(ruta_excel)
-        print(f"   ✓ Excel guardado: {ruta_excel.name}")
-        
         return {
             'success': True,
             'parquet': ruta_parquet,
-            'excel': ruta_excel,
             'registros': registros_procesados
         }
         

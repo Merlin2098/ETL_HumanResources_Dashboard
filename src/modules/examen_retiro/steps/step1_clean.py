@@ -9,7 +9,6 @@ Arquitectura:
 
 Salida: Archivos sin timestamp en carpeta silver/
     - examenes_retiro.parquet
-    - examenes_retiro.xlsx
 
 Autor: Richi
 Fecha: 06.01.2025
@@ -204,7 +203,7 @@ def limpiar_silver_examenes_retiro(df_bronze: pl.DataFrame) -> pl.DataFrame:
 
 def guardar_resultados(df_silver: pl.DataFrame, carpeta_trabajo: Path):
     """
-    Guarda el DataFrame Silver como parquet y Excel en carpeta silver/
+    Guarda el DataFrame Silver como parquet en carpeta silver/
     Sin timestamp - se sobreescribe en cada ejecución
     
     Args:
@@ -212,7 +211,7 @@ def guardar_resultados(df_silver: pl.DataFrame, carpeta_trabajo: Path):
         carpeta_trabajo: Path de la carpeta de trabajo
         
     Returns:
-        tuple: (ruta_parquet, ruta_excel)
+        Path: ruta del parquet generado
     """
     # Crear carpeta silver si no existe
     carpeta_silver = carpeta_trabajo / "silver"
@@ -221,7 +220,6 @@ def guardar_resultados(df_silver: pl.DataFrame, carpeta_trabajo: Path):
     # Nombres fijos sin timestamp
     nombre_base = "examenes_retiro"
     ruta_parquet = carpeta_silver / f"{nombre_base}.parquet"
-    ruta_excel = carpeta_silver / f"{nombre_base}.xlsx"
     
     print(f"\n[2/2] Guardando resultados en capa Silver...")
     print(f"  📁 Carpeta: {carpeta_silver}")
@@ -232,20 +230,7 @@ def guardar_resultados(df_silver: pl.DataFrame, carpeta_trabajo: Path):
     print(f" ✓")
     print(f"    Ubicación: {ruta_parquet.name}")
     
-    # Guardar Excel
-    print(f"  - Guardando Excel...", end='', flush=True)
-    # Convertir fechas a string para Excel
-    df_export = df_silver.clone()
-    for col in df_export.columns:
-        if df_export[col].dtype == pl.Date:
-            df_export = df_export.with_columns(
-                pl.col(col).cast(pl.Utf8, strict=False).alias(col)
-            )
-    df_export.write_excel(ruta_excel)
-    print(f" ✓")
-    print(f"    Ubicación: {ruta_excel.name}")
-    
-    return ruta_parquet, ruta_excel
+    return ruta_parquet
 
 
 def main():
@@ -286,7 +271,7 @@ def main():
         df_silver = limpiar_silver_examenes_retiro(df_bronze)
         
         # 3. Guardar resultados
-        ruta_parquet, ruta_excel = guardar_resultados(df_silver, carpeta_trabajo)
+        ruta_parquet = guardar_resultados(df_silver, carpeta_trabajo)
         
         # Calcular tiempo total
         tiempo_total = time.time() - tiempo_inicio
@@ -303,7 +288,6 @@ def main():
         
         print(f"\n📁 Archivos generados en carpeta silver/:")
         print(f"  - Parquet: {ruta_parquet.name}")
-        print(f"  - Excel:   {ruta_excel.name}")
         
         print(f"\n⏱️  Tiempo de ejecución: {tiempo_total:.2f}s")
         

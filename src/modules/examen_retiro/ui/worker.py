@@ -179,7 +179,7 @@ class ExamenRetiroWorker(QThread):
                 self.progress_updated.emit(35, "💾 Guardando archivo Silver...")
                 
                 # Guardar Silver
-                ruta_parquet_silver, ruta_excel_silver = guardar_resultados_step1(
+                ruta_parquet_silver = guardar_resultados_step1(
                     df_silver, 
                     self.output_dir
                 )
@@ -189,7 +189,6 @@ class ExamenRetiroWorker(QThread):
                 resultado['step1'] = {
                     'dataframe': df_silver,
                     'parquet': ruta_parquet_silver,
-                    'excel': ruta_excel_silver,
                     'registros': len(df_silver),
                     'columnas': len(df_silver.columns),
                     'duracion': self.timers['step1']

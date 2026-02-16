@@ -19,9 +19,6 @@ stages:
       - name: "parquet_silver"
         path_template: "${output_dir}/silver/control_practicantes_silver.parquet"
         required: true
-      - name: "excel_silver"
-        path_template: "${output_dir}/silver/control_practicantes_silver.xlsx"
-        required: false
   
   - name: "Control Practicantes Silver → Gold"
     description: "Generación de capa Gold con tiempo de servicio y flags"

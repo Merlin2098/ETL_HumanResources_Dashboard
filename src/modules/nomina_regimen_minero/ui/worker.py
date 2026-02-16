@@ -87,7 +87,7 @@ class NominaRegimenMineroWorker(BaseETLWorker):
                 self.progress_updated.emit(40, "💾 Guardando resultados en Silver...")
                 
                 # Guardar resultados
-                ruta_parquet, ruta_excel = guardar_resultados(df_consolidado, self.output_dir)
+                ruta_parquet = guardar_resultados(df_consolidado, self.output_dir)
                 
                 # Calcular tiempo step1
                 self.timers['step1'] = time.time() - tiempo_inicio_step1
@@ -95,7 +95,6 @@ class NominaRegimenMineroWorker(BaseETLWorker):
                 resultado['step1'] = {
                     'dataframe': df_consolidado,
                     'parquet': ruta_parquet,
-                    'excel': ruta_excel,
                     'registros': len(df_consolidado),
                     'columnas': len(df_consolidado.columns),
                     'duracion': self.timers['step1']
@@ -106,7 +105,6 @@ class NominaRegimenMineroWorker(BaseETLWorker):
                 self.logger.info(f"  • Registros: {len(df_consolidado):,}")
                 self.logger.info(f"  • Columnas: {len(df_consolidado.columns)}")
                 self.logger.info(f"  • Parquet: {ruta_parquet.name}")
-                self.logger.info(f"  • Excel: {ruta_excel.name}")
                 self.logger.info(f"  ⏱️ Duración: {self.logger.format_duration(self.timers['step1'])}")
                 self.logger.info("-"*70)
                 

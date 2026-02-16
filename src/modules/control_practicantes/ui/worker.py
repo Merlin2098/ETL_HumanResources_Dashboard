@@ -133,7 +133,6 @@ class ControlPracticantesWorker(BaseETLWorker):
                     f"{flags_info}\n"
                     f"\n📂 Outputs generados en: {carpeta_trabajo.name}/\n"
                     f"  • silver/control_practicantes_silver.parquet\n"
-                    f"  • silver/control_practicantes_silver.xlsx\n"
                     f"  • gold/control_practicantes_flagsgold.parquet\n"
                     f"  • gold/control_practicantes_flagsgold.xlsx"
                 )

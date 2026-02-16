@@ -10,8 +10,8 @@ Limpieza aplicada:
     - Genera columna PERIODO desde AÑO-MES
     
 Salida: Archivos sin timestamp en carpeta silver/
-    - Relacion Ingresos EMPLEADOS.parquet/.xlsx
-    - Relacion Ingresos PRACTICANTES.parquet/.xlsx
+    - Relacion Ingresos EMPLEADOS.parquet
+    - Relacion Ingresos PRACTICANTES.parquet
 
 Autor: Richi
 Fecha: 06.01.2025
@@ -275,7 +275,7 @@ def generar_reporte_calidad(df_original: pl.DataFrame, df_limpio: pl.DataFrame, 
 
 def guardar_resultados(resultados: dict, carpeta_trabajo: Path):
     """
-    Guarda ambas hojas en silver/ sin timestamp
+    Guarda ambas hojas en silver/ sin timestamp (solo parquet)
     - EMPLEADOS: Se procesará después a Gold
     - PRACTICANTES: Se queda aquí (solo consulta)
     
@@ -305,17 +305,10 @@ def guardar_resultados(resultados: dict, carpeta_trabajo: Path):
         datos["df"].write_parquet(ruta_parquet, compression="snappy")
         print(f" ✓")
         
-        # Guardar Excel
-        print(f"    - Guardando Excel...", end='', flush=True)
-        ruta_excel = carpeta_silver / f"{nombre_base}.xlsx"
-        datos["df"].write_excel(ruta_excel)
-        print(f" ✓")
-        
         print(f"    - Registros: {datos['registros']:,}")
         
         rutas_guardadas[nombre_hoja] = {
-            "parquet": ruta_parquet,
-            "excel": ruta_excel
+            "parquet": ruta_parquet
         }
     
     return rutas_guardadas
@@ -411,7 +404,6 @@ def main():
     for nombre_hoja, rutas in rutas_guardadas.items():
         print(f"\n  {nombre_hoja}:")
         print(f"    - Parquet: {rutas['parquet'].name}")
-        print(f"    - Excel:   {rutas['excel'].name}")
     
     print(f"\n⏱️  Tiempo de ejecución: {tiempo_total:.2f}s")
     

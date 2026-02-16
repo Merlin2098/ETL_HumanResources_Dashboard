@@ -279,7 +279,7 @@ def consolidar_y_exportar(
     registros_sin_goce: int
 ):
     """
-    Exporta el DataFrame consolidado a Parquet y Excel.
+    Exporta el DataFrame consolidado a Parquet.
     Se sobreescribe en cada ejecución (sin versionamiento).
     
     Args:
@@ -303,13 +303,6 @@ def consolidar_y_exportar(
     df_consolidado.write_parquet(ruta_parquet, compression="snappy")
     print(f" ✓")
     print(f"    Ubicación: {ruta_parquet.name}")
-    
-    # Guardar Excel (se sobreescribe)
-    print(f"  - Guardando Excel...", end='', flush=True)
-    ruta_excel = carpeta_silver / f"{nombre_base}.xlsx"
-    df_consolidado.write_excel(ruta_excel)
-    print(f" ✓")
-    print(f"    Ubicación: {ruta_excel.name}")
     
     # Resumen de distribución
     print(f"\n📊 Distribución de registros:")
@@ -424,7 +417,6 @@ def main():
         
         print(f"\n📂 Archivos generados:")
         print(f"  - licencias_consolidadas.parquet")
-        print(f"  - licencias_consolidadas.xlsx")
         
         print(f"\n⏱️  Tiempo de ejecución: {tiempo_total:.2f}s")
         
@@ -519,16 +511,9 @@ def procesar_sin_gui(ruta_archivo: Path, carpeta_salida: Path) -> dict:
         
         print(f"   ✓ Parquet guardado: {ruta_parquet.name}")
         
-        # Guardar Excel para visualización
-        ruta_excel = carpeta_salida / "licencias_consolidadas.xlsx"
-        df_consolidado.write_excel(ruta_excel)
-        
-        print(f"   ✓ Excel guardado: {ruta_excel.name}")
-        
         return {
             'success': True,
             'parquet': ruta_parquet,
-            'excel': ruta_excel,
             'registros': len(df_consolidado),
             'registros_con_goce': registros_con_goce,
             'registros_sin_goce': registros_sin_goce

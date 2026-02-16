@@ -1,6 +1,6 @@
 """
 Script de consolidación de reportes de planilla - Régimen Minero
-Consolida múltiples archivos Excel en un solo parquet/Excel en capa Silver
+Consolida múltiples archivos Excel en un solo parquet en capa Silver
 """
 
 import polars as pl
@@ -237,7 +237,7 @@ def consolidar_archivos(archivos, carpeta_trabajo):
 
 def guardar_resultados(df, carpeta_trabajo):
     """
-    Guarda el DataFrame consolidado como parquet y Excel en carpeta silver/
+    Guarda el DataFrame consolidado como parquet en carpeta silver/
     Sin timestamp - se sobreescribe en cada ejecución
     
     Args:
@@ -245,7 +245,7 @@ def guardar_resultados(df, carpeta_trabajo):
         carpeta_trabajo: Path de la carpeta de trabajo
         
     Returns:
-        tuple: (ruta_parquet, ruta_excel)
+        Path: ruta del parquet generado
     """
     # Crear carpeta silver si no existe
     carpeta_silver = Path(carpeta_trabajo) / "silver"
@@ -253,11 +253,8 @@ def guardar_resultados(df, carpeta_trabajo):
     
     # Nombres fijos sin timestamp
     nombre_parquet = "Planilla Metso Consolidado - Regimen Minero.parquet"
-    nombre_excel = "Planilla Metso Consolidado - Regimen Minero.xlsx"
-    
-    # Rutas de salida
+    # Ruta de salida
     ruta_parquet = carpeta_silver / nombre_parquet
-    ruta_excel = carpeta_silver / nombre_excel
     
     print(f"\n[3/3] Guardando resultados en capa Silver...")
     print(f"  📁 Carpeta: {carpeta_silver}")
@@ -268,13 +265,7 @@ def guardar_resultados(df, carpeta_trabajo):
     print(f" ✓")
     print(f"    Ubicación: {ruta_parquet}")
     
-    # Guardar como Excel
-    print(f"  - Guardando Excel...", end='', flush=True)
-    df.write_excel(ruta_excel)
-    print(f" ✓")
-    print(f"    Ubicación: {ruta_excel}")
-    
-    return ruta_parquet, ruta_excel
+    return ruta_parquet
 
 
 def main():
@@ -331,7 +322,7 @@ def main():
         df_consolidado = consolidar_archivos(archivos_excel, carpeta_path)
         
         # 4. Guardar resultados
-        ruta_parquet, ruta_excel = guardar_resultados(df_consolidado, carpeta_path)
+        ruta_parquet = guardar_resultados(df_consolidado, carpeta_path)
         
         # Calcular tiempo total
         tiempo_total = time.time() - tiempo_inicio
@@ -353,7 +344,6 @@ def main():
         
         print(f"\n📁 Archivos generados en carpeta silver/:")
         print(f"  - Parquet: {ruta_parquet.name}")
-        print(f"  - Excel: {ruta_excel.name}")
         
         print(f"\n⏱️  Tiempo de ejecución: {tiempo_total:.2f}s")
         

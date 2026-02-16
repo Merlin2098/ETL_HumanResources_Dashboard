@@ -1,6 +1,6 @@
 """
 Script de consolidación de reportes de planilla
-Consolida múltiples archivos Excel en un solo parquet/Excel en capa Silver
+Consolida múltiples archivos Excel en un solo parquet en capa Silver
 
 REFACTORIZADO para compatibilidad con worker UI:
 - consolidar_archivos(): Acepta lista de archivos directamente y GUARDA resultados
@@ -276,18 +276,13 @@ def consolidar_archivos(archivos, carpeta_trabajo):
     print(f"\n[3/3] Guardando resultados en capa Silver...")
     
     try:
-        # Llamar a la función guardar_resultados para generar Parquet y Excel
-        ruta_parquet, ruta_excel = guardar_resultados(df_consolidado, carpeta_trabajo)
+        # Llamar a la función guardar_resultados para generar Parquet
+        ruta_parquet = guardar_resultados(df_consolidado, carpeta_trabajo)
         
         # Verificar que los archivos fueron creados
         if not ruta_parquet.exists():
             raise FileNotFoundError(f"No se pudo crear el archivo Parquet: {ruta_parquet}")
         
-        if not ruta_excel.exists():
-            print(f"  ⚠️  Advertencia: No se pudo crear el archivo Excel: {ruta_excel}")
-        else:
-            print(f"  ✓ Excel generado: {ruta_excel.name}")
-            
     except Exception as e:
         print(f"  ✗ ERROR al guardar resultados: {e}")
         print(f"  [DEBUG] Traceback:")
@@ -299,7 +294,7 @@ def consolidar_archivos(archivos, carpeta_trabajo):
 
 def guardar_resultados(df, carpeta_trabajo):
     """
-    Guarda el DataFrame consolidado como parquet y Excel en carpeta silver/
+    Guarda el DataFrame consolidado como parquet en carpeta silver/
     Sin timestamp - se sobreescribe en cada ejecución
     
     Args:
@@ -307,7 +302,7 @@ def guardar_resultados(df, carpeta_trabajo):
         carpeta_trabajo: Path de la carpeta de trabajo
         
     Returns:
-        tuple: (ruta_parquet, ruta_excel)
+        Path: ruta al parquet generado
     """
     # Crear carpeta silver si no existe
     carpeta_silver = Path(carpeta_trabajo) / "silver"
@@ -315,11 +310,8 @@ def guardar_resultados(df, carpeta_trabajo):
     
     # Nombres fijos sin timestamp
     nombre_parquet = "Planilla_Metso_Consolidado_Silver.parquet"
-    nombre_excel = "Planilla_Metso_Consolidado_Silver.xlsx"
-    
-    # Rutas de salida
+    # Ruta de salida
     ruta_parquet = carpeta_silver / nombre_parquet
-    ruta_excel = carpeta_silver / nombre_excel
     
     print(f"  📁 Carpeta: {carpeta_silver}")
     
@@ -341,17 +333,7 @@ def guardar_resultados(df, carpeta_trabajo):
             print(f"  ✗ Error también con compresión: {e2}")
             raise
     
-    # Guardar como Excel (opcional pero útil para visualización)
-    print(f"  - Guardando Excel...", end='', flush=True)
-    try:
-        df.write_excel(ruta_excel)
-        size_mb = ruta_excel.stat().st_size / (1024 * 1024) if ruta_excel.exists() else 0
-        print(f" ✓ ({size_mb:.2f} MB)")
-    except Exception as e:
-        print(f" ✗ ERROR (Excel): {e}")
-        # No lanzar excepción para Excel, el pipeline solo necesita Parquet
-    
-    return ruta_parquet, ruta_excel
+    return ruta_parquet
 
 
 # ============================================================================
@@ -441,21 +423,13 @@ def main():
         
         # Verificar archivos generados
         carpeta_silver = carpeta_path / "silver"
-        ruta_parquet = carpeta_silver / "Planilla Metso Consolidado.parquet"
-        ruta_excel = carpeta_silver / "Planilla Metso Consolidado.xlsx"
-        
+        ruta_parquet = carpeta_silver / "Planilla_Metso_Consolidado_Silver.parquet"
         print(f"\n📁 Archivos generados en carpeta silver/:")
         if ruta_parquet.exists():
             size_mb = ruta_parquet.stat().st_size / (1024 * 1024)
             print(f"  ✓ Parquet: {ruta_parquet.name} ({size_mb:.2f} MB)")
         else:
             print(f"  ✗ Parquet: NO GENERADO")
-            
-        if ruta_excel.exists():
-            size_mb = ruta_excel.stat().st_size / (1024 * 1024)
-            print(f"  ✓ Excel: {ruta_excel.name} ({size_mb:.2f} MB)")
-        else:
-            print(f"  ⚠️  Excel: NO GENERADO")
         
         print(f"\n⏱️  Tiempo de ejecución: {tiempo_total:.2f}s")
         

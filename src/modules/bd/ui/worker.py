@@ -191,7 +191,7 @@ class BDWorker(BaseETLWorker):
         
         # Guardar Silver
         self.logger.info("💾 Guardando en capa Silver...")
-        ruta_parquet, ruta_excel = self._guardar_silver(df, self.output_dir)
+        ruta_parquet = self._guardar_silver(df, self.output_dir)
         
         self.timers['step1'] = time.time() - tiempo_inicio
         
@@ -206,8 +206,7 @@ class BDWorker(BaseETLWorker):
         return {
             'registros': len(df),
             'columnas': len(df.columns),
-            'parquet': ruta_parquet,
-            'excel': ruta_excel
+            'parquet': ruta_parquet
         }
     
     def _extraer_datos_excel(self, archivo_excel, openpyxl):
@@ -261,13 +260,8 @@ class BDWorker(BaseETLWorker):
         ruta_parquet = carpeta_silver / "bd_silver.parquet"
         df.write_parquet(ruta_parquet, compression="snappy")
         self.logger.info(f"  ✓ Parquet: {ruta_parquet.name}")
-        
-        # Excel (opcional)
-        ruta_excel = carpeta_silver / "bd_silver.xlsx"
-        df.write_excel(ruta_excel)
-        self.logger.info(f"  ✓ Excel: {ruta_excel.name}")
-        
-        return ruta_parquet, ruta_excel
+
+        return ruta_parquet
     
     # ========================================================================
     # STEP 1.5: EXTRACCIÓN CENTROS DE COSTO
