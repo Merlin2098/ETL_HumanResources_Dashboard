@@ -70,11 +70,11 @@ class PDTWorker(BaseETLWorker):
             
             # Validar que solo haya un archivo
             if len(self.archivos) != 1:
-                return {
-                    'success': False,
-                    'error': f'Se esperaba 1 archivo, se recibieron {len(self.archivos)}',
-                    'timers': self.timers
-                }
+                return self.build_error_result(
+                    stage_name='Validación de entrada',
+                    error=f'Se esperaba 1 archivo, se recibieron {len(self.archivos)}',
+                    timers=self.timers
+                )
             
             archivo_bronze = self.archivos[0]
             
@@ -144,11 +144,13 @@ class PDTWorker(BaseETLWorker):
                         continue
                 
                 if not resultados_hojas:
-                    return {
-                        'success': False,
-                        'error': 'No se procesaron datos de ninguna hoja',
-                        'timers': self.timers
-                    }
+                    return self.build_error_result(
+                        stage_name='Step 1: Bronze → Silver',
+                        error='No se procesaron datos de ninguna hoja',
+                        timers=self.timers,
+                        stage_index=1,
+                        total_stages=3
+                    )
                 
                 self.progress_updated.emit(40, "💾 Guardando resultados en Silver...")
                 
@@ -191,12 +193,15 @@ class PDTWorker(BaseETLWorker):
                 self.logger.error(f"❌ Error crítico en Step 1: {str(e)}")
                 import traceback
                 self.logger.error(traceback.format_exc())
-                
-                return {
-                    'success': False,
-                    'error': f'Error en Step 1: {str(e)}',
-                    'timers': self.timers
-                }
+
+                return self.build_error_result(
+                    stage_name='Step 1: Bronze → Silver',
+                    error=f'Error en Step 1: {str(e)}',
+                    timers=self.timers,
+                    stage_index=1,
+                    total_stages=3,
+                    module_path='src.modules.pdt.steps.step1_consolidar_ingresos'
+                )
             
             # ============ STEP 2: Silver → Gold (EMPLEADOS) ============
             self.logger.info("")
@@ -332,7 +337,16 @@ class PDTWorker(BaseETLWorker):
                 self.logger.error(f"❌ Error en Step 2: {e}")
                 import traceback
                 self.logger.error(traceback.format_exc())
-                resultado['step2'] = {'error': str(e)}
+                resultado['step2'] = {
+                    'error': str(e),
+                    'error_details': self.build_error_details(
+                        stage_name='Step 2: Silver → Gold (EMPLEADOS)',
+                        error=e,
+                        stage_index=2,
+                        total_stages=3,
+                        module_path='src.modules.pdt.steps.step2_exportar_ingresos'
+                    )
+                }
                 # No retornar error aquí, silver ya fue generado exitosamente
             
             # ============ STEP 3: Silver → Gold (PRACTICANTES) ============
@@ -474,7 +488,16 @@ class PDTWorker(BaseETLWorker):
                 self.logger.error(f"❌ Error en Step 3: {e}")
                 import traceback
                 self.logger.error(traceback.format_exc())
-                resultado['step3'] = {'error': str(e)}
+                resultado['step3'] = {
+                    'error': str(e),
+                    'error_details': self.build_error_details(
+                        stage_name='Step 3: Silver → Gold (PRACTICANTES)',
+                        error=e,
+                        stage_index=3,
+                        total_stages=3,
+                        module_path='src.modules.pdt.steps.step3_exportar_practicantes'
+                    )
+                }
                 # No retornar error aquí, steps previos ya fueron generados exitosamente
             
             # ============ RESULTADO FINAL ============
@@ -536,9 +559,9 @@ class PDTWorker(BaseETLWorker):
             self.logger.error(traceback.format_exc())
             
             self.timers['total'] = time.time() - tiempo_inicio_total
-            
-            return {
-                'success': False,
-                'error': str(e),
-                'timers': self.timers
-            }
+
+            return self.build_error_result(
+                stage_name='ETL completo PDT',
+                error=str(e),
+                timers=self.timers
+            )

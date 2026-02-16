@@ -10,10 +10,11 @@ MEJORADO con:
 """
 from PySide6.QtCore import QThread, Signal
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any, Union
 from abc import abstractmethod
 import sys
 import time
+import traceback
 
 # Agregar path del proyecto
 sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
@@ -105,10 +106,8 @@ class BaseETLWorker(QThread):
                 self.finished.emit(True, mensaje, self.resultado)
             else:
                 self._log_error_summary()
-                
-                error = self.resultado.get('error', 'Error desconocido')
-                mensaje = f"❌ Error en ETL: {error}"
-                
+
+                mensaje = self._build_user_error_message(self.resultado)
                 self.finished.emit(False, mensaje, self.resultado)
                 
         except Exception as e:
@@ -127,6 +126,116 @@ class BaseETLWorker(QThread):
                     'timers': {'total': total_duration}
                 }
             )
+
+    def _build_user_error_message(self, resultado: Dict[str, Any]) -> str:
+        """
+        Construye un mensaje de error entendible para el usuario
+        con contexto técnico mínimo (stage/módulo) cuando existe.
+        """
+        error = str(resultado.get('error', 'Error desconocido'))
+        lines = [f"❌ Error en ETL: {error}"]
+
+        details = resultado.get('error_details', {})
+        if isinstance(details, dict) and details:
+            stage_name = details.get('stage_name')
+            stage_index = details.get('stage_index')
+            total_stages = details.get('total_stages')
+            module_path = details.get('module_path')
+            function_name = details.get('function_name')
+            detail_error = details.get('error_message')
+            tb_excerpt = details.get('traceback_excerpt', [])
+
+            if stage_name:
+                if stage_index and total_stages:
+                    lines.append(f"Etapa: {stage_index}/{total_stages} - {stage_name}")
+                else:
+                    lines.append(f"Etapa: {stage_name}")
+
+            if module_path and function_name:
+                lines.append(f"Módulo: {module_path}.{function_name}()")
+
+            if detail_error and detail_error != error:
+                lines.append(f"Detalle: {detail_error}")
+
+            if isinstance(tb_excerpt, list) and tb_excerpt:
+                lines.append(f"Traceback: {tb_excerpt[0]}")
+
+        log_path = self.logger.get_log_path()
+        if log_path:
+            lines.append(f"Log: {log_path}")
+
+        return "\n".join(lines)
+
+    @staticmethod
+    def build_error_details(
+        stage_name: str,
+        error: Union[Exception, str],
+        stage_index: Optional[int] = None,
+        total_stages: Optional[int] = None,
+        module_path: Optional[str] = None,
+        function_name: Optional[str] = None,
+        traceback_text: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Construye payload estándar de error para UI/log.
+        """
+        if traceback_text is None:
+            traceback_text = traceback.format_exc()
+            if traceback_text.strip() == "NoneType: None":
+                traceback_text = ""
+
+        error_message = str(error)
+        details: Dict[str, Any] = {
+            'stage_name': stage_name,
+            'error_message': error_message
+        }
+
+        if stage_index is not None:
+            details['stage_index'] = stage_index
+        if total_stages is not None:
+            details['total_stages'] = total_stages
+        if module_path:
+            details['module_path'] = module_path
+        if function_name:
+            details['function_name'] = function_name
+        if isinstance(error, Exception):
+            details['exception_type'] = type(error).__name__
+
+        tb_lines = [line for line in traceback_text.splitlines() if line.strip()]
+        if tb_lines:
+            details['traceback_excerpt'] = tb_lines[:8]
+
+        return details
+
+    def build_error_result(
+        self,
+        stage_name: str,
+        error: Union[Exception, str],
+        timers: Optional[Dict[str, Any]] = None,
+        stage_index: Optional[int] = None,
+        total_stages: Optional[int] = None,
+        module_path: Optional[str] = None,
+        function_name: Optional[str] = None,
+        traceback_text: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Construye resultado de error estándar (success=False + error_details).
+        """
+        error_message = str(error)
+        return {
+            'success': False,
+            'error': error_message,
+            'error_details': self.build_error_details(
+                stage_name=stage_name,
+                error=error,
+                stage_index=stage_index,
+                total_stages=total_stages,
+                module_path=module_path,
+                function_name=function_name,
+                traceback_text=traceback_text
+            ),
+            'timers': timers if timers is not None else self.resultado.get('timers', {})
+        }
     
     def _log_success_summary(self):
         """Registra resumen de éxito con estadísticas"""
@@ -198,6 +307,27 @@ class BaseETLWorker(QThread):
         
         error_msg = self.resultado.get('error', 'Error desconocido')
         self.logger.error(f"Causa: {error_msg}")
+
+        error_details = self.resultado.get('error_details', {})
+        if isinstance(error_details, dict) and error_details:
+            stage_name = error_details.get('stage_name')
+            stage_index = error_details.get('stage_index')
+            total_stages = error_details.get('total_stages')
+            module_path = error_details.get('module_path')
+            function_name = error_details.get('function_name')
+            detail_error = error_details.get('error_message')
+
+            if stage_name:
+                if stage_index and total_stages:
+                    self.logger.error(f"Etapa fallida: {stage_index}/{total_stages} - {stage_name}")
+                else:
+                    self.logger.error(f"Etapa fallida: {stage_name}")
+
+            if module_path and function_name:
+                self.logger.error(f"Origen: {module_path}.{function_name}()")
+
+            if detail_error and detail_error != error_msg:
+                self.logger.error(f"Detalle técnico: {detail_error}")
         
         self.logger.info("")
         self.logger.info(f"⏱️  Tiempo transcurrido: {self.logger.format_duration(total_duration)}")

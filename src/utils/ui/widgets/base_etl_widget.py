@@ -187,8 +187,49 @@ class BaseETLWidget(QWidget):
             self.progress_bar.setVisible(False)
             self.status_label.setText("")
         else:
-            QMessageBox.critical(self, "Error en Procesamiento", message)
+            detailed_message = self._build_error_dialog_message(message, results)
+            QMessageBox.critical(self, "Error en Procesamiento", detailed_message)
     
     def _log(self, message: str):
         """Agrega mensaje al log"""
         self.log_text.append(message)
+
+    @staticmethod
+    def _build_error_dialog_message(message: str, results: dict) -> str:
+        """Enriquece el mensaje de error mostrado al usuario."""
+        if "Detalle técnico:" in message or "Etapa:" in message:
+            return message
+
+        if not isinstance(results, dict):
+            return message
+
+        details = results.get("error_details", {})
+        if not isinstance(details, dict) or not details:
+            return message
+
+        lines = [message, "", "Detalle técnico:"]
+
+        stage_name = details.get("stage_name")
+        stage_index = details.get("stage_index")
+        total_stages = details.get("total_stages")
+        module_path = details.get("module_path")
+        function_name = details.get("function_name")
+        error_message = details.get("error_message")
+        tb_excerpt = details.get("traceback_excerpt", [])
+
+        if stage_name:
+            if stage_index and total_stages:
+                lines.append(f"- Etapa: {stage_index}/{total_stages} - {stage_name}")
+            else:
+                lines.append(f"- Etapa: {stage_name}")
+
+        if module_path and function_name:
+            lines.append(f"- Módulo: {module_path}.{function_name}()")
+
+        if error_message:
+            lines.append(f"- Motivo: {error_message}")
+
+        if isinstance(tb_excerpt, list) and tb_excerpt:
+            lines.append(f"- Traceback: {tb_excerpt[0]}")
+
+        return "\n".join(lines)

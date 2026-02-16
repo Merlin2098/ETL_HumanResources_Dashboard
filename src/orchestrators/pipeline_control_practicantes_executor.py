@@ -9,11 +9,12 @@ Compatible con señales Qt para integración en UI
 
 import yaml
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from importlib import import_module
 from PySide6.QtCore import QObject, Signal
 import sys
 import time
+import traceback
 
 
 class PipelineControlPracticantesExecutor(QObject):
@@ -43,6 +44,7 @@ class PipelineControlPracticantesExecutor(QObject):
         self.output_dir = output_dir
         self.pipeline_config = None
         self.stages_results = {}
+        self.last_stage_error: Optional[Dict[str, Any]] = None
         
     def _log(self, nivel: str, mensaje: str):
         """Emite señal de log"""
@@ -51,6 +53,50 @@ class PipelineControlPracticantesExecutor(QObject):
     def _progress(self, porcentaje: int, mensaje: str):
         """Emite señal de progreso"""
         self.progress_update.emit(porcentaje, mensaje)
+
+    @staticmethod
+    def _extract_stage_failure(result: Any) -> Optional[str]:
+        """
+        Detecta fallas cuando un step retorna dict en lugar de lanzar excepción.
+        """
+        if not isinstance(result, dict):
+            return None
+
+        success = result.get("success")
+
+        if success is False:
+            return (
+                result.get("error")
+                or result.get("mensaje")
+                or "El stage reportó success=False"
+            )
+
+        if success is None and result.get("error"):
+            return str(result.get("error"))
+
+        return None
+
+    @staticmethod
+    def _build_error_details(
+        stage_name: str,
+        stage_index: int,
+        total_stages: int,
+        module_path: str,
+        function_name: str,
+        error: Exception,
+        traceback_text: str
+    ) -> Dict[str, Any]:
+        tb_lines = [line for line in traceback_text.splitlines() if line.strip()]
+        return {
+            "stage_name": stage_name,
+            "stage_index": stage_index + 1,
+            "total_stages": total_stages,
+            "module_path": module_path,
+            "function_name": function_name,
+            "exception_type": type(error).__name__,
+            "error_message": str(error),
+            "traceback_excerpt": tb_lines[:8]
+        }
     
     def load_pipeline(self) -> bool:
         """
@@ -141,12 +187,12 @@ class PipelineControlPracticantesExecutor(QObject):
         self._log("INFO", "=" * 70)
         
         tiempo_inicio = time.time()
+        module_path = stage_config.get('module', '')
+        function_name = stage_config.get('function', '')
+        self.last_stage_error = None
         
         try:
             # Importar módulo
-            module_path = stage_config['module']
-            function_name = stage_config['function']
-            
             self._log("INFO", f"→ Importando: {module_path}")
             module = import_module(module_path)
             
@@ -169,6 +215,10 @@ class PipelineControlPracticantesExecutor(QObject):
             
             # Ejecutar función
             result = func(**params)
+
+            stage_error = self._extract_stage_failure(result)
+            if stage_error:
+                raise RuntimeError(stage_error)
             
             # Guardar resultado para stages posteriores
             self.stages_results[stage_name] = result
@@ -194,11 +244,23 @@ class PipelineControlPracticantesExecutor(QObject):
             
         except Exception as e:
             duracion = time.time() - tiempo_inicio
-            
-            self._log("ERROR", f"Error en stage '{stage_name}': {str(e)}")
-            
-            import traceback
-            tb_lines = traceback.format_exc().split('\n')
+            tb_text = traceback.format_exc()
+            self.last_stage_error = self._build_error_details(
+                stage_name=stage_name,
+                stage_index=stage_index,
+                total_stages=total_stages,
+                module_path=module_path,
+                function_name=function_name,
+                error=e,
+                traceback_text=tb_text
+            )
+
+            self._log(
+                "ERROR",
+                f"Error en stage '{stage_name}' ({module_path}.{function_name}): {str(e)}"
+            )
+
+            tb_lines = tb_text.split('\n')
             for line in tb_lines[:10]:
                 if line.strip():
                     self._log("DEBUG", f"  {line}")
@@ -295,20 +357,41 @@ class PipelineControlPracticantesExecutor(QObject):
         self._log("INFO", f"Total de stages: {total_stages}")
         self._log("INFO", "=" * 70)
         
+        failed_stages = []
+
         for idx, stage_config in enumerate(stages):
             success = self.execute_stage(stage_config, idx, total_stages)
             
             if not success:
+                if self.last_stage_error:
+                    failed_stages.append(self.last_stage_error.copy())
+
                 if self.pipeline_config['config'].get('stop_on_error', True):
                     self._log("ERROR", "Pipeline detenido por error en stage")
-                    
+                    error_details = self.last_stage_error or {}
+                    error_reason = error_details.get('error_message', 'Error desconocido')
                     return {
                         'success': False,
-                        'error': f"Error en stage: {stage_config['name']}",
+                        'error': f"Stage '{stage_config['name']}' falló: {error_reason}",
+                        'error_details': error_details,
+                        'failed_stages': failed_stages,
                         'completed_stages': idx,
                         'total_stages': total_stages,
                         'duracion_total': time.time() - tiempo_inicio_total
                     }
+
+        if failed_stages:
+            self._log("ERROR", "Pipeline finalizado con stages fallidos")
+            return {
+                'success': False,
+                'error': f"Pipeline finalizado con {len(failed_stages)} stage(s) fallido(s)",
+                'error_details': failed_stages[0],
+                'failed_stages': failed_stages,
+                'completed_stages': total_stages - len(failed_stages),
+                'total_stages': total_stages,
+                'duracion_total': time.time() - tiempo_inicio_total,
+                'stages_results': self.stages_results
+            }
         
         # Pipeline completado
         duracion_total = time.time() - tiempo_inicio_total

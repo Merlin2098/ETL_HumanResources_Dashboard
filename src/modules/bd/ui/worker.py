@@ -39,6 +39,7 @@ class BDWorker(BaseETLWorker):
         
         # Lazy loading de DuckDB (solo si se ejecuta step 3)
         self.duckdb = None
+        self.current_stage = "Inicialización"
         
         # Timers
         self.timers = {
@@ -70,12 +71,12 @@ class BDWorker(BaseETLWorker):
             self.logger.error(traceback.format_exc())
             
             self.timers['total'] = time.time() - tiempo_inicio_total
-            
-            return {
-                'success': False,
-                'error': str(e),
-                'timers': self.timers
-            }
+
+            return self.build_error_result(
+                stage_name=self.current_stage,
+                error=str(e),
+                timers=self.timers
+            )
     
     # ========================================================================
     # MODO: ETL COMPLETO (Steps 1 + 1.5 + 2)
@@ -86,6 +87,7 @@ class BDWorker(BaseETLWorker):
         resultado = {}
         
         # Validar que haya archivo
+        self.current_stage = "Validación de entrada"
         if not self.archivos or len(self.archivos) == 0:
             raise ValueError("No se proporcionó archivo Excel")
         
@@ -99,28 +101,40 @@ class BDWorker(BaseETLWorker):
         self.logger.info("")
         
         # Step 1: Bronze → Silver
+        self.current_stage = "Step 1: Bronze → Silver"
         self.progress_updated.emit(5, "🔄 Step 1: Bronze → Silver")
         resultado['step1'] = self._step1_bronze_to_silver(archivo_excel)
         self.progress_updated.emit(25, "✓ Step 1 completado")
         
         # Step 1.5: Extracción de Centros de Costo
+        self.current_stage = "Step 1.5: Centros de Costo"
         self.progress_updated.emit(30, "🔄 Step 1.5: Centros de Costo")
         resultado['step1.5'] = self._step1_5_extraer_centros_costo(resultado['step1']['parquet'])
         self.progress_updated.emit(50, "✓ Step 1.5 completado")
         
         # Step 2: Silver → Gold
+        self.current_stage = "Step 2: Silver → Gold"
         self.progress_updated.emit(55, "🔄 Step 2: Silver → Gold")
         resultado['step2'] = self._step2_silver_to_gold(resultado['step1']['parquet'])
         self.progress_updated.emit(75, "✓ Step 2 completado")
         
         # Step 3: Aplicación de Flags (usa el CC_ACTUAL recién generado)
+        self.current_stage = "Step 3: Aplicación de Flags"
         self.progress_updated.emit(80, "🔄 Step 3: Aplicando Flags")
         try:
             resultado['step3'] = self._step3_aplicar_flags_automatico(resultado['step1.5']['parquet_actual'])
             self.progress_updated.emit(100, "✓ Step 3 completado")
         except Exception as e:
             self.logger.warning(f"⚠️  Step 3 (Flags) falló: {str(e)}")
-            resultado['step3'] = {'error': str(e)}
+            resultado['step3'] = {
+                'error': str(e),
+                'error_details': self.build_error_details(
+                    stage_name='Step 3: Aplicación de Flags',
+                    error=e,
+                    stage_index=4,
+                    total_stages=4
+                )
+            }
             self.progress_updated.emit(100, "⚠️  ETL completado (Step 3 con errores)")
         
         # Resultado final

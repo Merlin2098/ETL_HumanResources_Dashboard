@@ -114,20 +114,26 @@ class NominaRegimenMineroWorker(BaseETLWorker):
                 
             except ImportError as e:
                 self.logger.error(f"❌ No se pudo importar step1: {e}")
-                return {
-                    'success': False,
-                    'error': f'No se encontró nomina_regimen_minero/step1_consolidar_regimen_minero.py: {e}',
-                    'timers': self.timers
-                }
+                return self.build_error_result(
+                    stage_name='Step 1: Bronze → Silver',
+                    error=f'No se encontró nomina_regimen_minero/step1_consolidar_regimen_minero.py: {e}',
+                    timers=self.timers,
+                    stage_index=1,
+                    total_stages=2,
+                    module_path='src.modules.nomina_regimen_minero.steps.step1_consolidar_regimen_minero'
+                )
             except Exception as e:
                 self.logger.error(f"❌ Error en Step 1: {e}")
                 import traceback
                 self.logger.error(traceback.format_exc())
-                return {
-                    'success': False,
-                    'error': f'Error en consolidación: {str(e)}',
-                    'timers': self.timers
-                }
+                return self.build_error_result(
+                    stage_name='Step 1: Bronze → Silver',
+                    error=f'Error en consolidación: {str(e)}',
+                    timers=self.timers,
+                    stage_index=1,
+                    total_stages=2,
+                    module_path='src.modules.nomina_regimen_minero.steps.step1_consolidar_regimen_minero'
+                )
             
             # ============ STEP 2: Silver → Gold ============
             self.logger.info("")
@@ -266,7 +272,16 @@ class NominaRegimenMineroWorker(BaseETLWorker):
                 self.logger.error(f"❌ Error en Step 2: {e}")
                 import traceback
                 self.logger.error(traceback.format_exc())
-                resultado['step2'] = {'error': str(e)}
+                resultado['step2'] = {
+                    'error': str(e),
+                    'error_details': self.build_error_details(
+                        stage_name='Step 2: Silver → Gold',
+                        error=e,
+                        stage_index=2,
+                        total_stages=2,
+                        module_path='src.modules.nomina_regimen_minero.steps.step2_exportar_regimen_minero'
+                    )
+                }
                 # No retornar error aquí, silver ya fue generado exitosamente
             
             # ============ RESULTADO FINAL ============
@@ -316,9 +331,9 @@ class NominaRegimenMineroWorker(BaseETLWorker):
             self.logger.error(traceback.format_exc())
             
             self.timers['total'] = time.time() - tiempo_inicio_total
-            
-            return {
-                'success': False,
-                'error': str(e),
-                'timers': self.timers
-            }
+
+            return self.build_error_result(
+                stage_name='ETL completo Nómina Régimen Minero',
+                error=str(e),
+                timers=self.timers
+            )

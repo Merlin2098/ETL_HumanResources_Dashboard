@@ -14,9 +14,10 @@ Implementa:
 - Logs detallados de validaciones
 """
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Any, Optional, Union
 import sys
 import time
+import traceback
 
 # Asegurar que el directorio raíz del proyecto esté en el path
 project_root = Path(__file__).resolve().parents[4]
@@ -95,8 +96,7 @@ class ExamenRetiroWorker(QThread):
                 self.finished.emit(True, mensaje, self.resultado)
             else:
                 self._log_error_summary()
-                error = self.resultado.get('error', 'Error desconocido')
-                mensaje = f"❌ Error en ETL: {error}"
+                mensaje = self._build_user_error_message(self.resultado)
                 self.finished.emit(False, mensaje, self.resultado)
                 
         except Exception as e:
@@ -110,6 +110,10 @@ class ExamenRetiroWorker(QThread):
                 {
                     'success': False,
                     'error': str(e),
+                    'error_details': self._build_error_details(
+                        stage_name='Ejecución ETL Exámenes de Retiro',
+                        error=e
+                    ),
                     'timers': {'total': self.timers['total']}
                 }
             )
@@ -157,6 +161,13 @@ class ExamenRetiroWorker(QThread):
                     return {
                         'success': False,
                         'error': 'No se encontraron datos en el archivo Excel',
+                        'error_details': self._build_error_details(
+                            stage_name='Step 1: Bronze → Silver',
+                            error='No se encontraron datos en el archivo Excel',
+                            stage_index=1,
+                            total_stages=3,
+                            module_path='src.modules.examen_retiro.steps.step1_clean'
+                        ),
                         'timers': self.timers
                     }
                 
@@ -199,15 +210,28 @@ class ExamenRetiroWorker(QThread):
                 return {
                     'success': False,
                     'error': f'No se encontró examen_retiro/step1_clean.py: {e}',
+                    'error_details': self._build_error_details(
+                        stage_name='Step 1: Bronze → Silver',
+                        error=e,
+                        stage_index=1,
+                        total_stages=3,
+                        module_path='src.modules.examen_retiro.steps.step1_clean'
+                    ),
                     'timers': self.timers
                 }
             except Exception as e:
                 self.logger.error(f"❌ Error en Step 1: {e}")
-                import traceback
                 self.logger.error(traceback.format_exc())
                 return {
                     'success': False,
                     'error': f'Error en extracción Bronze→Silver: {str(e)}',
+                    'error_details': self._build_error_details(
+                        stage_name='Step 1: Bronze → Silver',
+                        error=e,
+                        stage_index=1,
+                        total_stages=3,
+                        module_path='src.modules.examen_retiro.steps.step1_clean'
+                    ),
                     'timers': self.timers
                 }
             
@@ -304,9 +328,17 @@ class ExamenRetiroWorker(QThread):
                 resultado['step2'] = {'warning': f'Step 2 no implementado: {e}'}
             except Exception as e:
                 self.logger.error(f"❌ Error en Step 2: {e}")
-                import traceback
                 self.logger.error(traceback.format_exc())
-                resultado['step2'] = {'error': str(e)}
+                resultado['step2'] = {
+                    'error': str(e),
+                    'error_details': self._build_error_details(
+                        stage_name='Step 2: Silver → Gold',
+                        error=e,
+                        stage_index=2,
+                        total_stages=3,
+                        module_path='src.modules.examen_retiro.steps.step2_gold'
+                    )
+                }
                 # No retornar error aquí, silver ya fue generado
             
             # ============ STEP 3: Gold → Gold Enriquecido (JOIN con CC) ============
@@ -358,7 +390,16 @@ class ExamenRetiroWorker(QThread):
                         
                     except FileNotFoundError as e:
                         self.logger.error(f"❌ {str(e)}")
-                        resultado['step3'] = {'error': 'Query SQL no encontrada'}
+                        resultado['step3'] = {
+                            'error': 'Query SQL no encontrada',
+                            'error_details': self._build_error_details(
+                                stage_name='Step 3: Gold → Gold Enriquecido',
+                                error=e,
+                                stage_index=3,
+                                total_stages=3,
+                                module_path='assets/queries/query_cc_join.sql'
+                            )
+                        }
                         raise
                     
                     self.progress_updated.emit(82, "📊 Cargando parquets...")
@@ -424,9 +465,17 @@ class ExamenRetiroWorker(QThread):
                 resultado['step3'] = {'warning': f'Step 3 no implementado: {e}'}
             except Exception as e:
                 self.logger.error(f"❌ Error en Step 3: {e}")
-                import traceback
                 self.logger.error(traceback.format_exc())
-                resultado['step3'] = {'error': str(e)}
+                resultado['step3'] = {
+                    'error': str(e),
+                    'error_details': self._build_error_details(
+                        stage_name='Step 3: Gold → Gold Enriquecido',
+                        error=e,
+                        stage_index=3,
+                        total_stages=3,
+                        module_path='src.modules.examen_retiro.steps.step3_join'
+                    )
+                }
                 # No retornar error aquí, gold ya fue generado
             
             # ============ RESULTADO FINAL ============
@@ -474,12 +523,15 @@ class ExamenRetiroWorker(QThread):
             
         except Exception as e:
             self.logger.error(f"❌ Error crítico en ETL: {str(e)}")
-            import traceback
             self.logger.error(traceback.format_exc())
             
             return {
                 'success': False,
                 'error': str(e),
+                'error_details': self._build_error_details(
+                    stage_name='ETL completo Exámenes de Retiro',
+                    error=e
+                ),
                 'timers': self.timers
             }
     
@@ -497,6 +549,93 @@ class ExamenRetiroWorker(QThread):
         
         error_msg = self.resultado.get('error', 'Error desconocido')
         self.logger.error(f"Causa: {error_msg}")
+
+        error_details = self.resultado.get('error_details', {})
+        if isinstance(error_details, dict) and error_details:
+            stage_name = error_details.get('stage_name')
+            stage_index = error_details.get('stage_index')
+            total_stages = error_details.get('total_stages')
+            module_path = error_details.get('module_path')
+            detail_error = error_details.get('error_message')
+
+            if stage_name:
+                if stage_index and total_stages:
+                    self.logger.error(f"Etapa fallida: {stage_index}/{total_stages} - {stage_name}")
+                else:
+                    self.logger.error(f"Etapa fallida: {stage_name}")
+
+            if module_path:
+                self.logger.error(f"Origen: {module_path}")
+
+            if detail_error and detail_error != error_msg:
+                self.logger.error(f"Detalle técnico: {detail_error}")
+
+    def _build_user_error_message(self, resultado: Dict[str, Any]) -> str:
+        """Construye mensaje de error con contexto técnico."""
+        error = str(resultado.get('error', 'Error desconocido'))
+        lines = [f"❌ Error en ETL: {error}"]
+
+        details = resultado.get('error_details', {})
+        if isinstance(details, dict) and details:
+            stage_name = details.get('stage_name')
+            stage_index = details.get('stage_index')
+            total_stages = details.get('total_stages')
+            module_path = details.get('module_path')
+            detail_error = details.get('error_message')
+            tb_excerpt = details.get('traceback_excerpt', [])
+
+            if stage_name:
+                if stage_index and total_stages:
+                    lines.append(f"Etapa: {stage_index}/{total_stages} - {stage_name}")
+                else:
+                    lines.append(f"Etapa: {stage_name}")
+
+            if module_path:
+                lines.append(f"Módulo: {module_path}")
+
+            if detail_error and detail_error != error:
+                lines.append(f"Detalle: {detail_error}")
+
+            if isinstance(tb_excerpt, list) and tb_excerpt:
+                lines.append(f"Traceback: {tb_excerpt[0]}")
+
+        log_path = self.logger.get_log_path()
+        if log_path:
+            lines.append(f"Log: {log_path}")
+
+        return "\n".join(lines)
+
+    @staticmethod
+    def _build_error_details(
+        stage_name: str,
+        error: Union[Exception, str],
+        stage_index: Optional[int] = None,
+        total_stages: Optional[int] = None,
+        module_path: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Construye payload estándar de error."""
+        traceback_text = traceback.format_exc()
+        if traceback_text.strip() == "NoneType: None":
+            traceback_text = ""
+        tb_lines = [line for line in traceback_text.splitlines() if line.strip()]
+
+        details: Dict[str, Any] = {
+            'stage_name': stage_name,
+            'error_message': str(error)
+        }
+
+        if isinstance(error, Exception):
+            details['exception_type'] = type(error).__name__
+        if stage_index is not None:
+            details['stage_index'] = stage_index
+        if total_stages is not None:
+            details['total_stages'] = total_stages
+        if module_path:
+            details['module_path'] = module_path
+        if tb_lines:
+            details['traceback_excerpt'] = tb_lines[:8]
+
+        return details
     
     def _emit_progress(self, percentage: int, message: str):
         """Callback del logger para progreso"""
