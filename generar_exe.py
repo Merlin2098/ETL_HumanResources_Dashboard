@@ -27,6 +27,14 @@ EXCLUSIONES = [
     "pandas.tests",
 ]
 
+ARCHIVOS_REQUERIDOS = [
+    "etl_manager.py",
+    "assets/config/theme_light.json",
+    "assets/config/path_cache.json",
+    "src/orchestrators/pipelines/pipeline_nomina_licencias.yaml",
+    "src/orchestrators/pipelines/pipeline_control_practicantes.yaml",
+]
+
 
 def validar_entorno_virtual():
     print("=" * 60)
@@ -55,12 +63,13 @@ def verificar_estructura():
 
     missing = [carpeta for carpeta in carpetas_requeridas if not (base_dir / carpeta).exists()]
 
-    if not (base_dir / MAIN_SCRIPT).exists():
-        print(f"ERROR: No se encuentra el script principal: {MAIN_SCRIPT}")
-        sys.exit(1)
-
     if missing:
         print(f"ERROR: Faltan carpetas criticas: {missing}")
+        sys.exit(1)
+
+    archivos_faltantes = [ruta for ruta in ARCHIVOS_REQUERIDOS if not (base_dir / ruta).exists()]
+    if archivos_faltantes:
+        print(f"ERROR: Faltan archivos criticos: {archivos_faltantes}")
         sys.exit(1)
 
     print("OK estructura validada.\n")
@@ -89,12 +98,18 @@ def _module_name_from_path(base_dir: Path, py_file: Path) -> str:
 def discover_hidden_imports(base_dir: Path) -> list[str]:
     src_root = base_dir / "src"
     modules: set[str] = set()
+    runtime_prefixes = ("src.app_main", "src.modules.", "src.orchestrators.", "src.utils.")
 
     for py_file in src_root.rglob("*.py"):
         if "__pycache__" in py_file.parts:
             continue
         module_name = _module_name_from_path(base_dir, py_file)
-        if module_name:
+        if (
+            module_name
+            and (module_name == "src" or module_name.startswith(runtime_prefixes))
+            and ".tests." not in module_name
+            and not module_name.endswith("_test")
+        ):
             modules.add(module_name)
 
     extras = {
