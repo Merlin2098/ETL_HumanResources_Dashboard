@@ -12,8 +12,8 @@ if str(project_root) not in sys.path:
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QIcon
-from ui.main_app import ETLManagerWindow  # ✅ Import absoluto correcto
-from utils.paths import get_resource_path  # ✅ Para rutas en producción
+from src.app_main import ETLManagerWindow  # ✅ Import absoluto correcto
+from src.utils.paths import get_resource_path  # ✅ Para rutas en producción
 
 def main():
     """Función principal"""
@@ -27,7 +27,7 @@ def main():
     
     # Configurar ícono de la aplicación
     try:
-        icon_path = get_resource_path("config/app.ico")  # ✅ Usar helper
+        icon_path = get_resource_path("assets/config/app.ico")  # ✅ Usar helper
         if icon_path.exists():
             app.setWindowIcon(QIcon(str(icon_path)))
             print("✅ Ícono de aplicación configurado")

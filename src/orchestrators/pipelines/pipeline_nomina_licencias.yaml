@@ -1,0 +1,57 @@
+name: "Nómina con Licencias"
+description: "Pipeline completo: Nóminas + Licencias → Silver → Gold Enriquecido"
+version: "1.0.0"
+
+# Configuración global
+config:
+  log_dir: "logs"
+  stop_on_error: true
+
+# Definición de stages
+stages:
+  - name: "Nómina Bronze → Silver"
+    description: "Consolidación de planillas Excel a Parquet Silver"
+    module: "src.modules.nomina.steps.step1_consolidar_planillas"
+    function: "consolidar_archivos"
+    params:
+      # archivos y output_dir se pasan dinámicamente desde el executor
+    outputs:
+      - name: "parquet_nomina_silver"
+        path_template: "${output_dir}/silver/Planilla_Metso_Consolidado_Silver.parquet"
+        required: true
+  
+  - name: "Licencias Bronze → Silver"
+    description: "Procesamiento de licencias a Parquet Silver"
+    module: "src.modules.licencias.steps.step1_consolidar_licencias"
+    function: "procesar_sin_gui"
+    params:
+      # ruta_archivo y carpeta_salida se pasan dinámicamente
+    outputs:
+      - name: "parquet_licencias_silver"
+        path_template: "${output_dir}/silver/licencias_consolidadas.parquet"
+        required: true
+  
+  - name: "Nómina Silver → Gold"
+    description: "Transformación de Silver a Gold con validaciones"
+    module: "src.modules.nomina.steps.step2_exportar"
+    function: "exportar_a_gold"
+    params:
+      # ruta_parquet_silver y carpeta_trabajo se pasan dinámicamente
+    outputs:
+      - name: "parquet_nomina_gold"
+        path_template: "${output_dir}/gold/actual/Planilla_Metso_Consolidado.parquet"
+        required: true
+  
+  - name: "Enriquecimiento con Licencias"
+    description: "Agregar columnas de licencias a nómina Gold"
+    module: "src.modules.licencias.steps.step2_enriquecer_nomina"
+    function: "procesar_sin_gui"
+    params:
+      # ruta_nomina, ruta_licencias se pasan dinámicamente
+    outputs:
+      - name: "parquet_nomina_enriquecida"
+        path_template: "${output_dir}/gold/actual/Planilla Metso BI_Gold_Con_Licencias.parquet"
+        required: true
+      - name: "excel_nomina_enriquecida"
+        path_template: "${output_dir}/gold/actual/Planilla Metso BI_Gold_Con_Licencias.xlsx"
+        required: false
