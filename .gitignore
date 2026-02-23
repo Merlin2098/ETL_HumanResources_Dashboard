@@ -14,34 +14,9 @@ logs/
 
 # Specific files
 config/json/path_cache.json
-config/path_cache.json
 .claude/
 data/
-
-# Add these entries to the HOST project's .gitignore when deploying Tinker.
-
-# Core framework footprint
-agent/
-agent_tools/
-instructions/
-.clinerules
-agent_framework_config.yaml
-
-# Framework bootstrap docs/prompts
-instructions/claude/trigger_vscode.md
-instructions/claude/trigger_antigravity.md
-instructions/chat/trigger_chat.md
-instructions/chat/command_glossary_chat.md
-instructions/model_agnostic/trigger_generic.md
-instructions/model_agnostic/PORTABLE_DEPLOYMENT.md
-instructions/model_agnostic/kernel_profiles.md
-instructions/model_agnostic/.gitignore.host
-instructions/model_agnostic/instructions_dummies.md
-agent/agent_outputs/runtime/
-
-# Optional framework metadata files at host root
-AGENTS.md
-agent.md
+.pre-commit-config.yaml
 
 # __pycache__ and Python temp files
 __pycache__/
@@ -62,3 +37,21 @@ __pycache__/
 # Operating systems
 .DS_Store
 Thumbs.db
+
+# ============================================================================
+# Host Project Gitignore Template - Tinker Framework
+# ============================================================================
+# Add these entries to the HOST project's .gitignore when deploying Tinker.
+# This reflects the current portable structure where the framework lives under
+# `agents/` plus root-level bootstrap files.
+# Full Tinker framework tree
+agents/
+instructions/
+# Root-level framework bootstrap/config files
+.clinerules
+agent_framework_config.yaml
+AGENTS.md
+agent.md
+.pre-commit-config.yaml
+# Installer backup folder (created when using --backup)
+.tinker_backups/

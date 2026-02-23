@@ -1,46 +1,62 @@
-repos:
+﻿repos:
   - repo: local
     hooks:
+      # New hook - requirements change detection
+      - id: sync-requirements
+        name: Sync virtual environment dependencies
+        entry: .venv/Scripts/python.exe
+        args: ["-m", "agents.hooks.update_requirements"]
+        language: system
+        files: ^requirements\.txt$
+        pass_filenames: false
+        always_run: false  # Solo corre si cambia requirements.txt
       # Existing hooks - context generation
       - id: update-treemap
         name: Update project structure map
-        entry: .venv/Scripts/python.exe agent_tools/treemap.py
+        entry: .venv/Scripts/python.exe
+        args: ["-m", "agents.hooks.treemap"]
         language: system
         pass_filenames: false
         always_run: true
 
       - id: update-dependencies
         name: Update dependency analysis
-        entry: .venv/Scripts/python.exe agent_tools/analyze_dependencies.py
+        entry: .venv/Scripts/python.exe
+        args: ["-m", "agents.hooks.analyze_dependencies"]
         language: system
         pass_filenames: false
         always_run: true
 
       - id: generate-skill-wrappers
         name: Generate skill wrappers
-        entry: .venv/Scripts/python.exe agent_tools/generate_skill_wrappers.py
+        entry: .venv/Scripts/python.exe
+        args: ["-m", "agents.hooks.generate_skill_wrappers"]
         language: system
         pass_filenames: false
-        files: ^agent/skills/|^agent_tools/generate_skill_wrappers\.py$
+        files: ^agents/logic/skills/|^agents/hooks/generate_skill_wrappers\.py$
 
       # New hooks - agent protocol validation
       - id: validate-task-plans
         name: Validate task plans
-        entry: .venv/Scripts/python.exe agent_tools/schema_validator.py --type task_plan
+        entry: .venv/Scripts/python.exe
+        args: ["-m", "agents.hooks.schema_validator", "--type", "task_plan"]
         language: system
-        files: ^agent/agent_outputs/plans/.*task_plan\.json$
+        files: ^agents/logic/agent_outputs/plans/.*task_plan\.json$
         pass_filenames: true
 
       - id: validate-system-configs
         name: Validate system configs
-        entry: .venv/Scripts/python.exe agent_tools/schema_validator.py --type system_config
+        entry: .venv/Scripts/python.exe
+        args: ["-m", "agents.hooks.schema_validator", "--type", "system_config"]
         language: system
-        files: ^agent/agent_outputs/plans/.*system_config\.yaml$
+        files: ^agents/logic/agent_outputs/plans/.*system_config\.yaml$
         pass_filenames: true
 
       - id: validate-execution-reports
         name: Validate execution reports
-        entry: .venv/Scripts/python.exe agent_tools/schema_validator.py --type report
+        entry: .venv/Scripts/python.exe
+        args: ["-m", "agents.hooks.schema_validator", "--type", "report"]
         language: system
-        files: ^agent/agent_outputs/reports/.*execution_report\.json$
+        files: ^agents/logic/agent_outputs/reports/.*execution_report\.json$
         pass_filenames: true
+

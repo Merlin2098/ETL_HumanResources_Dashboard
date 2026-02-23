@@ -25,3 +25,7 @@ setuptools
 numpy
 jsonschema
 pyyaml
+
+# Added by Tinker installer (missing deps)
+hypothesis
+pytest
