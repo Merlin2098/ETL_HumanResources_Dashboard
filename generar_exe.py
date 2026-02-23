@@ -1,5 +1,6 @@
 """
-Build script for PyInstaller (onedir) aligned with src/assets migration.
+Build script for PyInstaller (onedir) aligned with current runtime requirements.
+Includes mandatory preflight contracts under assets/validate_source.
 """
 
 import os
@@ -31,8 +32,19 @@ ARCHIVOS_REQUERIDOS = [
     "etl_manager.py",
     "assets/config/theme_light.json",
     "assets/config/path_cache.json",
+    "src/utils/validate_source.py",
     "src/orchestrators/pipelines/pipeline_nomina_licencias.yaml",
     "src/orchestrators/pipelines/pipeline_control_practicantes.yaml",
+]
+
+CONTRATOS_PREVALIDACION = [
+    "assets/validate_source/nomina.json",
+    "assets/validate_source/licencias.json",
+    "assets/validate_source/bd.json",
+    "assets/validate_source/regimen_minero.json",
+    "assets/validate_source/control_practicantes.json",
+    "assets/validate_source/ingresos.json",
+    "assets/validate_source/examen_retiro.json",
 ]
 
 
@@ -56,6 +68,7 @@ def verificar_estructura():
     carpetas_requeridas = [
         "src",
         "assets",
+        "assets/validate_source",
         "src/modules",
         "src/orchestrators",
         "src/orchestrators/pipelines",
@@ -70,6 +83,11 @@ def verificar_estructura():
     archivos_faltantes = [ruta for ruta in ARCHIVOS_REQUERIDOS if not (base_dir / ruta).exists()]
     if archivos_faltantes:
         print(f"ERROR: Faltan archivos criticos: {archivos_faltantes}")
+        sys.exit(1)
+
+    contratos_faltantes = [ruta for ruta in CONTRATOS_PREVALIDACION if not (base_dir / ruta).exists()]
+    if contratos_faltantes:
+        print(f"ERROR: Faltan contratos de prevalidacion: {contratos_faltantes}")
         sys.exit(1)
 
     print("OK estructura validada.\n")
@@ -230,7 +248,8 @@ def generar_exe():
             print("Notas:")
             print("1. Distribuye la carpeta completa, no solo el .exe")
             print("2. _internal incluye assets, pipelines y metadatos necesarios")
-            print("3. Prueba ejecutando el .exe desde la carpeta generada")
+            print("3. Incluye contratos de prevalidacion en assets/validate_source")
+            print("4. Prueba ejecutando el .exe desde la carpeta generada")
         else:
             print("ERROR EN LA COMPILACION")
             print("=" * 60)
