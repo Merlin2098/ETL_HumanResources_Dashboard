@@ -26,6 +26,7 @@ sys.path.insert(0, str(project_root))
 from PySide6.QtCore import QThread, Signal
 from src.utils.lazy_loader import create_etl_loader
 from src.utils.logger_qt import UILogger
+from src.utils.validate_source import SourceValidationError, validate_all_sources_for_etl
 
 
 class ExamenRetiroWorker(QThread):
@@ -131,6 +132,14 @@ class ExamenRetiroWorker(QThread):
         resultado = {}
         
         try:
+            # Preflight / Validate Source (antes de cualquier stage)
+            self.progress_updated.emit(2, "🔎 Preflight: validando archivo fuente...")
+            self.logger.info("🔎 PRE-FLIGHT: validando contrato de fuente...")
+            preflight = validate_all_sources_for_etl("examen_retiro", self.archivo_bronze)
+            preflight.raise_if_failed()
+            self.logger.info(f"✓ Preflight válido ({self.archivo_bronze.name})")
+            self.progress_updated.emit(4, "✓ Preflight completado")
+
             # ============ STEP 1: Bronze → Silver ============
             self.logger.info("="*70)
             self.logger.info("STEP 1: EXTRACCIÓN Y LIMPIEZA (Bronze → Silver)")
@@ -519,6 +528,21 @@ class ExamenRetiroWorker(QThread):
             self.logger.info(f"\n📦 Módulos cargados: {', '.join(modulos_cargados)}")
             
             return resultado
+
+        except SourceValidationError as e:
+            self.logger.error(str(e))
+            return {
+                'success': False,
+                'error': str(e),
+                'error_details': self._build_error_details(
+                    stage_name='Preflight / Validate Source',
+                    error=e,
+                    stage_index=1,
+                    total_stages=3,
+                    module_path='src.utils.validate_source',
+                ),
+                'timers': self.timers
+            }
             
         except Exception as e:
             self.logger.error(f"❌ Error crítico en ETL: {str(e)}")

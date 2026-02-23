@@ -158,11 +158,38 @@ Mis_Datos/
 El proyecto incluye configuraciones pre-establecidas:
 
 - **Schemas JSON** (`/esquemas/`): Definen estructura esperada de datos Gold
+- **Source Contracts JSON** (`/validate_source/`): Definen validación Preflight de archivos Bronze (hojas, encabezados, columnas, regex)
 - **Queries SQL** (`/queries/`): Transformaciones complejas y generación de flags
 - **Temas UI** (`/config/`): Personalización de interfaz gráfica
 - **Path Cache**: Almacena rutas frecuentes en JSON para agilizar navegación
 
 No se requiere configuración de variables de entorno ni archivos externos.
+
+## ✅ Preflight / Validate Source
+
+Antes de ejecutar transformaciones, cada ETL valida sus fuentes de entrada contra contratos JSON en `assets/validate_source/`.
+
+- Módulo reutilizable: `src/utils/validate_source.py`
+- Funciones principales:
+  - `load_validation_contract(etl_name)`
+  - `validate_excel_source(path, contract, required_cols=None)`
+  - `validate_all_sources_for_etl(etl_name, inputs)`
+
+Reglas validadas por contrato:
+
+- Hojas requeridas
+- Posición de encabezado (`row_index_1_based`, `column_letter`)
+- Columnas requeridas (derivadas de `assets/esquemas`)
+- Regex de nombre de archivo (cuando aplique)
+
+Si una validación falla, el ETL se detiene inmediatamente con mensaje claro en UI/log.
+
+### Cómo agregar un nuevo contrato
+
+1. Crear `assets/validate_source/<etl_id>.json`.
+2. Definir `sheet_rules` y `sheets.<sheet>.header_start`.
+3. Definir `required_columns_source` apuntando a `assets/esquemas/...`.
+4. En el worker del ETL, llamar `validate_all_sources_for_etl("<etl_id>", inputs)` antes de Step 1.
 
 ## 🔒 Consideraciones de Seguridad
 

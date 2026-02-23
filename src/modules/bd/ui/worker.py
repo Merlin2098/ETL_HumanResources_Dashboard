@@ -24,6 +24,7 @@ project_root = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(project_root))
 
 from src.utils.ui.workers.base_worker import BaseETLWorker
+from src.utils.validate_source import validate_all_sources_for_etl
 
 
 class BDWorker(BaseETLWorker):
@@ -99,6 +100,15 @@ class BDWorker(BaseETLWorker):
         self.logger.info(f"📂 Archivo: {archivo_excel.name}")
         self.logger.info(f"📁 Carpeta de trabajo: {self.output_dir}")
         self.logger.info("")
+
+        # Preflight / Validate Source (antes de cualquier transformación)
+        self.current_stage = "Preflight / Validate Source"
+        self.progress_updated.emit(2, "🔎 Preflight: validando archivo fuente...")
+        self.logger.info("🔎 PRE-FLIGHT: validando contrato de fuente...")
+        preflight = validate_all_sources_for_etl("bd", archivo_excel)
+        preflight.raise_if_failed()
+        self.logger.info(f"✓ Preflight válido ({archivo_excel.name})")
+        self.progress_updated.emit(4, "✓ Preflight completado")
         
         # Step 1: Bronze → Silver
         self.current_stage = "Step 1: Bronze → Silver"

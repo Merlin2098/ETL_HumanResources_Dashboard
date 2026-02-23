@@ -20,6 +20,7 @@ sys.path.insert(0, str(project_root))
 
 from src.utils.ui.workers.base_worker import BaseETLWorker
 from src.utils.lazy_loader import create_etl_loader
+from src.utils.validate_source import SourceValidationError, validate_all_sources_for_etl
 
 
 class NominaRegimenMineroWorker(BaseETLWorker):
@@ -57,6 +58,27 @@ class NominaRegimenMineroWorker(BaseETLWorker):
         
         try:
             resultado = {}
+
+            # Preflight / Validate Source (antes de cualquier stage)
+            if not self.archivos:
+                return self.build_error_result(
+                    stage_name="Preflight / Validate Source",
+                    error="No se seleccionaron archivos de Régimen Minero",
+                    timers=self.timers,
+                    stage_index=1,
+                    total_stages=2,
+                    module_path="src.utils.validate_source",
+                    function_name="validate_all_sources_for_etl",
+                )
+
+            self.progress_updated.emit(2, "🔎 Preflight: validando fuentes Bronze...")
+            self.logger.info("🔎 PRE-FLIGHT: validando contratos de fuentes...")
+            preflight = validate_all_sources_for_etl("regimen_minero", self.archivos)
+            preflight.raise_if_failed()
+            self.logger.info(
+                f"✓ Preflight válido ({len(preflight.checked_sources)} archivo(s))"
+            )
+            self.progress_updated.emit(4, "✓ Preflight completado")
             
             # ============ STEP 1: Bronze → Silver ============
             self.logger.info("="*70)
@@ -322,6 +344,21 @@ class NominaRegimenMineroWorker(BaseETLWorker):
             self.logger.info(f"\n📦 Módulos cargados: {', '.join(modulos_cargados)}")
             
             return resultado
+
+        except SourceValidationError as e:
+            self.logger.error(str(e))
+
+            self.timers['total'] = time.time() - tiempo_inicio_total
+
+            return self.build_error_result(
+                stage_name='Preflight / Validate Source',
+                error=str(e),
+                timers=self.timers,
+                stage_index=1,
+                total_stages=2,
+                module_path='src.utils.validate_source',
+                function_name='validate_all_sources_for_etl'
+            )
             
         except Exception as e:
             self.logger.error(f"❌ Error crítico en ETL: {str(e)}")

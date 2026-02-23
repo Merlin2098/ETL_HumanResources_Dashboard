@@ -16,6 +16,7 @@ sys.path.insert(0, str(project_root))
 from src.utils.ui.workers.base_worker import BaseETLWorker
 from src.orchestrators.pipeline_nomina_executor import PipelineNominaExecutor
 from src.utils.paths import get_resource_path
+from src.utils.validate_source import SourceValidationError, validate_all_sources_for_etl
 
 
 class NominaWorker(BaseETLWorker):
@@ -46,6 +47,31 @@ class NominaWorker(BaseETLWorker):
         try:
             # Obtener ruta del YAML del pipeline
             yaml_path = get_resource_path("src/orchestrators/pipelines/pipeline_nomina_licencias.yaml")
+
+            # Preflight / Validate Source (antes de cualquier stage)
+            if not self.archivos:
+                return self.build_error_result(
+                    stage_name="Preflight / Validate Source",
+                    error="No se seleccionaron archivos de nómina",
+                    timers=self.timers,
+                    module_path="src.utils.validate_source",
+                    function_name="validate_all_sources_for_etl",
+                )
+
+            self.progress_updated.emit(2, "🔎 Preflight: validando fuentes Bronze...")
+            self.logger.info("🔎 PRE-FLIGHT: validando contratos de fuentes...")
+
+            preflight_nomina = validate_all_sources_for_etl("nomina", self.archivos)
+            preflight_nomina.raise_if_failed()
+            self.logger.info(
+                f"✓ Preflight nómina válido ({len(preflight_nomina.checked_sources)} archivo(s))"
+            )
+
+            archivo_licencias = self.output_dir / "licencias" / "CONTROL DE LICENCIAS.xlsx"
+            preflight_licencias = validate_all_sources_for_etl("licencias", archivo_licencias)
+            preflight_licencias.raise_if_failed()
+            self.logger.info(f"✓ Preflight licencias válido ({archivo_licencias.name})")
+            self.progress_updated.emit(4, "✓ Preflight completado")
             
             if not yaml_path.exists():
                 self.logger.error(f"❌ No se encontró el archivo YAML del pipeline: {yaml_path}")
@@ -122,6 +148,18 @@ class NominaWorker(BaseETLWorker):
                 self.progress_updated.emit(0, f"❌ Error: {error_msg}")
             
             return resultado
+
+        except SourceValidationError as e:
+            self.logger.error(str(e))
+
+            self.timers['total'] = time.time() - tiempo_inicio_total
+            return self.build_error_result(
+                stage_name="Preflight / Validate Source",
+                error=str(e),
+                timers=self.timers,
+                module_path="src.utils.validate_source",
+                function_name="validate_all_sources_for_etl",
+            )
             
         except Exception as e:
             self.logger.error(f"❌ Error crítico en pipeline: {str(e)}")

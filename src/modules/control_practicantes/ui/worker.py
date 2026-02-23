@@ -16,6 +16,7 @@ sys.path.insert(0, str(project_root))
 from src.utils.ui.workers.base_worker import BaseETLWorker
 from src.orchestrators.pipeline_control_practicantes_executor import PipelineControlPracticantesExecutor
 from src.utils.paths import get_resource_path
+from src.utils.validate_source import SourceValidationError, validate_all_sources_for_etl
 
 
 class ControlPracticantesWorker(BaseETLWorker):
@@ -65,6 +66,14 @@ class ControlPracticantesWorker(BaseETLWorker):
                 }
             
             archivo = self.archivos[0]  # Solo 1 archivo
+
+            # Preflight / Validate Source (antes de ejecutar stages)
+            self.progress_updated.emit(2, "🔎 Preflight: validando archivo fuente...")
+            self.logger.info("🔎 PRE-FLIGHT: validando contrato de fuente...")
+            preflight = validate_all_sources_for_etl("control_practicantes", archivo)
+            preflight.raise_if_failed()
+            self.logger.info(f"✓ Preflight válido ({archivo.name})")
+            self.progress_updated.emit(4, "✓ Preflight completado")
             
             # Determinar carpeta de trabajo (carpeta del archivo)
             carpeta_trabajo = archivo.parent
@@ -149,6 +158,18 @@ class ControlPracticantesWorker(BaseETLWorker):
                 self.progress_updated.emit(0, f"❌ Error: {error_msg}")
             
             return resultado
+
+        except SourceValidationError as e:
+            self.logger.error(str(e))
+
+            self.timers['total'] = time.time() - tiempo_inicio_total
+            return self.build_error_result(
+                stage_name="Preflight / Validate Source",
+                error=str(e),
+                timers=self.timers,
+                module_path="src.utils.validate_source",
+                function_name="validate_all_sources_for_etl",
+            )
             
         except Exception as e:
             self.logger.error(f"❌ Error crítico en pipeline: {str(e)}")

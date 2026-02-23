@@ -20,6 +20,7 @@ from typing import Dict
 import sys
 import time
 from src.utils.paths import get_resource_path
+from src.utils.validate_source import SourceValidationError, validate_all_sources_for_etl
 
 # Asegurar que el directorio raíz del proyecto esté en el path
 project_root = Path(__file__).resolve().parents[4]
@@ -77,6 +78,14 @@ class PDTWorker(BaseETLWorker):
                 )
             
             archivo_bronze = self.archivos[0]
+
+            # Preflight / Validate Source (antes de cualquier stage)
+            self.progress_updated.emit(2, "🔎 Preflight: validando archivo fuente...")
+            self.logger.info("🔎 PRE-FLIGHT: validando contrato de fuente...")
+            preflight = validate_all_sources_for_etl("ingresos", archivo_bronze)
+            preflight.raise_if_failed()
+            self.logger.info(f"✓ Preflight válido ({archivo_bronze.name})")
+            self.progress_updated.emit(4, "✓ Preflight completado")
             
             # ============ STEP 1: Bronze → Silver ============
             self.logger.info("="*70)
@@ -553,6 +562,20 @@ class PDTWorker(BaseETLWorker):
             
             return resultado
             
+        except SourceValidationError as e:
+            self.logger.error(str(e))
+            self.timers['total'] = time.time() - tiempo_inicio_total
+
+            return self.build_error_result(
+                stage_name='Preflight / Validate Source',
+                error=str(e),
+                timers=self.timers,
+                stage_index=1,
+                total_stages=3,
+                module_path='src.utils.validate_source',
+                function_name='validate_all_sources_for_etl'
+            )
+
         except Exception as e:
             self.logger.error(f"❌ Error crítico en ETL: {str(e)}")
             import traceback
