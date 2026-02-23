@@ -17,6 +17,7 @@ config/json/path_cache.json
 .claude/
 data/
 .pre-commit-config.yaml
+assets\config\path_cache.json
 
 # __pycache__ and Python temp files
 __pycache__/

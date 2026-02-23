@@ -3,7 +3,6 @@
     "nomina_carpeta": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Analisis de nómina\\prueba",
     "nomina_regimen_minero_carpeta": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Contratista minero",
     "pdt_archivo": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Movimientos\\Ingresos pdt\\Relación de ingresos 2024-2026.xlsx",
-    "examen_retiro_bronze": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Analisis de nómina\\motivo_cese\\Programación de examen de Retiro3.xlsm",
     "examen_retiro_cc_actual": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Base de datos\\centros de costo\\CC_ACTUAL.parquet",
     "bd_bronze": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Base de datos\\Prueba\\BD. 06.01.2026..xlsm",
     "examen_retiro_cc_old": "C:\\Users\\ricuculm\\OneDrive - Metso\\Documents\\Laboratorio\\2. Reportabilidad\\REPORTABILIDAD\\Base de datos\\centros de costo\\OLD\\CC_OLD.parquet",
@@ -36,7 +35,7 @@
   },
   "metadata": {
     "created": "2026-01-07T12:11:25.926351",
-    "last_updated": "2026-02-15T20:49:39.350017",
+    "last_updated": "2026-02-23T12:30:55.319563",
     "version": "1.0"
   }
 }
