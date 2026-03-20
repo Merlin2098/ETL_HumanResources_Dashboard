@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "version": "1.5",
+    "version": "1.6",
     "capa": "gold",
     "fecha_creacion": "2025-01-06",
     "fecha_actualizacion": "2026-03-20",
-    "descripcion": "Esquema de datos para la capa gold - Régimen Minero - columnas base del parquet silver (sin columnas enriquecidas). Incluye horas extras 25% y 35%"
+    "descripcion": "Esquema de datos para la capa gold - Régimen Minero - columnas base del parquet silver (sin columnas enriquecidas). Incluye horas extras simples y montos de horas extra"
   },
   "schema": {
     "PERIODO": {
@@ -89,6 +89,20 @@
       "precision": 2,
       "description": "Días de descanso médico en el periodo"
     },
+    "# HRS EXTRAS SIMP.25%": {
+      "type": "float",
+      "nullable": true,
+      "min_value": 0,
+      "precision": 2,
+      "description": "Número de horas extras simples al 25% en el periodo"
+    },
+    "# HRS EXTRAS SIMP.35%": {
+      "type": "float",
+      "nullable": true,
+      "min_value": 0,
+      "precision": 2,
+      "description": "Número de horas extras simples al 35% en el periodo"
+    },
     "HORAS EXTRAS 25%": {
       "type": "float",
       "nullable": true,
@@ -160,7 +174,7 @@
       "DIAS TRABAJADOS debe ser mayor o igual a 0 y menor o igual a 31",
       "FECHA DE INGRESO debe ser anterior a PERIODO si ambas existen",
       "Los montos (TOTAL INGRESOS, TOTAL DESCUENTOS, TOTAL APORTACIONES, NETO) deben ser no negativos",
-      "DIAS DESC MEDICO (P), HORAS EXTRAS 25%, HORAS EXTRAS 35%, #HRS EXTRAS DOBLES, HORAS EXTRAS 100%, DESCANSO MEDICO deben ser no negativos"
+      "DIAS DESC MEDICO (P), # HRS EXTRAS SIMP.25%, # HRS EXTRAS SIMP.35%, HORAS EXTRAS 25%, HORAS EXTRAS 35%, #HRS EXTRAS DOBLES, HORAS EXTRAS 100%, DESCANSO MEDICO deben ser no negativos"
     ]
   },
   "transformations": {
@@ -188,6 +202,8 @@
     "FECHA DE INGRESO",
     "DIAS TRABAJADOS",
     "DIAS DESC MEDICO (P)",
+    "# HRS EXTRAS SIMP.25%",
+    "# HRS EXTRAS SIMP.35%",
     "HORAS EXTRAS 25%",
     "HORAS EXTRAS 35%",
     "#HRS EXTRAS DOBLES",
@@ -215,6 +231,8 @@
     "FECHA DE INGRESO",
     "DIAS TRABAJADOS",
     "DIAS DESC MEDICO (P)",
+    "# HRS EXTRAS SIMP.25%",
+    "# HRS EXTRAS SIMP.35%",
     "HORAS EXTRAS 25%",
     "HORAS EXTRAS 35%",
     "#HRS EXTRAS DOBLES",
