@@ -1,6 +1,6 @@
 """
 Script de transformación Silver → Gold para reportes de planilla - Régimen Minero
-Implementa versionamiento con carpetas actual/ e historico/
+Guarda salida Gold únicamente en carpeta actual/
 """
 
 import polars as pl
@@ -8,7 +8,6 @@ import json
 from pathlib import Path
 from tkinter import Tk, filedialog
 from datetime import datetime
-import shutil
 
 
 def seleccionar_archivo(titulo, tipos):
@@ -197,25 +196,23 @@ def generar_excel_visualizacion(df, ruta_salida):
 
 def gestionar_versionamiento_gold(carpeta_base):
     """
-    Gestiona el versionamiento en la capa Gold:
-    - Crea carpetas gold/actual/ y gold/historico/
+    Prepara la salida en la capa Gold:
+    - Crea carpeta gold/actual/
     
     Args:
         carpeta_base: Path de la carpeta base del proyecto
         
     Returns:
-        tuple: (carpeta_actual, carpeta_historico)
+        Path: carpeta_actual
     """
     # Crear estructura de carpetas
     carpeta_gold = Path(carpeta_base) / "gold"
     carpeta_actual = carpeta_gold / "actual"
-    carpeta_historico = carpeta_gold / "historico"
     
     # Crear carpetas si no existen
     carpeta_actual.mkdir(parents=True, exist_ok=True)
-    carpeta_historico.mkdir(parents=True, exist_ok=True)
     
-    return carpeta_actual, carpeta_historico
+    return carpeta_actual
 
 
 def main():
@@ -334,34 +331,22 @@ def main():
         traceback.print_exc()
         return
     
-    # Preparar carpetas gold con versionamiento
+    # Preparar carpeta gold
     carpeta_base = Path(ruta_parquet).parent.parent  # Subir desde silver/ a carpeta base
-    carpeta_actual, carpeta_historico = gestionar_versionamiento_gold(carpeta_base)
-    
-    # Generar timestamp para archivos de histórico
-    timestamp = datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
+    carpeta_actual = gestionar_versionamiento_gold(carpeta_base)
     
     # Rutas de salida en actual/ (sin timestamp)
     ruta_parquet_gold_actual = carpeta_actual / "Planilla Metso - Regimen Minero.parquet"
     ruta_excel_gold_actual = carpeta_actual / "Planilla Metso - Regimen Minero.xlsx"
     
-    # Rutas de salida en historico/ (con timestamp)
-    ruta_parquet_gold_historico = carpeta_historico / f"Planilla Metso - Regimen Minero_{timestamp}.parquet"
-    ruta_excel_gold_historico = carpeta_historico / f"Planilla Metso - Regimen Minero_{timestamp}.xlsx"
-    
     # Guardar archivos
     print("\n💾 Guardando archivos en capa Gold...")
     print(f"  📁 Carpeta actual: {carpeta_actual}")
-    print(f"  📁 Carpeta histórico: {carpeta_historico}")
     print("-" * 70)
     
     # Guardar en actual/
     df_gold.write_parquet(ruta_parquet_gold_actual)
     print(f"✓ Parquet gold (actual): {ruta_parquet_gold_actual.name}")
-    
-    # Guardar en historico/
-    df_gold.write_parquet(ruta_parquet_gold_historico)
-    print(f"✓ Parquet gold (histórico): {ruta_parquet_gold_historico.name}")
     
     # Generar Excel de visualización en actual/
     try:
@@ -369,13 +354,6 @@ def main():
         print(f"✓ Excel gold (actual): {ruta_excel_gold_actual.name}")
     except Exception as e:
         print(f"⚠️  Error al generar Excel en actual/: {e}")
-    
-    # Generar Excel de visualización en historico/
-    try:
-        generar_excel_visualizacion(df_gold, ruta_excel_gold_historico)
-        print(f"✓ Excel gold (histórico): {ruta_excel_gold_historico.name}")
-    except Exception as e:
-        print(f"⚠️  Error al generar Excel en histórico/: {e}")
     
     # Resumen final
     duracion = (datetime.now() - inicio).total_seconds()
@@ -387,20 +365,11 @@ def main():
     print(f"📋 Schema utilizado: {Path(ruta_schema).name}")
     print(f"\n📁 Estructura de carpetas Gold:")
     print(f"   {carpeta_base / 'gold'}/")
-    print(f"   ├── actual/        (Power BI apunta aquí - se sobreescribe)")
-    print(f"   │   ├── Planilla Metso - Regimen Minero.parquet")
-    print(f"   │   └── Planilla Metso - Regimen Minero.xlsx")
-    print(f"   └── historico/     (versiones con timestamp - se acumulan)")
-    print(f"       ├── Planilla Metso - Regimen Minero_{timestamp}.parquet")
-    print(f"       └── Planilla Metso - Regimen Minero_{timestamp}.xlsx")
-    
-    # Contar archivos en histórico
-    archivos_historico = list(carpeta_historico.glob("*.parquet"))
-    if archivos_historico:
-        print(f"\n📦 Total de archivos parquet en histórico: {len(archivos_historico)}")
+    print(f"   └── actual/        (Power BI apunta aquí - se sobreescribe)")
+    print(f"       ├── Planilla Metso - Regimen Minero.parquet")
+    print(f"       └── Planilla Metso - Regimen Minero.xlsx")
     
     print("\n💡 Los archivos en actual/ se sobreescriben en cada ejecución")
-    print("💡 Los archivos en histórico/ se acumulan con timestamp")
     print("=" * 70)
 
 

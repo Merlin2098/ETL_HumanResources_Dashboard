@@ -1,6 +1,6 @@
 """
 Script de transformación Silver → Gold para reportes de planilla
-Implementa versionamiento con carpetas actual/ e historico/
+Guarda salida Gold únicamente en carpeta actual/
 
 REFACTORIZADO para compatibilidad con worker UI y estructura simplificada
 """
@@ -9,7 +9,6 @@ import polars as pl
 import json
 from pathlib import Path
 from datetime import datetime
-import shutil
 import traceback
 import os
 import time
@@ -259,55 +258,24 @@ def generar_excel_visualizacion(df, ruta_salida):
 
 def gestionar_versionamiento_gold(carpeta_base):
     """
-    Gestiona la estructura de versionamiento para archivos gold
+    Prepara la estructura de salida para archivos gold.
     ESTRUCTURA SIMPLIFICADA:
     gold/
     ├── actual/        <- Power BI apunta aquí
-    └── historico/     <- Versiones anteriores
     
     Args:
         carpeta_base: Carpeta raíz del proyecto (donde está silver/)
         
     Returns:
-        tuple: (carpeta_actual, carpeta_historico)
+        Path: carpeta_actual
     """
     carpeta_gold = Path(carpeta_base) / "gold"
     carpeta_actual = carpeta_gold / "actual"      # ← SIN subcarpeta "nomina"
-    carpeta_historico = carpeta_gold / "historico"  # ← SIN subcarpeta "nomina"
     
     # Crear estructura si no existe
     carpeta_actual.mkdir(parents=True, exist_ok=True)
-    carpeta_historico.mkdir(parents=True, exist_ok=True)
     
-    # Archivos a verificar - NOMBRE QUE EL PIPELINE ESPERA
-    nombre_parquet = "Planilla_Metso_Consolidado.parquet"
-    nombre_excel = "Planilla_Metso_Consolidado.xlsx"
-    
-    archivo_actual_parquet = carpeta_actual / nombre_parquet
-    archivo_actual_excel = carpeta_actual / nombre_excel
-    
-    # Mover archivos existentes a histórico
-    if archivo_actual_parquet.exists() or archivo_actual_excel.exists():
-        print("\n📦 Archivando versión anterior...")
-        
-        # Generar timestamp para histórico
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        
-        # Mover parquet a histórico
-        if archivo_actual_parquet.exists():
-            nombre_historico_parquet = f"Planilla_Metso_Consolidado_{timestamp}.parquet"
-            destino_parquet = carpeta_historico / nombre_historico_parquet
-            shutil.move(str(archivo_actual_parquet), str(destino_parquet))
-            print(f"  ✓ Parquet anterior archivado: {nombre_historico_parquet}")
-        
-        # Mover excel a histórico
-        if archivo_actual_excel.exists():
-            nombre_historico_excel = f"Planilla_Metso_Consolidado_{timestamp}.xlsx"
-            destino_excel = carpeta_historico / nombre_historico_excel
-            shutil.move(str(archivo_actual_excel), str(destino_excel))
-            print(f"  ✓ Excel anterior archivado: {nombre_historico_excel}")
-    
-    return carpeta_actual, carpeta_historico
+    return carpeta_actual
 
 
 # ============================================================================
@@ -351,7 +319,7 @@ def seleccionar_y_convertir_columnas(df_silver, esquema):
 def guardar_resultados(df_gold, carpeta_silver):
     """
     Función de compatibilidad para el worker UI
-    Guarda los archivos gold con versionamiento SIMPLIFICADO
+    Guarda los archivos gold en actual/
     
     Args:
         df_gold: DataFrame gold procesado
@@ -363,8 +331,8 @@ def guardar_resultados(df_gold, carpeta_silver):
     # Subir desde silver/ a carpeta base del proyecto
     carpeta_base = Path(carpeta_silver).parent
     
-    # Gestionar versionamiento con estructura simplificada
-    carpeta_actual, carpeta_historico = gestionar_versionamiento_gold(carpeta_base)
+    # Preparar salida gold
+    carpeta_actual = gestionar_versionamiento_gold(carpeta_base)
     
     # Rutas de salida - NOMBRES QUE EL PIPELINE ESPERA
     ruta_parquet_gold = carpeta_actual / "Planilla_Metso_Consolidado.parquet"
@@ -399,8 +367,7 @@ def guardar_resultados(df_gold, carpeta_silver):
     return {
         'parquet': ruta_parquet_gold,
         'excel': ruta_excel_gold,
-        'carpeta_actual': carpeta_actual,
-        'carpeta_historico': carpeta_historico
+        'carpeta_actual': carpeta_actual
     }
 
 
@@ -408,7 +375,7 @@ def exportar_a_gold(ruta_parquet_silver: Path, carpeta_trabajo: Path) -> dict:
     """
     Procesa Silver a Gold sin interfaz gráfica (modo headless)
     Usado por el pipeline executor
-    Genera estructura SIMPLIFICADA: gold/actual/ y gold/historico/
+    Genera estructura SIMPLIFICADA: gold/actual/
     
     Args:
         ruta_parquet_silver: Path al parquet Silver de nómina
@@ -478,15 +445,13 @@ def exportar_a_gold(ruta_parquet_silver: Path, carpeta_trabajo: Path) -> dict:
         
         print(f"   ✓ Gold guardado exitosamente")
         print(f"     • Estructura: gold/")
-        print(f"       ├── actual/    (archivos actuales)")
-        print(f"       └── historico/ (versiones anteriores)")
+        print(f"       └── actual/    (archivos actuales)")
         
         return {
             'success': True,
             'parquet': rutas_gold['parquet'],
             'excel': rutas_gold['excel'],
             'carpeta_actual': rutas_gold['carpeta_actual'],
-            'carpeta_historico': rutas_gold['carpeta_historico'],
             'registros': len(df_gold),
             'columnas': len(df_gold.columns)
         }
@@ -636,19 +601,12 @@ def main():
     print(f"📋 Schema utilizado: {Path(ruta_schema).name}")
     print(f"\n📁 Estructura de carpetas Gold (SIMPLIFICADA):")
     print(f"   gold/")
-    print(f"   ├── actual/        (Power BI apunta aquí)")
-    print(f"   │   ├── Planilla_Metso_Consolidado.parquet")
-    print(f"   │   └── Planilla_Metso_Consolidado.xlsx")
-    print(f"   └── historico/     (versiones anteriores)")
-    
-    # Contar archivos en histórico
-    archivos_historico = list(rutas['carpeta_historico'].glob("*.parquet"))
-    if archivos_historico:
-        print(f"\n📦 Archivos en histórico: {len(archivos_historico)}")
+    print(f"   └── actual/        (Power BI apunta aquí)")
+    print(f"       ├── Planilla_Metso_Consolidado.parquet")
+    print(f"       └── Planilla_Metso_Consolidado.xlsx")
     
     print("\n💡 Estructura simplificada - sin carpeta 'nomina' intermedia")
     print("💡 Los archivos en actual/ se sobreescriben en cada ejecución")
-    print("💡 Las versiones anteriores se guardan automáticamente en historico/")
     print("=" * 70)
 
 

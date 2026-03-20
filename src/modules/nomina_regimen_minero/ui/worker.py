@@ -218,31 +218,19 @@ class NominaRegimenMineroWorker(BaseETLWorker):
                     
                     self.progress_updated.emit(80, "💾 Preparando carpetas Gold...")
                     
-                    # Preparar carpetas gold con versionamiento
+                    # Preparar carpeta gold
                     carpeta_base = ruta_parquet.parent.parent  # Subir desde silver/ a carpeta base
-                    carpeta_actual, carpeta_historico = gestionar_versionamiento_gold(carpeta_base)
-                    
-                    # Generar timestamp para archivos de histórico
-                    from datetime import datetime
-                    timestamp = datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
+                    carpeta_actual = gestionar_versionamiento_gold(carpeta_base)
                     
                     # Rutas de salida en actual/ (sin timestamp)
                     ruta_parquet_gold_actual = carpeta_actual / "Planilla Metso - Regimen Minero.parquet"
                     ruta_excel_gold_actual = carpeta_actual / "Planilla Metso - Regimen Minero.xlsx"
-                    
-                    # Rutas de salida en historico/ (con timestamp)
-                    ruta_parquet_gold_historico = carpeta_historico / f"Planilla Metso - Regimen Minero_{timestamp}.parquet"
-                    ruta_excel_gold_historico = carpeta_historico / f"Planilla Metso - Regimen Minero_{timestamp}.xlsx"
                     
                     self.progress_updated.emit(85, "💾 Guardando archivos Gold...")
                     
                     # Guardar parquet en actual/
                     df_gold.write_parquet(ruta_parquet_gold_actual)
                     self.logger.info(f"✓ Parquet gold (actual): {ruta_parquet_gold_actual.name}")
-                    
-                    # Guardar parquet en historico/
-                    df_gold.write_parquet(ruta_parquet_gold_historico)
-                    self.logger.info(f"✓ Parquet gold (histórico): {ruta_parquet_gold_historico.name}")
                     
                     self.progress_updated.emit(90, "📝 Generando Excel con formato...")
                     
@@ -253,13 +241,6 @@ class NominaRegimenMineroWorker(BaseETLWorker):
                     except Exception as e:
                         self.logger.warning(f"⚠️ Error al generar Excel en actual/: {e}")
                     
-                    # Generar Excel en historico/
-                    try:
-                        generar_excel_visualizacion(df_gold, ruta_excel_gold_historico)
-                        self.logger.info(f"✓ Excel gold (histórico): {ruta_excel_gold_historico.name}")
-                    except Exception as e:
-                        self.logger.warning(f"⚠️ Error al generar Excel en histórico/: {e}")
-                    
                     # Calcular tiempo step2
                     self.timers['step2'] = time.time() - tiempo_inicio_step2
                     
@@ -269,7 +250,6 @@ class NominaRegimenMineroWorker(BaseETLWorker):
                         'parquet': ruta_parquet_gold_actual,
                         'excel': ruta_excel_gold_actual,
                         'carpeta_actual': carpeta_actual,
-                        'carpeta_historico': carpeta_historico,
                         'duracion': self.timers['step2']
                     }
                     
